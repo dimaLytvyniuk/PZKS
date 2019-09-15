@@ -2,18 +2,12 @@ package webServer
 
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
-import akka.http.scaladsl.model._
-import akka.http.scaladsl.server.Directives._
 import akka.stream.ActorMaterializer
-import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
-import spray.json.DefaultJsonProtocol._
+import controllers.ItemController
 
 import scala.io.StdIn
 
 object WebServer {
-
-  final case class Item(name: String, id: Long)
-  implicit val itemFormat = jsonFormat2(Item)
 
   def main(args: Array[String]) {
 
@@ -22,12 +16,9 @@ object WebServer {
     // needed for the future flatMap/onComplete in the end
     implicit val executionContext = system.dispatcher
 
-    val route =
-      path("item") {
-        get {
-          complete(Item("item", 1))
-        }
-      }
+    val itemController = new ItemController()
+
+    val route = itemController.routes
 
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
 
