@@ -46,12 +46,7 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     var nodeValue = ""
 
     if (nodeType == NodeType.HasValue) {
-      if (value.constName != null && value.constName != "") {
-        nodeValue = value.constName
-      }
-      else {
-        nodeValue = value.intValue.toString()
-      }
+      nodeValue = value.getStrValue()
     } else {
       nodeType match {
         case NodeType.Sum => nodeValue = "+"

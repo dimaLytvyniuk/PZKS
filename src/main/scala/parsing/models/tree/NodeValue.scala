@@ -1,6 +1,14 @@
 package parsing.models.tree
 
 class NodeValue {
-  var constName: String = ""
-  var intValue: Int = 0
+  var tokenValue: TokenValue = null
+  var functionImplementation: FunctionImplementation = null
+
+  def getStrValue: String = {
+    if (tokenValue != null) {
+      tokenValue.getStrValue()
+    } else {
+      functionImplementation.executeStr()
+    }
+  }
 }

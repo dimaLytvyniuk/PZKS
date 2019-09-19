@@ -220,7 +220,8 @@ class ExpressionTree {
     _strValues = ""
     _usedVariables += variableName
 
-    new NodeValue { constName = variableName }
+    val variableValue = new TokenValue { constName = variableName }
+    new NodeValue { tokenValue = variableValue }
   }
 
   private def getNumberVariable(): NodeValue = {
@@ -228,7 +229,8 @@ class ExpressionTree {
 
     _intValue = 0
 
-    new NodeValue { intValue = numberValue }
+    val numberToken = new TokenValue { intValue = numberValue }
+    new NodeValue { tokenValue = numberToken }
   }
 
   private def getNewValueNode(): ExpressionNode = {
