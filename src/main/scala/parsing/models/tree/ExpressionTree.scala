@@ -197,12 +197,13 @@ class ExpressionTree {
         _currentNode = newNode
         _head = _currentNode
       } else {
-        newNode.level = lastNode.level + 1
-        if (lastNode.rightNode != null) {
-          newNode.leftNode = lastNode.rightNode
+        val targetNode = lastNode.parent
+        newNode.level = targetNode.level + 1
+        if (targetNode.rightNode != null) {
+          newNode.leftNode = targetNode.rightNode
         }
 
-        lastNode.rightNode = newNode
+        targetNode.rightNode = newNode
         _currentNode = newNode
       }
     }
