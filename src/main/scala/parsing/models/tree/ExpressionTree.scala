@@ -19,6 +19,7 @@ class ExpressionTree {
   private var _countOfOpenedBraces = 0
 
   private var _usedVariables = new immutable.HashSet[String]()
+  private var _supportedFunctions = Set("max", "min")
 
   def head = _head
   def usedVariables = _usedVariables
