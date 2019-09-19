@@ -22,11 +22,6 @@ class ExpressionTree {
 
   var usedVariables = new immutable.HashSet[String]()
 
-  _head = ExpressionNode.getEmptyNode(0)
-  _head.addLeftNode(ExpressionNode.getEmptyNode(_head.level + 1))
-  _currentNode = _head.leftNode
-  _stack.push(_head)
-
   def head = _head
 
   def addChar(ch: Char): Unit = {
@@ -60,11 +55,14 @@ class ExpressionTree {
     _countOfOpenedBraces += 1
     _previousCharType = CharType.OpenBrace
 
-    if (_previousCharType != CharType.None) {
-      _currentNode.addLeftNode(ExpressionNode.getEmptyNode(_currentNode.level + 1))
-      _stack.push(_currentNode)
-      _currentNode = _currentNode.leftNode
+    if (_previousCharType == CharType.None) {
+      _head = ExpressionNode.getEmptyNode(0)
+      _currentNode = _head
     }
+
+    _currentNode.leftNode = ExpressionNode.getEmptyNode(_currentNode.level + 1)
+    _stack.push(_currentNode)
+    _currentNode = _currentNode.leftNode
   }
 
   private def addClosedBrace(): Unit = {
