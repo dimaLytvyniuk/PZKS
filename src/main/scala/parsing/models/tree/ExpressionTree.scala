@@ -20,6 +20,7 @@ class ExpressionTree {
 
   private var _usedVariables = new immutable.HashSet[String]()
   private var _supportedFunctions = Set("max", "min")
+  private var _currentFunctionName: String = null
 
   def head = _head
   def usedVariables = _usedVariables
@@ -37,11 +38,16 @@ class ExpressionTree {
     else if (numbers.contains(ch)) {
       addNumber(ch)
     }
+    else if (ch == ',') {
+      addComa()
+    }
     else
     {
       addVariableName(ch)
     }
   }
+
+  def evaluateStr: String = _head.evaluateStr()
 
   def endBuildingExpression(): Unit = {
     if (
@@ -72,14 +78,22 @@ class ExpressionTree {
   private def addOpenBrace(): Unit = {
     if (
       _previousCharType == CharType.ClosedBrace ||
-      _previousCharType == CharType.Number ||
-      _previousCharType == CharType.Variable)
+      _previousCharType == CharType.Number)
     {
         throw new IncorrectOpenBraceException()
     }
 
-    _countOfOpenedBraces += 1
-    _previousCharType = CharType.OpenBrace
+    if (_previousCharType == CharType.Variable) {
+      if (_usedVariables.contains(_strValues)) {
+        _currentFunctionName = _strValues
+        _previousCharType = CharType.OpenedFunctionBrace
+      } else {
+        throw new IncorrectOpenBraceException()
+      }
+    } else {
+      _countOfOpenedBraces += 1
+      _previousCharType = CharType.OpenBrace
+    }
   }
 
   private def addClosedBrace(): Unit = {
@@ -124,6 +138,10 @@ class ExpressionTree {
 
     _intValue *= 10
     _intValue += ch.asDigit
+  }
+
+  private def addComa(): Unit = {
+
   }
 
   private def addVariableName(ch: Char): Unit = {
@@ -211,8 +229,6 @@ class ExpressionTree {
 
     _previousCharType = CharType.ArithmeticOperation
   }
-
-  def evaluateStr = _head.evaluateStr()
 
   private def getCurrentVariable(): NodeValue = {
     val variableName = _strValues
