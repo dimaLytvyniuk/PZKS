@@ -54,15 +54,6 @@ class ExpressionTree {
 
     _countOfOpenedBraces += 1
     _previousCharType = CharType.OpenBrace
-
-    if (_previousCharType == CharType.None) {
-      _head = ExpressionNode.getEmptyNode(0)
-      _currentNode = _head
-    }
-
-    _currentNode.leftNode = ExpressionNode.getEmptyNode(_currentNode.level + 1)
-    _stack.push(_currentNode)
-    _currentNode = _currentNode.leftNode
   }
 
   private def addClosedBrace(): Unit = {
@@ -75,10 +66,20 @@ class ExpressionTree {
       throw new IncorrectClosedBraceException()
     }
 
-    if (_previousCharType == CharType.Variable) {
-      storeCurrentVariable()
-    } else if (_previousCharType == CharType.Number) {
-      storeNumberVariable()
+    if (
+      _previousCharType == CharType.Number ||
+      _previousCharType == CharType.Variable) {
+      val newNode = getNewValueNode()
+
+      if (_head == null) {
+        newNode.level = 0
+        _head = newNode
+        _currentNode = _head
+      } else {
+        newNode.level = _currentNode.level + 1
+        _currentNode.rightNode = newNode
+        _currentNode = newNode
+      }
     }
 
     _countOfOpenedBraces -= 1
@@ -123,42 +124,93 @@ class ExpressionTree {
       throw new IncorrectArithmeticOperationException()
     }
 
-    if (_previousCharType == CharType.Variable) {
-      storeCurrentVariable()
-    } else if (_previousCharType == CharType.Number) {
-      storeNumberVariable()
+    if (
+      _previousCharType == CharType.Number ||
+        _previousCharType == CharType.Variable) {
+      val newNode = getNewValueNode()
+
+      if (_head == null) {
+        newNode.level = 0
+        _head = newNode
+        _currentNode = _head
+      } else {
+        newNode.level = _currentNode.level + 1
+        _currentNode.rightNode = newNode
+        _currentNode = newNode
+      }
     }
 
-    _previousCharType = CharType.ArithmeticOperation
-
-    _currentNode = _stack.pop()
+    val newNode = ExpressionNode.getEmptyNode(0, _countOfOpenedBraces)
     ch match {
-      case '+' => _currentNode.nodeType = NodeType.Sum
-      case '-' => _currentNode.nodeType = NodeType.Subtraction
-      case '*' => _currentNode.nodeType = NodeType.Multiplication
-      case '/' => _currentNode.nodeType = NodeType.Division
+      case '+' => newNode.nodeType = NodeType.Sum
+      case '-' => newNode.nodeType = NodeType.Subtraction
+      case '*' => newNode.nodeType = NodeType.Multiplication
+      case '/' => newNode.nodeType = NodeType.Division
       case _ => throw new IllegalArgumentException("ch")
     }
 
-    _currentNode.addRightNode(ExpressionNode.getEmptyNode(_currentNode.level + 1))
-    _stack.push(_currentNode)
-    _currentNode = _currentNode.rightNode
+    if (_head == null) {
+      newNode.level = 0
+      _head = newNode
+      _currentNode = _head
+    } else {
+      var parentNode = _currentNode.parent
+      while (
+          parentNode != null &&
+          newNode.braceNumber < parentNode.braceNumber) {
+        parentNode = parentNode.parent
+      }
+
+      while (
+          parentNode != null &&
+          NodeType.checkPrioritization(_currentNode.nodeType, parentNode.nodeType) == 1 &&
+          newNode.braceNumber == parentNode.braceNumber) {
+        parentNode = parentNode.parent
+      }
+
+      if (parentNode == null) {
+        newNode.level = 0
+        newNode.leftNode = _currentNode
+        _currentNode = newNode
+        _head = _currentNode
+      } else {
+        newNode.level = parentNode.level + 1
+        newNode.leftNode = parentNode.rightNode
+        parentNode.rightNode = newNode
+        _currentNode = newNode
+      }
+    }
+
+    _previousCharType = CharType.ArithmeticOperation
   }
 
-  private def storeCurrentVariable(): Unit = {
+  private def getCurrentVariable(): NodeValue = {
     val variableName = _strValues
-    _currentNode.nodeType = NodeType.HasValue
-    _currentNode.value.constName = variableName
 
     _strValues = ""
     usedVariables += variableName
+
+    new NodeValue { constName = variableName }
   }
 
-  private def storeNumberVariable(): Unit = {
-    val intValue = _intValue
-    _currentNode.nodeType = NodeType.HasValue
-    _currentNode.value.intValue = intValue
+  private def getNumberVariable(): NodeValue = {
+    val numberValue = _intValue
 
     _intValue = 0
+
+    new NodeValue { intValue = numberValue }
+  }
+
+  private def getNewValueNode(): ExpressionNode = {
+    val newNode = ExpressionNode.getEmptyNode(0, _countOfOpenedBraces)
+    newNode.nodeType = NodeType.HasValue
+
+    if (_previousCharType == CharType.Variable) {
+      newNode.value = getCurrentVariable()
+    } else {
+      newNode.value = getNumberVariable()
+    }
+
+    newNode
   }
 }

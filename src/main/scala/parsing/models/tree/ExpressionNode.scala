@@ -24,10 +24,6 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     _parent = node
   }
 
-  def addRightNode(node: ExpressionNode): Unit = {
-    _rightNode = node
-  }
-
   def level = _level
   def level_=(newLevel: Int) {
     _level = newLevel
@@ -43,7 +39,9 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
 }
 
 object ExpressionNode {
-  def getEmptyNode() = new ExpressionNode(0, NodeType.None, new NodeValue())
+  def getEmptyNode() = new ExpressionNode(0, NodeType.None, new NodeValue(), 0)
 
-  def getEmptyNode(level: Int) = new ExpressionNode(level, NodeType.None, new NodeValue())
+  def getEmptyNode(level: Int) = new ExpressionNode(level, NodeType.None, new NodeValue(), 0)
+
+  def getEmptyNode(level: Int, braceNumber: Int) = new ExpressionNode(level, NodeType.None, new NodeValue(), braceNumber)
 }
