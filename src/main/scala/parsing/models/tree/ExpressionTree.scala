@@ -1,8 +1,7 @@
 package parsing.models.tree
 
-import parsing.models.exceptions.{IncorrectArithmeticOperationException, IncorrectClosedBraceException, IncorrectNumberPositionException, IncorrectOpenBraceException, IncorrectSymbolPositionException}
+import parsing.models.exceptions._
 
-import scala.collection.mutable
 import scala.collection.immutable
 
 class ExpressionTree {
@@ -12,7 +11,6 @@ class ExpressionTree {
   private var _head: ExpressionNode = null
   private var _currentNode: ExpressionNode = null
 
-  private val _stack = new mutable.Stack[ExpressionNode]()
   private var _previousCharType = CharType.None
 
   private var _strValues: String = ""
@@ -20,9 +18,10 @@ class ExpressionTree {
 
   private var _countOfOpenedBraces = 0
 
-  var usedVariables = new immutable.HashSet[String]()
+  private var _usedVariables = new immutable.HashSet[String]()
 
   def head = _head
+  def usedVariables = _usedVariables
 
   def addChar(ch: Char): Unit = {
     if (ch == '(') {
@@ -40,6 +39,32 @@ class ExpressionTree {
     else
     {
       addVariableName(ch)
+    }
+  }
+
+  def endBuildingExpression(): Unit = {
+    if (
+        _previousCharType == CharType.ArithmeticOperation ||
+        _previousCharType == CharType.None ||
+        _previousCharType == CharType.OpenBrace)
+    {
+      throw new IncorrectEndOfExpressionException()
+    }
+
+    if (
+        _previousCharType == CharType.Number ||
+        _previousCharType == CharType.Variable) {
+      val newNode = getNewValueNode()
+
+      if (_head == null) {
+        newNode.level = 0
+        _head = newNode
+        _currentNode = _head
+      } else {
+        newNode.level = _currentNode.level + 1
+        _currentNode.rightNode = newNode
+        _currentNode = newNode
+      }
     }
   }
 
@@ -84,8 +109,6 @@ class ExpressionTree {
 
     _countOfOpenedBraces -= 1
     _previousCharType = CharType.ClosedBrace
-
-    _currentNode = _stack.pop()
   }
 
   private def addNumber(ch: Char): Unit = {
@@ -99,7 +122,7 @@ class ExpressionTree {
     _previousCharType = CharType.Number
 
     _intValue *= 10
-    _intValue += ch.asInstanceOf[Int]
+    _intValue += ch.asDigit
   }
 
   private def addVariableName(ch: Char): Unit = {
@@ -154,29 +177,32 @@ class ExpressionTree {
       _head = newNode
       _currentNode = _head
     } else {
-      var parentNode = _currentNode.parent
+      var lastNode = _currentNode
       while (
-          parentNode != null &&
-          newNode.braceNumber < parentNode.braceNumber) {
-        parentNode = parentNode.parent
+          lastNode.parent != null &&
+          newNode.braceNumber < lastNode.parent.braceNumber) {
+          lastNode = lastNode.parent
       }
 
       while (
-          parentNode != null &&
-          NodeType.checkPrioritization(_currentNode.nodeType, parentNode.nodeType) == 1 &&
-          newNode.braceNumber == parentNode.braceNumber) {
-        parentNode = parentNode.parent
+          lastNode.parent != null &&
+          NodeType.checkPrioritization(newNode.nodeType, lastNode.parent.nodeType) == 1 &&
+          newNode.braceNumber == lastNode.parent.braceNumber) {
+        lastNode = lastNode.parent
       }
 
-      if (parentNode == null) {
+      if (lastNode.parent == null) {
         newNode.level = 0
-        newNode.leftNode = _currentNode
+        newNode.leftNode = lastNode
         _currentNode = newNode
         _head = _currentNode
       } else {
-        newNode.level = parentNode.level + 1
-        newNode.leftNode = parentNode.rightNode
-        parentNode.rightNode = newNode
+        newNode.level = lastNode.level + 1
+        if (lastNode.rightNode != null) {
+          newNode.leftNode = lastNode.rightNode
+        }
+
+        lastNode.rightNode = newNode
         _currentNode = newNode
       }
     }
@@ -184,11 +210,13 @@ class ExpressionTree {
     _previousCharType = CharType.ArithmeticOperation
   }
 
+  def evaluateStr = _head.evaluateStr()
+
   private def getCurrentVariable(): NodeValue = {
     val variableName = _strValues
 
     _strValues = ""
-    usedVariables += variableName
+    _usedVariables += variableName
 
     new NodeValue { constName = variableName }
   }

@@ -1,7 +1,5 @@
 package parsing.models.tree
 
-import NodeType._
-
 object NodeType extends Enumeration {
   type OperationTypes = Value
   val Sum, Subtraction, Division, Multiplication, HasValue, None  = Value

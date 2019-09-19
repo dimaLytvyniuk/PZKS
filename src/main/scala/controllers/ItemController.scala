@@ -4,6 +4,8 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.Directives._
 import spray.json.DefaultJsonProtocol._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
+import parsing.ExpressionParsingService
+import parsing.models.InputExpressionModel
 
 final case class Item(name: String, id: Long)
 
@@ -27,6 +29,9 @@ class ItemController {
   )
 
   def getItem(): Route = {
+    val service = new ExpressionParsingService
+    val model = new InputExpressionModel("(5*3 + 5 * 3) - 2")
+    service.parseExpression(model)
     complete(Item("item", 2))
   }
 

@@ -8,17 +8,21 @@ import scala.collection.mutable
 
 class ExpressionParsingService {
   def parseExpression(expressionModel: InputExpressionModel): OutputParsedExpressionModel = {
-
+    val tree = buildExpressionTree(expressionModel.expression)
+    println(tree.evaluateStr)
+    null
   }
 
-  private[this] def buildExpressionTree(expression: String): ExpressionTree = {
-    val stack = new mutable.Stack()
-    val head = new ExpressionTree(0, NodeType.None, null)
+  private def buildExpressionTree(expression: String): ExpressionTree = {
+    val tree = new ExpressionTree
 
     for (ch <- expression) {
-      ch match {
-        case '(' => println("")
+      if (ch != ' ') {
+        tree.addChar(ch)
       }
     }
+    tree.endBuildingExpression()
+
+    tree
   }
 }

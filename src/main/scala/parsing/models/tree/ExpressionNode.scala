@@ -15,8 +15,8 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
 
   def rightNode = _rightNode
   def rightNode_=(node: ExpressionNode) {
-    _leftNode = node
-    _leftNode.parent = this
+    _rightNode = node
+    _rightNode.parent = this
   }
 
   def parent = _parent
@@ -35,6 +35,44 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     if (_leftNode != null) {
       _leftNode.level = newLevel - 1
     }
+  }
+
+  def evaluateStr(): String = {
+    var result = ""
+    if (nodeType == NodeType.None) {
+      throw new Exception("Incorrect evaluated expression")
+    }
+
+    var nodeValue = ""
+
+    if (nodeType == NodeType.HasValue) {
+      if (value.constName != null && value.constName != "") {
+        nodeValue = value.constName
+      }
+      else {
+        nodeValue = value.intValue.toString()
+      }
+    } else {
+      nodeType match {
+        case NodeType.Sum => nodeValue = "+"
+        case NodeType.Subtraction => nodeValue = "-"
+        case NodeType.Multiplication => nodeValue = "*"
+        case NodeType.Division => nodeValue = "/"
+        case _ => throw new Exception("Incorrect node type of node")
+      }
+    }
+
+    if (nodeType != NodeType.HasValue) {
+      result += "("
+      result += leftNode.evaluateStr()
+      result += nodeValue
+      result += rightNode.evaluateStr()
+      result += ")"
+    } else {
+      result = nodeValue
+    }
+
+    result
   }
 }
 
