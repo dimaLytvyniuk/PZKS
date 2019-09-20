@@ -2,7 +2,8 @@ package parsing.models.tree
 
 import parsing.models.exceptions._
 
-import scala.collection.immutable
+import scala.collection.mutable.ArrayBuffer
+import scala.collection.{immutable, mutable}
 
 class ExpressionTree {
   private val operations = Array('+', '-', '/', '*')
@@ -21,6 +22,7 @@ class ExpressionTree {
   private var _usedVariables = new immutable.HashSet[String]()
   private var _supportedFunctions = Set("max", "min")
   private var _currentFunctionName: String = null
+  private var _currentFunctionParameters = new ArrayBuffer[TokenValue]()
 
   def head = _head
   def usedVariables = _usedVariables
@@ -50,10 +52,7 @@ class ExpressionTree {
   def evaluateStr: String = _head.evaluateStr()
 
   def endBuildingExpression(): Unit = {
-    if (
-        _previousCharType == CharType.ArithmeticOperation ||
-        _previousCharType == CharType.None ||
-        _previousCharType == CharType.OpenBrace)
+    if (!isEndBuildingExpressionAllowed)
     {
       throw new IncorrectEndOfExpressionException()
     }
@@ -76,16 +75,15 @@ class ExpressionTree {
   }
 
   private def addOpenBrace(): Unit = {
-    if (
-      _previousCharType == CharType.ClosedBrace ||
-      _previousCharType == CharType.Number)
+    if (!isOpenBraceAllowed)
     {
         throw new IncorrectOpenBraceException()
     }
 
     if (_previousCharType == CharType.Variable) {
-      if (_usedVariables.contains(_strValues)) {
+      if (_supportedFunctions.contains(_strValues)) {
         _currentFunctionName = _strValues
+        _strValues = ""
         _previousCharType = CharType.OpenedFunctionBrace
       } else {
         throw new IncorrectOpenBraceException()
@@ -97,18 +95,34 @@ class ExpressionTree {
   }
 
   private def addClosedBrace(): Unit = {
-    if (
-      _previousCharType == CharType.OpenBrace ||
-      _previousCharType == CharType.ArithmeticOperation ||
-      _previousCharType == CharType.None ||
-      _countOfOpenedBraces < 1)
+    if (!isClosedBraceAllowed)
     {
       throw new IncorrectClosedBraceException()
     }
 
-    if (
-      _previousCharType == CharType.Number ||
-      _previousCharType == CharType.Variable) {
+    if (_previousCharType == CharType.FunctionIntValue || _previousCharType == CharType.FunctionCharValue) {
+      val tokenValue = getCurrentTokenValue()
+      _currentFunctionParameters += tokenValue
+      val functionDeclaration = TwoParameterFunctionDeclaration.nameToDeclarationMap(_currentFunctionName)
+      if (_currentFunctionParameters.length == 2) {
+        val newFunctionImplementation = new TwoParameterFunctionImplementation(_currentFunctionParameters(0), _currentFunctionParameters(1), functionDeclaration)
+        val newNodeValue = new NodeValue { functionImplementation = newFunctionImplementation }
+
+        val newNode = new ExpressionNode(0, NodeType.HasValue, newNodeValue, _countOfOpenedBraces)
+        if (_head == null) {
+          _head = newNode
+          _currentNode = _head
+        } else {
+          newNode.level = _currentNode.level + 1
+          _currentNode.rightNode = newNode
+        }
+
+        _currentFunctionParameters = new ArrayBuffer[TokenValue]()
+        _currentFunctionName = ""
+      } else {
+        throw new IncorrectFunctionException
+      }
+    } else if (_previousCharType == CharType.Number || _previousCharType == CharType.Variable) {
       val newNode = getNewValueNode()
 
       if (_head == null) {
@@ -122,52 +136,63 @@ class ExpressionTree {
       }
     }
 
-    _countOfOpenedBraces -= 1
+    if (_previousCharType != CharType.FunctionIntValue && _previousCharType != CharType.FunctionCharValue) {
+      _countOfOpenedBraces -= 1
+    }
+
     _previousCharType = CharType.ClosedBrace
   }
 
   private def addNumber(ch: Char): Unit = {
-    if (
-      _previousCharType == CharType.ClosedBrace ||
-      _previousCharType == CharType.Variable)
+    if (!isNumberAllowed)
     {
       throw new IncorrectNumberPositionException()
     }
 
-    _previousCharType = CharType.Number
+    if (_currentFunctionName == null || _currentFunctionName == "") {
+      _previousCharType = CharType.Number
+    } else {
+      _previousCharType = CharType.FunctionIntValue
+    }
 
     _intValue *= 10
     _intValue += ch.asDigit
   }
 
   private def addComa(): Unit = {
+    if (!isComaAllowed) {
+      throw new IncorrectSymbolPositionException()
+    }
 
+    val tokenValue = getCurrentTokenValue()
+    _currentFunctionParameters += tokenValue
+
+    _previousCharType = CharType.FunctionComa
   }
 
   private def addVariableName(ch: Char): Unit = {
-    if (
-      _previousCharType == CharType.ClosedBrace ||
-      _previousCharType == CharType.Number)
+    if (!isVariableNameAllowed)
     {
       throw new IncorrectSymbolPositionException()
     }
 
-    _previousCharType = CharType.Variable
+    if (_currentFunctionName == null || _currentFunctionName == "") {
+      _previousCharType = CharType.Variable
+    } else {
+      _previousCharType = CharType.FunctionCharValue
+    }
 
     _strValues += ch
   }
 
   private def addOperation(ch: Char): Unit = {
-    if (
-      _previousCharType == CharType.OpenBrace ||
-      _previousCharType == CharType.ArithmeticOperation ||
-      _previousCharType == CharType.None)
+    if (!isOperationAllowed)
     {
       throw new IncorrectArithmeticOperationException()
     }
 
     if (
-      _previousCharType == CharType.Number ||
+        _previousCharType == CharType.Number ||
         _previousCharType == CharType.Variable) {
       val newNode = getNewValueNode()
 
@@ -230,35 +255,92 @@ class ExpressionTree {
     _previousCharType = CharType.ArithmeticOperation
   }
 
-  private def getCurrentVariable(): NodeValue = {
-    val variableName = _strValues
+  private def getCurrentTokenValue(): TokenValue = {
+    val newTokenValue = new TokenValue()
 
-    _strValues = ""
-    _usedVariables += variableName
+    if (_previousCharType == CharType.FunctionCharValue || _previousCharType == CharType.Variable) {
+      val variableName = _strValues
 
-    val variableValue = new TokenValue { constName = variableName }
-    new NodeValue { tokenValue = variableValue }
-  }
+      _strValues = ""
+      _usedVariables += variableName
 
-  private def getNumberVariable(): NodeValue = {
-    val numberValue = _intValue
+      newTokenValue.constName = variableName
+    } else {
+      val numberValue = _intValue
 
-    _intValue = 0
+      _intValue = 0
 
-    val numberToken = new TokenValue { intValue = numberValue }
-    new NodeValue { tokenValue = numberToken }
+      newTokenValue.intValue = numberValue
+    }
+
+    newTokenValue
   }
 
   private def getNewValueNode(): ExpressionNode = {
     val newNode = ExpressionNode.getEmptyNode(0, _countOfOpenedBraces)
     newNode.nodeType = NodeType.HasValue
-
-    if (_previousCharType == CharType.Variable) {
-      newNode.value = getCurrentVariable()
-    } else {
-      newNode.value = getNumberVariable()
-    }
+    newNode.value = new NodeValue { tokenValue = getCurrentTokenValue() }
 
     newNode
+  }
+
+  private def isClosedBraceAllowed: Boolean = {
+    _previousCharType == CharType.Variable ||
+      _previousCharType == CharType.Number ||
+      _previousCharType == CharType.FunctionCharValue ||
+      _previousCharType == CharType.FunctionIntValue ||
+      _previousCharType == CharType.ClosedBrace ||
+      _countOfOpenedBraces > 0 ||
+      (
+        (
+          _previousCharType == CharType.FunctionCharValue ||
+          _previousCharType == CharType.FunctionIntValue ||
+          _previousCharType == CharType.OpenedFunctionBrace) &&
+        _countOfOpenedBraces < 1)
+  }
+
+  private def isOpenBraceAllowed: Boolean = {
+    _previousCharType == CharType.OpenBrace ||
+      _previousCharType == CharType.ArithmeticOperation ||
+      _previousCharType == CharType.Variable ||
+      _previousCharType == CharType.None
+  }
+
+  private def isNumberAllowed: Boolean = {
+    _previousCharType == CharType.ArithmeticOperation ||
+      _previousCharType == CharType.Number ||
+      _previousCharType == CharType.OpenBrace ||
+      _previousCharType == CharType.None ||
+      _previousCharType == CharType.OpenedFunctionBrace ||
+      _previousCharType == CharType.FunctionComa ||
+      _previousCharType == CharType.FunctionIntValue
+  }
+
+  private def isVariableNameAllowed: Boolean = {
+    _previousCharType == CharType.ArithmeticOperation ||
+      _previousCharType == CharType.Variable ||
+      _previousCharType == CharType.OpenBrace ||
+      _previousCharType == CharType.None ||
+      _previousCharType == CharType.OpenedFunctionBrace ||
+      _previousCharType == CharType.FunctionComa ||
+      _previousCharType == CharType.FunctionCharValue
+  }
+
+  private def isOperationAllowed: Boolean = {
+    _previousCharType == CharType.Variable ||
+    _previousCharType == CharType.Number ||
+    _previousCharType == CharType.ClosedBrace
+  }
+
+  private def isComaAllowed: Boolean = {
+    _previousCharType == CharType.FunctionIntValue ||
+    _previousCharType == CharType.FunctionCharValue
+  }
+
+  private def isEndBuildingExpressionAllowed = {
+    (_countOfOpenedBraces == 0) &&
+      _previousCharType == CharType.ClosedBrace ||
+      _previousCharType == CharType.Number ||
+      _previousCharType == CharType.Variable
   }
 }

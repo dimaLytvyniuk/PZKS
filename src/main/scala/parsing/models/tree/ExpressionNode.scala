@@ -43,10 +43,10 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
       throw new Exception("Incorrect evaluated expression")
     }
 
-    var nodeValue = ""
+    var nodeValue: String = ""
 
     if (nodeType == NodeType.HasValue) {
-      nodeValue = value.getStrValue()
+      nodeValue = value.getStrValue
     } else {
       nodeType match {
         case NodeType.Sum => nodeValue = "+"

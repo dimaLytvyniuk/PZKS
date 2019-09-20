@@ -30,7 +30,7 @@ class ItemController {
 
   def getItem(): Route = {
     val service = new ExpressionParsingService
-    val model = new InputExpressionModel("2 + (5*3+5*3)-2 + (3 * 4) - 5")
+    val model = new InputExpressionModel("2 + min(3, variable) + 3 * (3 - 2 * 2)")
     service.parseExpression(model)
     complete(Item("item", 2))
   }
