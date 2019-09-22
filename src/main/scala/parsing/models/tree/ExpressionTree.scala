@@ -57,6 +57,10 @@ class ExpressionTree {
       throw new IncorrectEndOfExpressionException()
     }
 
+    if (_countOfOpenedBraces > 0) {
+      throw new IncorrectCountOfBracesException
+    }
+
     if (
         _previousCharType == CharType.Number ||
         _previousCharType == CharType.Variable) {

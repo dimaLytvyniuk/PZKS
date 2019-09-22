@@ -3,7 +3,7 @@ package webServer
 import akka.actor.ActorSystem
 import akka.http.scaladsl.Http
 import akka.stream.ActorMaterializer
-import controllers.ItemController
+import controllers.{ExpressionController, ItemController}
 
 import scala.io.StdIn
 
@@ -15,9 +15,9 @@ object WebServer {
     // needed for the future flatMap/onComplete in the end
     implicit val executionContext = system.dispatcher
 
-    val itemController = new ItemController()
+    val expressionController = new ExpressionController()
 
-    val route = itemController.routes
+    val route = expressionController.routes
 
     val bindingFuture = Http().bindAndHandle(route, "localhost", 8080)
 

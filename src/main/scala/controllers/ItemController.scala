@@ -5,7 +5,8 @@ import akka.http.scaladsl.server.Directives._
 import spray.json.DefaultJsonProtocol._
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import parsing.ExpressionParsingService
-import parsing.models.InputExpressionModel
+import parsing.models.views.InputExpressionModel
+import spray.json.RootJsonFormat
 
 final case class Item(name: String, id: Long)
 

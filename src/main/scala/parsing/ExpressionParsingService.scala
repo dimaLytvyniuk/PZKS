@@ -1,24 +1,36 @@
 package parsing
 
-import parsing.models.tree.{ExpressionTree, NodeType}
-import parsing.models.{InputExpressionModel, OutputParsedExpressionModel}
-import parsing.models.tree.NodeType._
-
-import scala.collection.mutable
+import parsing.models.tree._
+import parsing.models.views._
 
 class ExpressionParsingService {
   def parseExpression(expressionModel: InputExpressionModel): OutputParsedExpressionModel = {
-    val tree = buildExpressionTree(expressionModel.expression)
-    println(tree.evaluateStr)
-    null
+    var exceptionModel: ExceptionModel = null
+    var treeViewModel: ExpressionTreeViewModel = null
+    var evaluatedResult: String = null
+
+    try {
+      val tree = buildExpressionTree(expressionModel.expression)
+      evaluatedResult = tree.evaluateStr
+
+      treeViewModel = ExpressionTreeViewModel.createFromExpressionTree(tree)
+    } catch {
+      case e: Exception => exceptionModel = new ExceptionModel(e.getMessage)
+    }
+
+    new OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
   }
 
   private def buildExpressionTree(expression: String): ExpressionTree = {
     val tree = new ExpressionTree
 
-    for (ch <- expression) {
-      if (ch != ' ') {
-        tree.addChar(ch)
+    for (i <- 0 until expression.length) {
+      if (expression(i) != ' ') {
+        try {
+          tree.addChar(expression(i))
+        } catch {
+          case e: Exception => throw new Exception(s"Exception at ${i + 1}: ${e.getMessage}.")
+        }
       }
     }
     tree.endBuildingExpression()
