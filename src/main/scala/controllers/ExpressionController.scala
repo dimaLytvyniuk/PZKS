@@ -6,6 +6,7 @@ import parsing.ExpressionParsingService
 import parsing.models.views._
 import spray.json._
 import DefaultJsonProtocol._
+import akka.http.scaladsl.model.StatusCodes
 
 trait JsonSupport {
   implicit val inputExpressionModelFormat = jsonFormat1(InputExpressionModel)
@@ -56,15 +57,23 @@ trait JsonSupport {
 }
 
 class ExpressionController extends Directives with JsonSupport {
+  private val cors = new CorsHandler {}
 
   val routes: Route =
     concat(
       post {
+        cors.corsHandler(
         path("expression" / "lab1") {
           entity(as[InputExpressionModel]) { inputExpressionModel =>
             parseFirstLabExpression(inputExpressionModel)
           }
-        }
+        })
+      },
+      options {
+        cors.corsHandler(
+          path("expression" / "lab1") {
+            complete(StatusCodes.OK)
+          })
       }
     )
 
