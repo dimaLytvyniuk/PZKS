@@ -1,0 +1,19 @@
+.container {
+    margin: 20px;
+}
+
+.result-container {
+    margin-top: 30px;
+}
+
+.error-container {
+    color: red
+}
+
+.evaluated-container {
+    color: blue
+}
+
+#submit-btn {
+    margin-top: 10px;
+}
