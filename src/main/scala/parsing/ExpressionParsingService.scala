@@ -29,7 +29,10 @@ class ExpressionParsingService {
         try {
           tree.addChar(expression(i))
         } catch {
-          case e: Exception => throw new Exception(s"Exception at ${i + 1}: ${e.getMessage}.")
+          case e: Exception => {
+            println(e)
+            throw new Exception(s"Exception at ${i + 1}: ${e.getMessage}.")
+          }
         }
       }
     }
