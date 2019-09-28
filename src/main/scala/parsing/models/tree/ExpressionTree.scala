@@ -15,8 +15,8 @@ class ExpressionTree {
   private var _previousCharType = CharType.None
 
   private var _strValues: String = ""
-  private var _intValue: Int = 0
-  private var _currentIntSign: Int = 1
+  private var _numberValue: Int = 0
+  private var _currentValueSign: Int = 1
 
   private var _countOfOpenedBraces = 0
 
@@ -39,7 +39,11 @@ class ExpressionTree {
       addOperation(ch)
     }
     else if (numbers.contains(ch)) {
-      addNumber(ch)
+      if (_previousCharType == CharType.Variable) {
+        addVariableName(ch)
+      } else {
+        addNumber(ch)
+      }
     }
     else if (ch == ',') {
       addComa()
@@ -62,20 +66,8 @@ class ExpressionTree {
       throw new IncorrectCountOfBracesException
     }
 
-    if (
-        _previousCharType == CharType.Number ||
-        _previousCharType == CharType.Variable) {
-      val newNode = getNewValueNode()
-
-      if (_head == null) {
-        newNode.level = 0
-        _head = newNode
-        _currentNode = _head
-      } else {
-        newNode.level = _currentNode.level + 1
-        _currentNode.rightNode = newNode
-        _currentNode = newNode
-      }
+    if (_previousCharType == CharType.Number || _previousCharType == CharType.Variable) {
+      addNewLeaf()
     }
   }
 
@@ -106,40 +98,9 @@ class ExpressionTree {
     }
 
     if (_previousCharType == CharType.FunctionIntValue || _previousCharType == CharType.FunctionCharValue) {
-      val tokenValue = getCurrentTokenValue()
-      _currentFunctionParameters += tokenValue
-      val functionDeclaration = TwoParameterFunctionDeclaration.nameToDeclarationMap(_currentFunctionName)
-      if (_currentFunctionParameters.length == 2) {
-        val newFunctionImplementation = new TwoParameterFunctionImplementation(_currentFunctionParameters(0), _currentFunctionParameters(1), functionDeclaration)
-        val newNodeValue = new NodeValue { functionImplementation = newFunctionImplementation }
-
-        val newNode = new ExpressionNode(0, NodeType.HasValue, newNodeValue, _countOfOpenedBraces)
-        if (_head == null) {
-          _head = newNode
-          _currentNode = _head
-        } else {
-          newNode.level = _currentNode.level + 1
-          _currentNode.rightNode = newNode
-          _currentNode = newNode
-        }
-
-        _currentFunctionParameters = new ArrayBuffer[TokenValue]()
-        _currentFunctionName = ""
-      } else {
-        throw new IncorrectFunctionException
-      }
+      addFunction()
     } else if (_previousCharType == CharType.Number || _previousCharType == CharType.Variable) {
-      val newNode = getNewValueNode()
-
-      if (_head == null) {
-        newNode.level = 0
-        _head = newNode
-        _currentNode = _head
-      } else {
-        newNode.level = _currentNode.level + 1
-        _currentNode.rightNode = newNode
-        _currentNode = newNode
-      }
+      addNewLeaf()
     }
 
     if (_previousCharType != CharType.FunctionIntValue && _previousCharType != CharType.FunctionCharValue) {
@@ -161,8 +122,8 @@ class ExpressionTree {
       _previousCharType = CharType.FunctionIntValue
     }
 
-    _intValue *= 10
-    _intValue += ch.asDigit
+    _numberValue *= 10
+    _numberValue += ch.asDigit
   }
 
   private def addComa(): Unit = {
@@ -203,18 +164,27 @@ class ExpressionTree {
       }
 
       if (ch == '-') {
-        _currentIntSign = -1
+        _currentValueSign = -1
       }
+    } else if (_previousCharType == CharType.Number || _previousCharType == CharType.Variable) {
+      addNewLeaf()
 
-      _previousCharType = CharType.ArithmeticOperation
-      return
-    } else if (
-        _previousCharType == CharType.Number ||
-        _previousCharType == CharType.Variable) {
-      val newNode = getNewValueNode()
+      addOperationNode(ch)
+    }
 
+    _previousCharType = CharType.ArithmeticOperation
+  }
+
+  private def addFunction(): Unit = {
+    val tokenValue = getCurrentTokenValue()
+    _currentFunctionParameters += tokenValue
+    val functionDeclaration = TwoParameterFunctionDeclaration.nameToDeclarationMap(_currentFunctionName)
+    if (_currentFunctionParameters.length == 2) {
+      val newFunctionImplementation = new TwoParameterFunctionImplementation(_currentFunctionParameters(0), _currentFunctionParameters(1), functionDeclaration)
+      val newNodeValue = new NodeValue { functionImplementation = newFunctionImplementation }
+
+      val newNode = new ExpressionNode(0, NodeType.HasValue, newNodeValue, _countOfOpenedBraces)
       if (_head == null) {
-        newNode.level = 0
         _head = newNode
         _currentNode = _head
       } else {
@@ -222,10 +192,31 @@ class ExpressionTree {
         _currentNode.rightNode = newNode
         _currentNode = newNode
       }
-    }
 
+      _currentFunctionParameters = new ArrayBuffer[TokenValue]()
+      _currentFunctionName = ""
+    } else {
+      throw new IncorrectFunctionException
+    }
+  }
+
+  def addNewLeaf(): Unit = {
+    val newNode = getNewValueNode()
+
+    if (_head == null) {
+      newNode.level = 0
+      _head = newNode
+      _currentNode = _head
+    } else {
+      newNode.level = _currentNode.level + 1
+      _currentNode.rightNode = newNode
+      _currentNode = newNode
+    }
+  }
+
+  private def addOperationNode(operation: Char): Unit = {
     val newNode = ExpressionNode.getEmptyNode(0, _countOfOpenedBraces)
-    ch match {
+    operation match {
       case '+' => newNode.nodeType = NodeType.Sum
       case '-' => newNode.nodeType = NodeType.Subtraction
       case '*' => newNode.nodeType = NodeType.Multiplication
@@ -240,13 +231,13 @@ class ExpressionTree {
     } else {
       var lastNode = _currentNode
       while (
-          lastNode.parent != null &&
+        lastNode.parent != null &&
           newNode.braceNumber < lastNode.parent.braceNumber) {
-          lastNode = lastNode.parent
+        lastNode = lastNode.parent
       }
 
       while (
-          lastNode.parent != null &&
+        lastNode.parent != null &&
           NodeType.checkPrioritization(newNode.nodeType, lastNode.parent.nodeType) == 1 &&
           newNode.braceNumber == lastNode.parent.braceNumber) {
         lastNode = lastNode.parent
@@ -268,28 +259,23 @@ class ExpressionTree {
         _currentNode = newNode
       }
     }
-
-    _previousCharType = CharType.ArithmeticOperation
   }
 
   private def getCurrentTokenValue(): TokenValue = {
     val newTokenValue = new TokenValue()
 
     if (_previousCharType == CharType.FunctionCharValue || _previousCharType == CharType.Variable) {
-      val variableName = _strValues
+      newTokenValue.constName = _strValues
+      _usedVariables += _strValues
 
       _strValues = ""
-      _usedVariables += variableName
-
-      newTokenValue.constName = variableName
     } else {
-      val numberValue = _intValue * _currentIntSign
+      newTokenValue.numberValue = _numberValue
 
-      _intValue = 0
-      _currentIntSign = 1
-
-      newTokenValue.intValue = numberValue
+      _numberValue = 0
     }
+    newTokenValue.sign = this._currentValueSign
+    _currentValueSign = 1
 
     newTokenValue
   }
