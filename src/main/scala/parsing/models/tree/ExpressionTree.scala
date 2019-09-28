@@ -49,8 +49,10 @@ class ExpressionTree {
     else if (ch == ',') {
       addComa()
     }
-    else
-    {
+    else if (ch == '.') {
+      addDot()
+    }
+    else {
       addVariableName(ch)
     }
   }
@@ -117,10 +119,18 @@ class ExpressionTree {
       throw new IncorrectNumberPositionException()
     }
 
-    _numberValue *= 10
-    _numberValue += ch.asDigit
+    if (_previousCharType == CharType.Dot || _previousCharType == CharType.DoubleValue) {
+      val currDigit: Double = ch.asDigit
+      _numberValue += currDigit / _currentDoubleDivider
+      _currentDoubleDivider *= 10
 
-    _previousCharType = CharType.IntValue
+      _previousCharType = CharType.DoubleValue
+    } else {
+      _numberValue *= 10
+      _numberValue += ch.asDigit
+
+      _previousCharType = CharType.IntValue
+    }
   }
 
   private def addComa(): Unit = {
@@ -163,11 +173,19 @@ class ExpressionTree {
       if (isValuePrevious) {
         addNewLeaf()
       }
-      
+
       addOperationNode(ch)
     }
 
     _previousCharType = CharType.ArithmeticOperation
+  }
+
+  private def addDot(): Unit = {
+    if (!isDotAllowed) {
+      throw new IncorrectDotException
+    }
+
+    _previousCharType = CharType.Dot
   }
 
   private def addFunction(): Unit = {
@@ -268,6 +286,7 @@ class ExpressionTree {
       newTokenValue.numberValue = _numberValue
 
       _numberValue = 0
+      _currentDoubleDivider = 10
     }
     newTokenValue.sign = this._currentValueSign
     _currentValueSign = 1
@@ -334,9 +353,13 @@ class ExpressionTree {
     isFunctionNow && isValuePrevious
   }
 
-  private def isEndBuildingExpressionAllowed = {
-    (_countOfOpenedBraces == 0) &&
-      _previousCharType == CharType.ClosedBrace ||
-      isValuePrevious
+  private def isEndBuildingExpressionAllowed: Boolean = {
+    _countOfOpenedBraces == 0 &&
+      (_previousCharType == CharType.ClosedBrace ||
+        isValuePrevious)
+  }
+
+  private def isDotAllowed: Boolean = {
+    _previousCharType == CharType.IntValue
   }
 }
