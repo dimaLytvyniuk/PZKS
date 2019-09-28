@@ -16,6 +16,7 @@ class ExpressionTree {
 
   private var _strValues: String = ""
   private var _intValue: Int = 0
+  private var _currentIntSign: Int = 1
 
   private var _countOfOpenedBraces = 0
 
@@ -119,6 +120,7 @@ class ExpressionTree {
         } else {
           newNode.level = _currentNode.level + 1
           _currentNode.rightNode = newNode
+          _currentNode = newNode
         }
 
         _currentFunctionParameters = new ArrayBuffer[TokenValue]()
@@ -195,7 +197,18 @@ class ExpressionTree {
       throw new IncorrectArithmeticOperationException()
     }
 
-    if (
+    if (_previousCharType == CharType.None || _previousCharType == CharType.OpenBrace) {
+      if (ch == '*' || ch == '/') {
+        throw new IncorrectArithmeticOperationException()
+      }
+
+      if (ch == '-') {
+        _currentIntSign = -1
+      }
+
+      _previousCharType = CharType.ArithmeticOperation
+      return
+    } else if (
         _previousCharType == CharType.Number ||
         _previousCharType == CharType.Variable) {
       val newNode = getNewValueNode()
@@ -270,9 +283,10 @@ class ExpressionTree {
 
       newTokenValue.constName = variableName
     } else {
-      val numberValue = _intValue
+      val numberValue = _intValue * _currentIntSign
 
       _intValue = 0
+      _currentIntSign = 1
 
       newTokenValue.intValue = numberValue
     }
@@ -289,18 +303,17 @@ class ExpressionTree {
   }
 
   private def isClosedBraceAllowed: Boolean = {
-    _previousCharType == CharType.Variable ||
+    (_previousCharType == CharType.Variable ||
       _previousCharType == CharType.Number ||
       _previousCharType == CharType.FunctionCharValue ||
       _previousCharType == CharType.FunctionIntValue ||
       _previousCharType == CharType.ClosedBrace ||
-      _countOfOpenedBraces > 0 ||
       (
         (
           _previousCharType == CharType.FunctionCharValue ||
           _previousCharType == CharType.FunctionIntValue ||
           _previousCharType == CharType.OpenedFunctionBrace) &&
-        _countOfOpenedBraces < 1)
+        _countOfOpenedBraces < 1)) && _countOfOpenedBraces > 0
   }
 
   private def isOpenBraceAllowed: Boolean = {
@@ -333,7 +346,9 @@ class ExpressionTree {
   private def isOperationAllowed: Boolean = {
     _previousCharType == CharType.Variable ||
     _previousCharType == CharType.Number ||
-    _previousCharType == CharType.ClosedBrace
+    _previousCharType == CharType.ClosedBrace ||
+    _previousCharType == CharType.None ||
+    _previousCharType == CharType.OpenBrace
   }
 
   private def isComaAllowed: Boolean = {
