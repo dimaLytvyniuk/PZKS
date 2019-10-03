@@ -69,6 +69,17 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
 
     result
   }
+
+  def height: Int = {
+    val leftHeight = if (_leftNode == null) 0 else _leftNode.height
+    val rightHeight = if (_rightNode == null) 0 else _rightNode.height
+
+    if (leftHeight >= rightHeight) {
+      leftHeight + 1
+    } else {
+      rightHeight + 1
+    }
+  }
 }
 
 object ExpressionNode {
