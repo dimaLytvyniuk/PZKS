@@ -188,7 +188,7 @@ class ExpressionTree {
     _previousCharType = CharType.Dot
   }
 
-  private def addFunction(): Unit = {
+  protected def addFunction(): Unit = {
     val tokenValue = getCurrentTokenValue()
     _currentFunctionParameters += tokenValue
     val functionDeclaration = TwoParameterFunctionDeclaration.nameToDeclarationMap(_currentFunctionName)

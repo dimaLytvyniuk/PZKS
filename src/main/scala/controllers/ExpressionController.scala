@@ -62,24 +62,39 @@ class ExpressionController extends Directives with JsonSupport {
   val routes: Route =
     concat(
       post {
-        cors.corsHandler(
+        cors.corsHandler(concat(
         path("expression" / "lab1") {
           entity(as[InputExpressionModel]) { inputExpressionModel =>
             parseFirstLabExpression(inputExpressionModel)
           }
-        })
+        },
+        path("expression" / "lab2") {
+          entity(as[InputExpressionModel]) { inputExpressionModel =>
+            parseSecondLabExpression(inputExpressionModel)
+          }
+        }))
       },
       options {
-        cors.corsHandler(
+        cors.corsHandler(concat(
           path("expression" / "lab1") {
             complete(StatusCodes.OK)
-          })
+          },
+          path("expression" / "lab2") {
+            complete(StatusCodes.OK)
+          }))
       }
     )
 
   def parseFirstLabExpression(inputExpressionModel: InputExpressionModel): Route = {
     val service = new ExpressionParsingService
     val outputModel = service.parseExpression(inputExpressionModel)
+
+    complete(outputModel)
+  }
+
+  def parseSecondLabExpression(inputExpressionModel: InputExpressionModel): Route = {
+    val service = new ExpressionParsingService
+    val outputModel = service.parseOptimizedExpression(inputExpressionModel)
 
     complete(outputModel)
   }
