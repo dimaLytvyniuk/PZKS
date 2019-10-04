@@ -8,13 +8,13 @@ export class ExpressionNode {
     leftNode: ExpressionNode;
     rightNode: ExpressionNode;
 
-    transformToViewModel(startId: number, nodes: Array<NodeViewModel>, edges: Array<EdgeViewModel>): NodeViewModel {
+    transformToViewModel(startId: number, currentLevel: number, nodes: Array<NodeViewModel>, edges: Array<EdgeViewModel>): NodeViewModel {
         let nodeViewModel = new NodeViewModel()
         nodeViewModel.label = this.value;
 
         if (this.leftNode !== null) {
             let leftNode = Object.assign(new ExpressionNode(), this.leftNode);
-            let leftNodeViewModel = leftNode.transformToViewModel(startId, nodes, edges);
+            let leftNodeViewModel = leftNode.transformToViewModel(startId, currentLevel + 1, nodes, edges);
             nodes.push(leftNodeViewModel);
 
             nodeViewModel.leftNode = leftNodeViewModel;
@@ -23,7 +23,7 @@ export class ExpressionNode {
 
         if (this.rightNode !== null) {
             let rightNode = Object.assign(new ExpressionNode(), this.rightNode);
-            let rightNodeViewModel = rightNode.transformToViewModel(startId, nodes, edges);
+            let rightNodeViewModel = rightNode.transformToViewModel(startId, currentLevel + 1, nodes, edges);
             nodes.push(rightNodeViewModel)
 
             nodeViewModel.rightNode = rightNodeViewModel;
@@ -31,6 +31,7 @@ export class ExpressionNode {
         }
 
         nodeViewModel.id = startId;
+        nodeViewModel.level = currentLevel;
 
         if (nodeViewModel.leftNode !== undefined) {
             let newEdge = new EdgeViewModel()

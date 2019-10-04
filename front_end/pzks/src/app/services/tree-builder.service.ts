@@ -17,8 +17,8 @@ export class TreeBuilderService {
     let edges = new Array<EdgeViewModel>()
 
     let head = Object.assign(new ExpressionNode(), expressionTree.head)
-    let headViewModel = head.transformToViewModel(1, nodes, edges);
-    headViewModel.label = `Head - ${headViewModel.label}`;
+    let headViewModel = head.transformToViewModel(1, 0, nodes, edges);
+
     nodes.push(headViewModel);
 
     let treeViewModel = new TreeViewModel();
