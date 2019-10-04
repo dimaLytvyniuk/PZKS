@@ -6,25 +6,25 @@ import scala.collection.mutable.ArrayBuffer
 import scala.collection.{immutable, mutable}
 
 class ExpressionTree {
-  private val operations = Array('+', '-', '/', '*')
-  private val numbers = Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
+  protected val operations = Array('+', '-', '/', '*')
+  protected val numbers = Array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 
-  private var _head: ExpressionNode = null
-  private var _currentNode: ExpressionNode = null
+  protected var _head: ExpressionNode = null
+  protected var _currentNode: ExpressionNode = null
 
-  private var _previousCharType = CharType.None
+  protected var _previousCharType = CharType.None
 
-  private var _strValues: String = ""
-  private var _numberValue: Double = 0
-  private var _currentDoubleDivider = 10
-  private var _currentValueSign: Int = 1
+  protected var _strValues: String = ""
+  protected var _numberValue: Double = 0
+  protected var _currentDoubleDivider = 10
+  protected var _currentValueSign: Int = 1
 
-  private var _countOfOpenedBraces = 0
+  protected var _countOfOpenedBraces = 0
 
-  private var _usedVariables = new immutable.HashSet[String]()
-  private val _supportedFunctions = Set("max", "min")
-  private var _currentFunctionName: String = null
-  private var _currentFunctionParameters = new ArrayBuffer[TokenValue]()
+  protected var _usedVariables = new immutable.HashSet[String]()
+  protected val _supportedFunctions = Set("max", "min")
+  protected var _currentFunctionName: String = null
+  protected var _currentFunctionParameters = new ArrayBuffer[TokenValue]()
 
   def head = _head
   def usedVariables = _usedVariables
@@ -74,7 +74,7 @@ class ExpressionTree {
     }
   }
 
-  private def addOpenBrace(): Unit = {
+  protected def addOpenBrace(): Unit = {
     if (!isOpenBraceAllowed)
     {
         throw new IncorrectOpenBraceException()
@@ -94,7 +94,7 @@ class ExpressionTree {
     }
   }
 
-  private def addClosedBrace(): Unit = {
+  protected def addClosedBrace(): Unit = {
     if (!isClosedBraceAllowed)
     {
       throw new IncorrectClosedBraceException()
@@ -113,7 +113,7 @@ class ExpressionTree {
     _previousCharType = CharType.ClosedBrace
   }
 
-  private def addNumber(ch: Char): Unit = {
+  protected def addNumber(ch: Char): Unit = {
     if (!isNumberAllowed)
     {
       throw new IncorrectNumberPositionException()
@@ -133,7 +133,7 @@ class ExpressionTree {
     }
   }
 
-  private def addComa(): Unit = {
+  protected def addComa(): Unit = {
     if (!isComaAllowed) {
       throw new IncorrectSymbolPositionException()
     }
@@ -144,7 +144,7 @@ class ExpressionTree {
     _previousCharType = CharType.FunctionComa
   }
 
-  private def addVariableName(ch: Char): Unit = {
+  protected def addVariableName(ch: Char): Unit = {
     if (!isVariableNameAllowed)
     {
       throw new IncorrectSymbolPositionException()
@@ -155,7 +155,7 @@ class ExpressionTree {
     _previousCharType = CharType.Variable
   }
 
-  private def addOperation(ch: Char): Unit = {
+  protected def addOperation(ch: Char): Unit = {
     if (!isOperationAllowed)
     {
       throw new IncorrectArithmeticOperationException()
@@ -180,7 +180,7 @@ class ExpressionTree {
     _previousCharType = CharType.ArithmeticOperation
   }
 
-  private def addDot(): Unit = {
+  protected def addDot(): Unit = {
     if (!isDotAllowed) {
       throw new IncorrectDotException
     }
@@ -227,7 +227,7 @@ class ExpressionTree {
     }
   }
 
-  private def addOperationNode(operation: Char): Unit = {
+  protected def addOperationNode(operation: Char): Unit = {
     val newNode = ExpressionNode.getEmptyNode(0, _countOfOpenedBraces)
     operation match {
       case '+' => newNode.nodeType = NodeType.Sum
@@ -274,7 +274,7 @@ class ExpressionTree {
     }
   }
 
-  private def getCurrentTokenValue(): TokenValue = {
+  protected def getCurrentTokenValue(): TokenValue = {
     val newTokenValue = new TokenValue()
 
     if (_previousCharType == CharType.Variable) {
@@ -294,7 +294,7 @@ class ExpressionTree {
     newTokenValue
   }
 
-  private def getNewValueNode(): ExpressionNode = {
+  protected def getNewValueNode(): ExpressionNode = {
     val newNode = ExpressionNode.getEmptyNode(0, _countOfOpenedBraces)
     newNode.nodeType = NodeType.HasValue
     newNode.value = new NodeValue { tokenValue = getCurrentTokenValue() }
@@ -302,13 +302,13 @@ class ExpressionTree {
     newNode
   }
 
-  private def isFunctionNow = _currentFunctionName != null && _currentFunctionName != ""
+  protected def isFunctionNow = _currentFunctionName != null && _currentFunctionName != ""
 
-  private def isValuePrevious = isNumberPrevious || _previousCharType == CharType.Variable
+  protected def isValuePrevious = isNumberPrevious || _previousCharType == CharType.Variable
 
-  private def isNumberPrevious = _previousCharType == CharType.IntValue || _previousCharType == CharType.DoubleValue
+  protected def isNumberPrevious = _previousCharType == CharType.IntValue || _previousCharType == CharType.DoubleValue
 
-  private def isClosedBraceAllowed: Boolean = {
+  protected def isClosedBraceAllowed: Boolean = {
     ((_previousCharType == CharType.Variable ||
       isValuePrevious ||
       _previousCharType == CharType.ClosedBrace) && _countOfOpenedBraces > 0) ||
@@ -316,14 +316,14 @@ class ExpressionTree {
      isFunctionNow)
   }
 
-  private def isOpenBraceAllowed: Boolean = {
+  protected def isOpenBraceAllowed: Boolean = {
     _previousCharType == CharType.OpenBrace ||
       _previousCharType == CharType.ArithmeticOperation ||
       _previousCharType == CharType.Variable ||
       _previousCharType == CharType.None
   }
 
-  private def isNumberAllowed: Boolean = {
+  protected def isNumberAllowed: Boolean = {
     _previousCharType == CharType.ArithmeticOperation ||
       isNumberPrevious ||
       _previousCharType == CharType.OpenBrace ||
@@ -333,7 +333,7 @@ class ExpressionTree {
       _previousCharType == CharType.Dot
   }
 
-  private def isVariableNameAllowed: Boolean = {
+  protected def isVariableNameAllowed: Boolean = {
     _previousCharType == CharType.ArithmeticOperation ||
       _previousCharType == CharType.Variable ||
       _previousCharType == CharType.OpenBrace ||
@@ -342,24 +342,24 @@ class ExpressionTree {
       _previousCharType == CharType.FunctionComa
   }
 
-  private def isOperationAllowed: Boolean = {
+  protected def isOperationAllowed: Boolean = {
     isValuePrevious ||
     _previousCharType == CharType.ClosedBrace ||
     _previousCharType == CharType.None ||
     _previousCharType == CharType.OpenBrace
   }
 
-  private def isComaAllowed: Boolean = {
+  protected def isComaAllowed: Boolean = {
     isFunctionNow && isValuePrevious
   }
 
-  private def isEndBuildingExpressionAllowed: Boolean = {
+  protected def isEndBuildingExpressionAllowed: Boolean = {
     _countOfOpenedBraces == 0 &&
       (_previousCharType == CharType.ClosedBrace ||
         isValuePrevious)
   }
 
-  private def isDotAllowed: Boolean = {
+  protected def isDotAllowed: Boolean = {
     _previousCharType == CharType.IntValue
   }
 }

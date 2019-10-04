@@ -91,8 +91,9 @@ export class Lab2Component implements OnInit {
     var options = {
       layout: {
         hierarchical: {
-          //direction: "Up-Down"
           direction: "UD"
+          //direction: "LR"
+          //direction: "RL"
         }
       }
     };
