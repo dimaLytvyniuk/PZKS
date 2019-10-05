@@ -6,17 +6,20 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   private var _rightNode: ExpressionNode = null
   private var _leftNode: ExpressionNode = null
   private var _parent: ExpressionNode = null
+  private var _isRightChild = false
 
   def leftNode = _leftNode
   def leftNode_=(node: ExpressionNode) {
     _leftNode = node
     _leftNode.parent = this
+    _leftNode.isRightChild = false
   }
 
   def rightNode = _rightNode
   def rightNode_=(node: ExpressionNode) {
     _rightNode = node
     _rightNode.parent = this
+    _rightNode.isRightChild = true
   }
 
   def parent = _parent
@@ -35,6 +38,11 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     if (_leftNode != null) {
       _leftNode.level = newLevel - 1
     }
+  }
+
+  def isRightChild: Boolean = _isRightChild
+  def isRightChild_=(newValue: Boolean) {
+    _isRightChild = newValue
   }
 
   def evaluateStr(): String = {

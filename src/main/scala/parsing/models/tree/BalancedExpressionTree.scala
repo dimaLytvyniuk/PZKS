@@ -18,9 +18,10 @@ class BalancedExpressionTree extends ExpressionTree {
     newCenterTree.leftNode = oldCenterTree
 
     if (parentOldCenterTree == null) {
+      newCenterTree.parent = null
       _head = newCenterTree
     } else {
-      oldCenterTree.parent.rightNode = newCenterTree
+      parentOldCenterTree.rightNode = newCenterTree
     }
   }
 
