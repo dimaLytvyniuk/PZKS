@@ -72,6 +72,11 @@ class ExpressionController extends Directives with JsonSupport {
           entity(as[InputExpressionModel]) { inputExpressionModel =>
             parseSecondLabExpression(inputExpressionModel)
           }
+        },
+        path("expression" / "lab3") {
+          entity(as[InputExpressionModel]) { inputExpressionModel =>
+            parseThirdLabExpression(inputExpressionModel)
+          }
         }))
       },
       options {
@@ -80,6 +85,9 @@ class ExpressionController extends Directives with JsonSupport {
             complete(StatusCodes.OK)
           },
           path("expression" / "lab2") {
+            complete(StatusCodes.OK)
+          },
+          path("expression" / "lab3") {
             complete(StatusCodes.OK)
           }))
       }
@@ -95,6 +103,13 @@ class ExpressionController extends Directives with JsonSupport {
   def parseSecondLabExpression(inputExpressionModel: InputExpressionModel): Route = {
     val service = new ExpressionParsingService
     val outputModel = service.parseOptimizedExpression(inputExpressionModel)
+
+    complete(outputModel)
+  }
+
+  def parseThirdLabExpression(inputExpressionModel: InputExpressionModel): Route = {
+    val service = new ExpressionParsingService
+    val outputModel = service.parseWithOpenBracesExpression(inputExpressionModel)
 
     complete(outputModel)
   }

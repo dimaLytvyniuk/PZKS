@@ -7,12 +7,15 @@ import { Lab1Component } from './components/lab1/lab1.component';
 import { BackendClientService } from './services/backend-client.service';
 import { HttpClientModule } from '@angular/common/http';
 import { Lab2Component } from './components/lab2/lab2.component';
+import { Lab3Component } from './components/lab3/lab3.component';
+import { TreeBuilderService } from './services/tree-builder.service';
 
 @NgModule({
   declarations: [
     AppComponent,
     Lab1Component,
-    Lab2Component
+    Lab2Component,
+    Lab3Component
   ],
   imports: [
     BrowserModule,
@@ -20,7 +23,8 @@ import { Lab2Component } from './components/lab2/lab2.component';
     HttpClientModule
   ],
   providers: [
-    BackendClientService
+    BackendClientService,
+    TreeBuilderService
   ],
   bootstrap: [AppComponent]
 })
