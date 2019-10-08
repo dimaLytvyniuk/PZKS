@@ -32,11 +32,11 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     _level = newLevel
 
     if (_rightNode != null) {
-      _rightNode.level = newLevel - 1
+      _rightNode.level = newLevel + 1
     }
 
     if (_leftNode != null) {
-      _leftNode.level = newLevel - 1
+      _leftNode.level = newLevel + 1
     }
   }
 
