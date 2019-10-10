@@ -67,45 +67,16 @@ class BalancedExpressionTree extends ExpressionTree {
       }
     }
 
-    /*if (canBeBalanced(_currentNode)) {
+    if (canBeBalanced(_currentNode)) {
       balanceTree(_currentNode)
-    }*/
+    }
   }
 
   protected def balanceTree(startNode: ExpressionNode): Unit = {
-    val oldCenterTree = startNode.parent.parent
-    val parentOldCenterTree = oldCenterTree.parent
-    val newCenterTree = startNode.parent
-
-    oldCenterTree.rightNode = newCenterTree.leftNode
-    newCenterTree.leftNode = oldCenterTree
-
-    if (parentOldCenterTree == null) {
-      newCenterTree.parent = null
-      _head = newCenterTree
+    if (startNode.parent.nodeType == NodeType.Subtraction || startNode.parent.nodeType == NodeType.Division) {
+      withInversingBalance(startNode)
     } else {
-      parentOldCenterTree.rightNode = newCenterTree
-    }
-
-    if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Subtraction) {
-      _currentNode.nodeType = NodeType.Sum
-      //newCenterTree.nodeType = NodeType.Sum
-      _currentNode.wasInversed = true
-      //newCenterTree.wasInversed = true
-    } else if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Division) {
-      _currentNode.nodeType = NodeType.Multiplication
-      //newCenterTree.nodeType = NodeType.Multiplication
-      _currentNode.wasInversed = true
-      //newCenterTree.wasInversed = true
-    }
-
-    if (_currentNode.nodeType != newCenterTree.nodeType && (newCenterTree.nodeType == NodeType.Subtraction || newCenterTree.nodeType == NodeType.Division)) {
-      newCenterTree.nextShouldBeInversed = true
-    }
-
-    newCenterTree.level = newCenterTree.level - 1
-    if (canBeMoreBalanced(newCenterTree)) {
-      moreBalanceTree(newCenterTree)
+      standardBalance(startNode)
     }
   }
 
@@ -124,52 +95,35 @@ class BalancedExpressionTree extends ExpressionTree {
       parentOldCenterTree.rightNode = newCenterTree
     }
 
-    if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Subtraction) {
-      _currentNode.nodeType = NodeType.Sum
-      //newCenterTree.nodeType = NodeType.Sum
-      _currentNode.wasInversed = true
-      //newCenterTree.wasInversed = true
-    } else if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Division) {
-      _currentNode.nodeType = NodeType.Multiplication
-      //newCenterTree.nodeType = NodeType.Multiplication
-      _currentNode.wasInversed = true
-      //newCenterTree.wasInversed = true
-    }
-
-    if (_currentNode.nodeType != newCenterTree.nodeType && (newCenterTree.nodeType == NodeType.Subtraction || newCenterTree.nodeType == NodeType.Division)) {
-      newCenterTree.nextShouldBeInversed = true
+    newCenterTree.level = newCenterTree.level - 1
+    if (canBeMoreBalanced(newCenterTree)) {
+      moreBalanceTree(newCenterTree)
     }
   }
 
   protected def withInversingBalance(startNode: ExpressionNode): Unit = {
-    val oldCenterTree = startNode.parent.parent
-    val parentOldCenterTree = oldCenterTree.parent
-    val newCenterTree = startNode.parent
+    val currentParent = startNode.parent
 
-    oldCenterTree.rightNode = newCenterTree.leftNode
-    newCenterTree.leftNode = oldCenterTree
+    if (currentParent.nodeType == NodeType.Subtraction) {
+      currentParent.nodeType = NodeType.Sum
+      currentParent.wasInversed = true
 
-    if (parentOldCenterTree == null) {
-      newCenterTree.parent = null
-      _head = newCenterTree
-    } else {
-      parentOldCenterTree.rightNode = newCenterTree
-    }
+      if (_currentNode.nodeType == NodeType.Subtraction) {
+        _currentNode.nodeType = NodeType.Sum
+        _currentNode.wasInversed = true
+      } else {
+        currentParent.nextShouldBeInversed = true
+      }
+    } else if (currentParent.nodeType == NodeType.Division) {
+      currentParent.nodeType = NodeType.Multiplication
+      currentParent.wasInversed = true
 
-    if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Subtraction) {
-      _currentNode.nodeType = NodeType.Sum
-      //newCenterTree.nodeType = NodeType.Sum
-      _currentNode.wasInversed = true
-      //newCenterTree.wasInversed = true
-    } else if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Division) {
-      _currentNode.nodeType = NodeType.Multiplication
-      //newCenterTree.nodeType = NodeType.Multiplication
-      _currentNode.wasInversed = true
-      //newCenterTree.wasInversed = true
-    }
-
-    if (_currentNode.nodeType != newCenterTree.nodeType && (newCenterTree.nodeType == NodeType.Subtraction || newCenterTree.nodeType == NodeType.Division)) {
-      newCenterTree.nextShouldBeInversed = true
+      if (_currentNode.nodeType == NodeType.Division) {
+        _currentNode.nodeType = NodeType.Multiplication
+        _currentNode.wasInversed = true
+      } else {
+        currentParent.nextShouldBeInversed = true
+      }
     }
   }
 
