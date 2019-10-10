@@ -112,6 +112,6 @@ class ExpressionParsingService {
     }
     tree.endBuildingExpression()
 
-    tree
+    tree.getCopy()
   }
 }

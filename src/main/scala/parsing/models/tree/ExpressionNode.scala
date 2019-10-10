@@ -110,6 +110,21 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
       NodeType.checkPrioritization(nodeType, secondNode.nodeType)
     }
   }
+
+  def getCopy(): ExpressionNode = {
+    val newNode = new ExpressionNode(level, nodeType, value.getCopy(), braceNumber)
+    if (_leftNode != null) {
+      newNode.leftNode = _leftNode.getCopy()
+    }
+    if (_rightNode != null) {
+      newNode.rightNode = _rightNode.getCopy()
+    }
+
+    newNode.wasInversed = _wasInversed
+    newNode.nextShouldBeInversed = _nextShouldBeInversed
+
+    newNode
+  }
 }
 
 object ExpressionNode {

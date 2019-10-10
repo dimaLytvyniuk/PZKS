@@ -27,4 +27,13 @@ class TokenValue {
       (numberValue * sign).toString
     }
   }
+
+  def getCopy(): TokenValue = {
+    val newValue = new TokenValue()
+    newValue.numberValue = numberValue
+    newValue.constName = constName
+    newValue.sign = sign
+
+    newValue
+  }
 }

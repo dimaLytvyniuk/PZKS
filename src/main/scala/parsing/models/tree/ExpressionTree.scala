@@ -302,6 +302,14 @@ class ExpressionTree {
     newNode
   }
 
+  def getCopy(): ExpressionTree = {
+    val newTree = new ExpressionTree
+    newTree._head = _head
+    newTree._usedVariables = usedVariables
+
+    newTree
+  }
+
   protected def isFunctionNow = _currentFunctionName != null && _currentFunctionName != ""
 
   protected def isValuePrevious = isNumberPrevious || _previousCharType == CharType.Variable

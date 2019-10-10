@@ -11,4 +11,12 @@ class NodeValue {
       functionImplementation.executeStr()
     }
   }
+
+  def getCopy(): NodeValue = {
+    val newNode = new NodeValue
+    newNode.tokenValue = if (tokenValue != null) tokenValue.getCopy() else null
+    newNode.functionImplementation = functionImplementation
+
+    newNode
+  }
 }
