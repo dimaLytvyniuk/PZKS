@@ -2,15 +2,74 @@ package parsing.models.tree
 
 class BalancedExpressionTree extends ExpressionTree {
   protected override def addOperationNode(operation: Char): Unit = {
-    var previousNodeLevel = 0
-    if (_currentNode != null) {
-      previousNodeLevel = _currentNode.level
+    val newNode = ExpressionNode.getEmptyNode(0, _countOfOpenedBraces)
+    operation match {
+      case '+' => newNode.nodeType = NodeType.Sum
+      case '-' => newNode.nodeType = NodeType.Subtraction
+      case '*' => newNode.nodeType = NodeType.Multiplication
+      case '/' => newNode.nodeType = NodeType.Division
+      case _ => throw new IllegalArgumentException("ch")
     }
-    super.addOperationNode(operation)
 
-    if (canBeBalanced(_currentNode)) {
-      balanceTree(_currentNode)
+    if (_head == null) {
+      newNode.level = 0
+      _head = newNode
+      _currentNode = _head
+    } else {
+      var lastNode = _currentNode
+      while (
+        lastNode.parent != null &&
+          newNode.braceNumber < lastNode.parent.braceNumber) {
+        lastNode = lastNode.parent
+      }
+
+      while (
+        lastNode.parent != null &&
+         newNode.checkPrioritization(lastNode.parent) == 1 &&
+          newNode.braceNumber == lastNode.parent.braceNumber) {
+        lastNode = lastNode.parent
+      }
+
+      if (lastNode.parent == null) {
+        newNode.level = 0
+        newNode.leftNode = lastNode
+        _currentNode = newNode
+        _head = _currentNode
+      } else {
+        val targetNode = lastNode.parent
+        newNode.level = targetNode.level + 1
+        if (targetNode.rightNode != null) {
+          newNode.leftNode = targetNode.rightNode
+        }
+
+        targetNode.rightNode = newNode
+        _currentNode = newNode
+      }
     }
+
+    if (_currentNode.parent != null && _currentNode.parent.wasInversed && _currentNode.braceNumber == _currentNode.parent.braceNumber) {
+      if (_currentNode.parent.nodeType == NodeType.Sum && _currentNode.nodeType == NodeType.Subtraction) {
+        _currentNode.nodeType = NodeType.Sum
+        _currentNode.wasInversed = true
+      } else if (_currentNode.parent.nodeType == NodeType.Multiplication && _currentNode.nodeType == NodeType.Division) {
+        _currentNode.nodeType = NodeType.Multiplication
+        _currentNode.wasInversed = true
+      }
+    }
+
+    if (_currentNode.parent != null && _currentNode.parent.nextShouldBeInversed && _currentNode.braceNumber == _currentNode.parent.braceNumber) {
+      if (_currentNode.parent.nodeType == NodeType.Subtraction && _currentNode.nodeType == NodeType.Subtraction) {
+        _currentNode.nodeType = NodeType.Sum
+        _currentNode.wasInversed = true
+      } else if (_currentNode.parent == NodeType.Division && _currentNode.nodeType == NodeType.Division) {
+        _currentNode.nodeType = NodeType.Multiplication
+        _currentNode.wasInversed = true
+      }
+    }
+
+    /*if (canBeBalanced(_currentNode)) {
+      balanceTree(_currentNode)
+    }*/
   }
 
   protected def balanceTree(startNode: ExpressionNode): Unit = {
@@ -28,9 +87,89 @@ class BalancedExpressionTree extends ExpressionTree {
       parentOldCenterTree.rightNode = newCenterTree
     }
 
+    if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Subtraction) {
+      _currentNode.nodeType = NodeType.Sum
+      //newCenterTree.nodeType = NodeType.Sum
+      _currentNode.wasInversed = true
+      //newCenterTree.wasInversed = true
+    } else if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Division) {
+      _currentNode.nodeType = NodeType.Multiplication
+      //newCenterTree.nodeType = NodeType.Multiplication
+      _currentNode.wasInversed = true
+      //newCenterTree.wasInversed = true
+    }
+
+    if (_currentNode.nodeType != newCenterTree.nodeType && (newCenterTree.nodeType == NodeType.Subtraction || newCenterTree.nodeType == NodeType.Division)) {
+      newCenterTree.nextShouldBeInversed = true
+    }
+
     newCenterTree.level = newCenterTree.level - 1
     if (canBeMoreBalanced(newCenterTree)) {
       moreBalanceTree(newCenterTree)
+    }
+  }
+
+  protected def standardBalance(startNode: ExpressionNode): Unit = {
+    val oldCenterTree = startNode.parent.parent
+    val parentOldCenterTree = oldCenterTree.parent
+    val newCenterTree = startNode.parent
+
+    oldCenterTree.rightNode = newCenterTree.leftNode
+    newCenterTree.leftNode = oldCenterTree
+
+    if (parentOldCenterTree == null) {
+      newCenterTree.parent = null
+      _head = newCenterTree
+    } else {
+      parentOldCenterTree.rightNode = newCenterTree
+    }
+
+    if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Subtraction) {
+      _currentNode.nodeType = NodeType.Sum
+      //newCenterTree.nodeType = NodeType.Sum
+      _currentNode.wasInversed = true
+      //newCenterTree.wasInversed = true
+    } else if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Division) {
+      _currentNode.nodeType = NodeType.Multiplication
+      //newCenterTree.nodeType = NodeType.Multiplication
+      _currentNode.wasInversed = true
+      //newCenterTree.wasInversed = true
+    }
+
+    if (_currentNode.nodeType != newCenterTree.nodeType && (newCenterTree.nodeType == NodeType.Subtraction || newCenterTree.nodeType == NodeType.Division)) {
+      newCenterTree.nextShouldBeInversed = true
+    }
+  }
+
+  protected def withInversingBalance(startNode: ExpressionNode): Unit = {
+    val oldCenterTree = startNode.parent.parent
+    val parentOldCenterTree = oldCenterTree.parent
+    val newCenterTree = startNode.parent
+
+    oldCenterTree.rightNode = newCenterTree.leftNode
+    newCenterTree.leftNode = oldCenterTree
+
+    if (parentOldCenterTree == null) {
+      newCenterTree.parent = null
+      _head = newCenterTree
+    } else {
+      parentOldCenterTree.rightNode = newCenterTree
+    }
+
+    if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Subtraction) {
+      _currentNode.nodeType = NodeType.Sum
+      //newCenterTree.nodeType = NodeType.Sum
+      _currentNode.wasInversed = true
+      //newCenterTree.wasInversed = true
+    } else if (_currentNode.nodeType == newCenterTree.nodeType && _currentNode.nodeType == NodeType.Division) {
+      _currentNode.nodeType = NodeType.Multiplication
+      //newCenterTree.nodeType = NodeType.Multiplication
+      _currentNode.wasInversed = true
+      //newCenterTree.wasInversed = true
+    }
+
+    if (_currentNode.nodeType != newCenterTree.nodeType && (newCenterTree.nodeType == NodeType.Subtraction || newCenterTree.nodeType == NodeType.Division)) {
+      newCenterTree.nextShouldBeInversed = true
     }
   }
 
