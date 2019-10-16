@@ -79,9 +79,13 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
 
     if (nodeType != NodeType.HasValue) {
       result += "("
-      result += leftNode.evaluateStr()
+      if (leftNode != null) {
+        result += leftNode.evaluateStr()
+      }
       result += nodeValue
-      result += rightNode.evaluateStr()
+      if (rightNode != null) {
+        result += rightNode.evaluateStr()
+      }
       result += ")"
     } else {
       result = nodeValue

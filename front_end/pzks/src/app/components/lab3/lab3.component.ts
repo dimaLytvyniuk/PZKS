@@ -41,7 +41,7 @@ export class Lab3Component implements OnInit {
     let inputModel = new InputExpression();
     inputModel.expression = this.inputExpression;
 
-    this.backEndClient.lab2(inputModel).subscribe(data => {
+    this.backEndClient.lab3(inputModel).subscribe(data => {
       console.log(data)
       this.outputResult = data
       if (this.outputResult.exceptionModel != null)
