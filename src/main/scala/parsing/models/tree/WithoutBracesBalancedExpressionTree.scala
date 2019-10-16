@@ -1,7 +1,11 @@
 package parsing.models.tree
 
-class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
+class WithoutBracesBalancedExpressionTree extends ExpressionTree {
   def getTreeWithOpenBraces(): ExpressionTree = {
-    getCopy()
+    val copiedTree = getCopy()
+
+    copiedTree
   }
+
+
 }
