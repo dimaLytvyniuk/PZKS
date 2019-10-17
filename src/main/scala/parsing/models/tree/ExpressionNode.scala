@@ -2,7 +2,7 @@ package parsing.models.tree
 
 import NodeType._
 
-class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var value: NodeValue, val braceNumber: Int) {
+class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var value: NodeValue, private var _braceNumber: Int) {
   private var _rightNode: ExpressionNode = null
   private var _leftNode: ExpressionNode = null
   private var _parent: ExpressionNode = null
@@ -57,6 +57,27 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     _nextShouldBeInversed = newValue
   }
 
+  def braceNumber: Int = _braceNumber
+  def braceNumber_=(newValue: Int): Unit = {
+    if (leftNode != null) {
+      if (leftNode.braceNumber > _braceNumber) {
+        leftNode.braceNumber = newValue + 1
+      } else {
+        leftNode.braceNumber = newValue
+      }
+    }
+
+    if (rightNode != null) {
+      if (rightNode.braceNumber > _braceNumber) {
+        rightNode.braceNumber = newValue + 1
+      } else {
+        rightNode.braceNumber = newValue
+      }
+    }
+
+    _braceNumber = newValue
+  }
+
   def evaluateStr(): String = {
     var result = ""
     if (nodeType == NodeType.None) {
@@ -94,6 +115,55 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     result
   }
 
+  def evaluateWithoutBracesStr(): String = {
+    var result = ""
+    if (nodeType == NodeType.None) {
+      throw new Exception("Incorrect evaluated expression")
+    }
+
+    var nodeValue: String = ""
+
+    if (nodeType == NodeType.HasValue) {
+      nodeValue = value.getStrValue
+    } else {
+      nodeType match {
+        case NodeType.Sum => nodeValue = "+"
+        case NodeType.Subtraction => nodeValue = "-"
+        case NodeType.Multiplication => nodeValue = "*"
+        case NodeType.Division => nodeValue = "/"
+        case _ => throw new Exception("Incorrect node type of node")
+      }
+    }
+
+    if (nodeType != NodeType.HasValue) {
+      var leftNodeResult = ""
+      if (leftNode != null) {
+        if (leftNode.braceNumber > braceNumber) {
+          leftNodeResult = s"(${leftNode.evaluateWithoutBracesStr()})"
+        } else {
+          leftNodeResult = leftNode.evaluateWithoutBracesStr()
+        }
+      }
+
+      var rightNodeResult = ""
+      if (rightNode != null) {
+        if (rightNode.braceNumber > braceNumber) {
+          rightNodeResult = s"(${rightNode.evaluateWithoutBracesStr()})"
+        } else {
+          rightNodeResult = rightNode.evaluateWithoutBracesStr()
+        }
+      }
+
+      result += leftNodeResult
+      result += nodeValue
+      result += rightNodeResult
+    } else {
+      result = nodeValue
+    }
+
+    result
+  }
+
   def height: Int = {
     val leftHeight = if (_leftNode == null) 0 else _leftNode.height
     val rightHeight = if (_rightNode == null) 0 else _rightNode.height
@@ -116,7 +186,7 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   }
 
   def getCopy(): ExpressionNode = {
-    val newNode = new ExpressionNode(level, nodeType, value.getCopy(), braceNumber)
+    val newNode = new ExpressionNode(level, nodeType, value.getCopy(), _braceNumber)
     if (_leftNode != null) {
       newNode.leftNode = _leftNode.getCopy()
     }
@@ -126,6 +196,17 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
 
     newNode.wasInversed = _wasInversed
     newNode.nextShouldBeInversed = _nextShouldBeInversed
+    newNode.isRightChild = isRightChild
+
+    newNode
+  }
+
+  def getWithoutReferencesCopy(): ExpressionNode = {
+    val newNode = new ExpressionNode(level, nodeType, value.getCopy(), _braceNumber)
+
+    newNode.wasInversed = _wasInversed
+    newNode.nextShouldBeInversed = _nextShouldBeInversed
+    newNode.isRightChild = isRightChild
 
     newNode
   }

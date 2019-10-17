@@ -45,7 +45,7 @@ class ExpressionParsingService {
 
     try {
       val tree = buildWithoutBracesBalancedExpressionTree(expressionModel.expression)
-      evaluatedResult = tree.evaluateStr
+      evaluatedResult = tree.evaluateWithoutBracesStr()
 
       treeViewModel = ExpressionTreeViewModel.createFromExpressionTree(tree)
     } catch {

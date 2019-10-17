@@ -310,6 +310,10 @@ class ExpressionTree {
     newTree
   }
 
+  def evaluateWithoutBracesStr(): String = {
+    _head.evaluateWithoutBracesStr()
+  }
+
   protected def isFunctionNow = _currentFunctionName != null && _currentFunctionName != ""
 
   protected def isValuePrevious = isNumberPrevious || _previousCharType == CharType.Variable
