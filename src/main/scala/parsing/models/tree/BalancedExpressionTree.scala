@@ -25,8 +25,8 @@ class BalancedExpressionTree extends ExpressionTree {
 
       while (
         lastNode.parent != null &&
-         newNode.checkPrioritization(lastNode.parent) == 1 &&
-          newNode.braceNumber == lastNode.parent.braceNumber) {
+          newNode.braceNumber == lastNode.parent.braceNumber &&
+          newNode.checkPrioritization(lastNode.parent) == 1) {
         lastNode = lastNode.parent
       }
 
@@ -96,6 +96,7 @@ class BalancedExpressionTree extends ExpressionTree {
   protected def withInversingBalance(startNode: ExpressionNode): Unit = {
     val masterChild = startNode.leftNode.leftNode
     val centerNode = startNode.leftNode
+    val parentStart = startNode.parent
 
     if (centerNode.nodeType == NodeType.Subtraction) {
       startNode.nodeType = NodeType.Sum
@@ -113,6 +114,13 @@ class BalancedExpressionTree extends ExpressionTree {
     centerNode.wasInversed = true
 
     masterChild.rightNode = centerNode
+
+    if (parentStart == null) {
+      masterChild.parent = null
+      _head = masterChild
+    } else {
+      parentStart.rightNode = masterChild
+    }
   }
 
   protected def moreBalanceTree(startNode: ExpressionNode): Unit = {
