@@ -8,7 +8,6 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   private var _parent: ExpressionNode = null
   private var _isRightChild = false
   private var _wasInversed = false
-  private var _nextShouldBeInversed = false
 
   def leftNode = _leftNode
   def leftNode_=(node: ExpressionNode) {
@@ -50,11 +49,6 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   def wasInversed: Boolean = _wasInversed
   def wasInversed_=(newValue: Boolean): Unit = {
     _wasInversed = newValue
-  }
-
-  def nextShouldBeInversed: Boolean = _nextShouldBeInversed
-  def nextShouldBeInversed_=(newValue: Boolean): Unit = {
-    _nextShouldBeInversed = newValue
   }
 
   def evaluateStr(): String = {
@@ -125,7 +119,6 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     }
 
     newNode.wasInversed = _wasInversed
-    newNode.nextShouldBeInversed = _nextShouldBeInversed
 
     newNode
   }

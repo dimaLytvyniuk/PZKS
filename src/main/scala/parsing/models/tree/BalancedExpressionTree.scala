@@ -57,18 +57,10 @@ class BalancedExpressionTree extends ExpressionTree {
       }
     }
 
-    if (_currentNode.parent != null && _currentNode.parent.nextShouldBeInversed && _currentNode.braceNumber == _currentNode.parent.braceNumber) {
-      if (_currentNode.parent.nodeType == NodeType.Subtraction && _currentNode.nodeType == NodeType.Subtraction) {
-        _currentNode.nodeType = NodeType.Sum
-        _currentNode.wasInversed = true
-      } else if (_currentNode.parent == NodeType.Division && _currentNode.nodeType == NodeType.Division) {
-        _currentNode.nodeType = NodeType.Multiplication
-        _currentNode.wasInversed = true
-      }
-    }
-
-    if (canBeBalanced(_currentNode)) {
-      balanceTree(_currentNode)
+    if (canBeBalancedStandard(_currentNode)) {
+      standardBalance(_currentNode)
+    } else if (canBeBalancedInversed(_currentNode)) {
+      withInversingBalance(_currentNode)
     }
   }
 
@@ -102,29 +94,25 @@ class BalancedExpressionTree extends ExpressionTree {
   }
 
   protected def withInversingBalance(startNode: ExpressionNode): Unit = {
-    val currentParent = startNode.parent
+    val masterChild = startNode.leftNode.leftNode
+    val centerNode = startNode.leftNode
 
-    if (currentParent.nodeType == NodeType.Subtraction) {
-      currentParent.nodeType = NodeType.Sum
-      currentParent.wasInversed = true
-
-      if (_currentNode.nodeType == NodeType.Subtraction) {
-        _currentNode.nodeType = NodeType.Sum
-        _currentNode.wasInversed = true
-      } else {
-        currentParent.nextShouldBeInversed = true
-      }
-    } else if (currentParent.nodeType == NodeType.Division) {
-      currentParent.nodeType = NodeType.Multiplication
-      currentParent.wasInversed = true
-
-      if (_currentNode.nodeType == NodeType.Division) {
-        _currentNode.nodeType = NodeType.Multiplication
-        _currentNode.wasInversed = true
-      } else {
-        currentParent.nextShouldBeInversed = true
-      }
+    if (centerNode.nodeType == NodeType.Subtraction) {
+      startNode.nodeType = NodeType.Sum
+      centerNode.nodeType = NodeType.Sum
+    } else if (centerNode.nodeType == NodeType.Division) {
+      centerNode.nodeType = NodeType.Multiplication
+      startNode.nodeType = NodeType.Multiplication
     }
+
+    startNode.leftNode = centerNode.rightNode
+    startNode.wasInversed = true
+
+    centerNode.leftNode = masterChild.rightNode
+    centerNode.rightNode = startNode
+    centerNode.wasInversed = true
+
+    masterChild.rightNode = centerNode
   }
 
   protected def moreBalanceTree(startNode: ExpressionNode): Unit = {
@@ -148,8 +136,8 @@ class BalancedExpressionTree extends ExpressionTree {
     }
   }
 
-  protected def canBeBalanced(startNode: ExpressionNode): Boolean = {
-    (startNode.parent != null && startNode.parent.parent != null) &&
+  protected def canBeBalancedStandard(startNode: ExpressionNode): Boolean = {
+    (startNode.parent != null && startNode.parent.parent != null && (startNode.parent.nodeType == NodeType.Multiplication || startNode.parent.nodeType == NodeType.Sum)) &&
       ((startNode.parent.nodeType != startNode.nodeType &&
         startNode.parent.nodeType == startNode.parent.parent.nodeType &&
         startNode.parent.braceNumber == startNode.parent.parent.braceNumber &&
@@ -159,6 +147,15 @@ class BalancedExpressionTree extends ExpressionTree {
         startNode.parent.parent.nodeType == startNode.nodeType &&
         startNode.parent.parent.braceNumber == startNode.braceNumber &&
         startNode.parent.parent.rightNode.height - startNode.parent.parent.leftNode.height > 1))
+  }
+
+  protected def canBeBalancedInversed(startNode: ExpressionNode): Boolean = {
+    startNode.leftNode != null && startNode.leftNode.leftNode != null &&
+      (startNode.leftNode.nodeType == NodeType.Division || startNode.leftNode.nodeType == NodeType.Subtraction) &&
+      startNode.leftNode.nodeType == startNode.nodeType &&
+      startNode.leftNode.braceNumber == startNode.braceNumber &&
+      startNode.leftNode.leftNode.nodeType == startNode.nodeType &&
+      startNode.leftNode.leftNode.braceNumber == startNode.braceNumber
   }
 
   protected def canBeMoreBalanced(startNode: ExpressionNode): Boolean = {
