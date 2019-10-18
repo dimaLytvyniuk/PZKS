@@ -7,6 +7,8 @@ object NodeType extends Enumeration {
   def checkPrioritization(firstNode: NodeType.Value, secondNode: NodeType.Value): Int = {
     if (secondNode == HasValue) {
       1
+    } else if (secondNode == None) {
+      throw new IllegalArgumentException
     } else if (firstNode == Sum) {
       if (secondNode == Division || secondNode == Multiplication || secondNode == Subtraction) {
         1
@@ -14,12 +16,10 @@ object NodeType extends Enumeration {
         0
       }
     } else if (firstNode == Subtraction) {
-      if (secondNode == Division || secondNode == Multiplication) {
+      if (secondNode == Division || secondNode == Multiplication || secondNode == Subtraction) {
         1
-      } else if (secondNode == Sum) {
-        -1
       } else {
-        0
+        -1
       }
     } else if (firstNode == Multiplication) {
       if (secondNode == Sum || secondNode == Subtraction) {
@@ -30,10 +30,10 @@ object NodeType extends Enumeration {
         0
       }
     } else {
-      if (secondNode == Sum || secondNode == Subtraction || secondNode == Multiplication) {
+      if (secondNode == Sum || secondNode == Subtraction) {
         -1
       } else {
-        0
+        1
       }
     }
   }
