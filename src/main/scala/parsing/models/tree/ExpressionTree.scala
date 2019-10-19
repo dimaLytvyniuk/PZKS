@@ -302,14 +302,6 @@ class ExpressionTree {
     newNode
   }
 
-  def getCopy(): ExpressionTree = {
-    val newTree = new ExpressionTree
-    newTree._head = _head
-    newTree._usedVariables = usedVariables
-
-    newTree
-  }
-
   def evaluateWithoutBracesStr(): String = {
     _head.evaluateWithoutBracesStr()
   }
@@ -373,5 +365,15 @@ class ExpressionTree {
 
   protected def isDotAllowed: Boolean = {
     _previousCharType == CharType.IntValue
+  }
+}
+
+object ExpressionTree {
+  def getCopy(tree: ExpressionTree): ExpressionTree = {
+    val newTree = new ExpressionTree
+    newTree._head = tree.head
+    newTree._usedVariables = tree.usedVariables
+
+    newTree
   }
 }

@@ -228,6 +228,19 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     }
   }
 
+  def lastLeftNode(): ExpressionNode = {
+    if (leftNode == null) {
+      null
+    } else {
+      var lastNode = leftNode
+      while (lastNode.leftNode != null) {
+        lastNode = lastNode.leftNode
+      }
+
+      lastNode
+    }
+  }
+
   def isSum = nodeType == NodeType.Sum
   def isSubtraction = nodeType == NodeType.Subtraction
   def isMultiplication = nodeType == NodeType.Multiplication
@@ -240,4 +253,11 @@ object ExpressionNode {
   def getEmptyNode(level: Int) = new ExpressionNode(level, NodeType.None, new NodeValue(), 0)
 
   def getEmptyNode(level: Int, braceNumber: Int) = new ExpressionNode(level, NodeType.None, new NodeValue(), braceNumber)
+
+  def getEmptyNode(braceNumber: Int, nodeType: NodeType.Value): ExpressionNode = {
+    val node = getEmptyNode(0, braceNumber)
+    node.nodeType = nodeType
+
+    node
+  }
 }

@@ -112,6 +112,8 @@ class ExpressionParsingService {
     }
     tree.endBuildingExpression()
 
-    tree.getTreeWithOpenBraces()
+    tree.openTreeBraces()
+
+    tree
   }
 }
