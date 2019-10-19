@@ -8,7 +8,6 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   private var _parent: ExpressionNode = null
   private var _isRightChild = false
   private var _wasInversed = false
-  private var _nextShouldBeInversed = false
 
   def leftNode = _leftNode
 
@@ -188,7 +187,12 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
       secondNode.nodeType == nodeType &&
       (secondNode.nodeType == NodeType.Sum || secondNode.nodeType == NodeType.Multiplication)) {
       1
-    } else {
+    } else if (secondNode.wasInversed && secondNode.nodeType == NodeType.Sum && nodeType == NodeType.Subtraction) {
+      0
+    } else if (secondNode.wasInversed && secondNode.nodeType == NodeType.Multiplication && nodeType == NodeType.Division) {
+      0
+    }
+    else {
       NodeType.checkPrioritization(nodeType, secondNode.nodeType)
     }
   }
