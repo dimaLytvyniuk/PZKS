@@ -11,6 +11,7 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   private var _nextShouldBeInversed = false
 
   def leftNode = _leftNode
+
   def leftNode_=(node: ExpressionNode) {
     _leftNode = node
     _leftNode.parent = this
@@ -18,6 +19,7 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   }
 
   def rightNode = _rightNode
+
   def rightNode_=(node: ExpressionNode) {
     _rightNode = node
     _rightNode.parent = this
@@ -25,11 +27,13 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   }
 
   def parent = _parent
+
   def parent_=(node: ExpressionNode) {
     _parent = node
   }
 
   def level = _level
+
   def level_=(newLevel: Int) {
     _level = newLevel
 
@@ -43,21 +47,25 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   }
 
   def isRightChild: Boolean = _isRightChild
+
   def isRightChild_=(newValue: Boolean) {
     _isRightChild = newValue
   }
 
   def wasInversed: Boolean = _wasInversed
+
   def wasInversed_=(newValue: Boolean): Unit = {
     _wasInversed = newValue
   }
 
   def nextShouldBeInversed: Boolean = _nextShouldBeInversed
+
   def nextShouldBeInversed_=(newValue: Boolean): Unit = {
     _nextShouldBeInversed = newValue
   }
 
   def braceNumber: Int = _braceNumber
+
   def braceNumber_=(newValue: Int): Unit = {
     if (leftNode != null) {
       if (leftNode.braceNumber > _braceNumber) {
@@ -209,6 +217,65 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     newNode.isRightChild = isRightChild
 
     newNode
+  }
+
+  def inverseRightChildNodes(): Unit = {
+    if (rightNode != null && rightNode.braceNumber == braceNumber &&
+      (rightNode.nodeType == NodeType.Sum || rightNode.nodeType == NodeType.Subtraction)) {
+      if (rightNode.nodeType == NodeType.Subtraction) {
+        rightNode.nodeType = NodeType.Sum
+        if (rightNode.leftNode.nodeType == HasValue) {
+          rightNode.leftNode.value.tokenValue.sign *= -1
+        }
+      } else {
+        rightNode.nodeType = NodeType.Subtraction
+      }
+
+      rightNode.inverseChildNodes()
+    }
+  }
+
+  def inverseChildNodes(): Unit = {
+    if (leftNode != null && leftNode.braceNumber == braceNumber &&
+      (leftNode.nodeType == NodeType.Sum || leftNode.nodeType == NodeType.Subtraction)) {
+      if (leftNode.nodeType == NodeType.Subtraction) {
+        leftNode.nodeType = NodeType.Sum
+        if (leftNode.leftNode.nodeType == HasValue) {
+          leftNode.leftNode.value.tokenValue.sign *= -1
+        }
+      } else {
+        leftNode.nodeType = NodeType.Subtraction
+      }
+
+      leftNode.inverseChildNodes()
+    }
+
+    if (rightNode != null && rightNode.braceNumber == braceNumber &&
+      (rightNode.nodeType == NodeType.Sum || rightNode.nodeType == NodeType.Subtraction)) {
+      if (rightNode.nodeType == NodeType.Subtraction) {
+        rightNode.nodeType = NodeType.Sum
+        if (rightNode.leftNode.nodeType == HasValue) {
+          rightNode.leftNode.value.tokenValue.sign *= -1
+        }
+      } else {
+        rightNode.nodeType = NodeType.Subtraction
+      }
+
+      rightNode.inverseChildNodes()
+    }
+  }
+
+  def optimizeBraceNumbers(): Unit = {
+    if (rightNode != null && leftNode != null) {
+      if (!wasInversed && rightNode.wasInversed && rightNode.braceNumber == braceNumber) {
+        if (nodeType == NodeType.Subtraction && rightNode.nodeType == NodeType.Sum) {
+          rightNode.braceNumber = braceNumber + 1;
+        }
+      }
+
+      leftNode.optimizeBraceNumbers()
+      rightNode.optimizeBraceNumbers()
+    }
   }
 }
 

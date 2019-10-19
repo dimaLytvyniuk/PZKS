@@ -72,6 +72,11 @@ class BalancedExpressionTree extends ExpressionTree {
     }
   }
 
+  override def endBuildingExpression(): Unit = {
+    super.endBuildingExpression()
+    _head.optimizeBraceNumbers()
+  }
+
   protected def balanceTree(startNode: ExpressionNode): Unit = {
     if (startNode.parent.nodeType == NodeType.Subtraction || startNode.parent.nodeType == NodeType.Division) {
       withInversingBalance(startNode)

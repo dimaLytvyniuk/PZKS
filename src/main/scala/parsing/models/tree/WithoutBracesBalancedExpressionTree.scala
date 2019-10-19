@@ -3,7 +3,7 @@ package parsing.models.tree
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class WithoutBracesBalancedExpressionTree extends ExpressionTree {
+class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
 
   def getTreeWithOpenBraces(): ExpressionTree = {
     val copiedTree = getCopy()
@@ -33,12 +33,17 @@ class WithoutBracesBalancedExpressionTree extends ExpressionTree {
   }
 
   def openBraces(node: ExpressionNode): Unit = {
-    node.nodeType match {
-      case NodeType.Sum => openSumBraces(node)
-      case NodeType.Subtraction => openSubtractionBraces(node)
-      case NodeType.Division => openDivisionBraces(node)
-      case NodeType.Multiplication => openMultiplicationBraces(node)
-      case _ => throw new IllegalArgumentException()
+    val nodeType = node.nodeType
+    if (nodeType == NodeType.Subtraction) {
+      openSubtractionBraces(node)
+    } else if (nodeType == NodeType.Sum) {
+      openSumBraces(node)
+    } else if (nodeType == NodeType.Division) {
+      openDivisionBraces(node)
+    } else if (nodeType == NodeType.Multiplication) {
+      openMultiplicationBraces(node)
+    } else {
+      throw new IllegalArgumentException
     }
   }
 
@@ -52,11 +57,14 @@ class WithoutBracesBalancedExpressionTree extends ExpressionTree {
   }
 
   def openSubtractionBraces(node: ExpressionNode): Unit = {
+    node.nodeType = NodeType.Sum
+
     if (node.braceNumber < node.leftNode.braceNumber) {
       node.leftNode.braceNumber = node.braceNumber
     }
     if (node.braceNumber < node.rightNode.braceNumber) {
       node.rightNode.braceNumber = node.braceNumber
+      node.inverseRightChildNodes()
     }
   }
 
