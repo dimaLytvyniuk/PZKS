@@ -49,7 +49,7 @@ class ExpressionParsingService {
 
       treeViewModel = ExpressionTreeViewModel.createFromExpressionTree(tree)
     } catch {
-      case e: Exception => exceptionModel = new ExceptionModel(e.getMessage)
+      case e: Exception => {exceptionModel = new ExceptionModel(e.getMessage); println(e)}
     }
 
     new OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)

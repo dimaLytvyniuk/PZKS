@@ -57,14 +57,19 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
   }
 
   def openSubtractionBraces(node: ExpressionNode): Unit = {
-    node.nodeType = NodeType.Sum
+    val nodeParent = node.parent
+    val nodeLeftChild = node.leftNode
 
     if (node.braceNumber < node.leftNode.braceNumber) {
       node.leftNode.braceNumber = node.braceNumber
     }
     if (node.braceNumber < node.rightNode.braceNumber) {
       node.rightNode.braceNumber = node.braceNumber
-      node.inverseRightChildNodes()
+    }
+
+    val subtreeNodes = dropOnSimpleNodesSubtree(node.rightNode)
+    for (child <- subtreeNodes) {
+      println(child.evaluateStr())
     }
   }
 
@@ -76,28 +81,35 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
 
   }
 
-  def dropOnSimpleNodeSubtree(subtreeHead: ExpressionNode): ArrayBuffer[ExpressionNode] = {
+  def dropOnSimpleNodesSubtree(subtreeHead: ExpressionNode): ArrayBuffer[ExpressionNode] = {
     if (subtreeHead.nodeType == NodeType.HasValue) {
       ArrayBuffer(subtreeHead)
     } else {
       val resultBuffer = new ArrayBuffer[ExpressionNode]()
       val nodeStack = new mutable.Stack[ExpressionNode]
-      var lastVisitedNode: ExpressionNode = null
       var node = subtreeHead
 
       while (!nodeStack.isEmpty || node != null) {
         if (node != null) {
           nodeStack.push(node)
-          node = node.leftNode
-        } else {
-          val peekNode = nodeStack.top
-          if (peekNode.rightNode != null && lastVisitedNode != peekNode.rightNode) {
-            node = peekNode.rightNode
+          if (node.leftNode == null || node.isMultiplication || node.isDivision) {
+            node = null
           } else {
-            if (isOperationBeforeBraces(peekNode)) {
-              openBraces(peekNode)
-            }
-            lastVisitedNode = nodeStack.pop()
+            node = node.leftNode
+          }
+        } else {
+          node = nodeStack.pop()
+
+          if (node.isDivision || node.isMultiplication) {
+            resultBuffer += node.getCopy()
+          } else {
+            resultBuffer += node.getWithoutReferencesCopy()
+          }
+
+          if (node.rightNode == null || node.isMultiplication || node.isDivision) {
+            node = null
+          } else {
+            node = node.rightNode
           }
         }
       }
