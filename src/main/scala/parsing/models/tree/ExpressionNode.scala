@@ -69,6 +69,10 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     }
 
     if (rightNode != null) {
+      if (rightNode.braceNumber != 1) {
+        val i = 0
+      }
+
       if (rightNode.braceNumber > _braceNumber) {
         rightNode.braceNumber = newValue + 1
       } else {
