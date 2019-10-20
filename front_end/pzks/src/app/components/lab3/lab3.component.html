@@ -19,8 +19,8 @@
     </div>
     <div class="evaluated-container" *ngIf="evaluatedResult">
       Evaluated result:
-      <div>
-        {{ evaluatedResult }}
+      <div *ngFor="let result of outputResult.expressionTree.evaluatedResults">
+        {{ result }}
       </div>
     </div>
   </div>

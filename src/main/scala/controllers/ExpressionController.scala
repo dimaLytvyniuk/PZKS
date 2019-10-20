@@ -32,7 +32,8 @@ trait JsonSupport {
   implicit object ExpressionTreeViewModelJsonFormat extends RootJsonFormat[ExpressionTreeViewModel] {
     def write(tree: ExpressionTreeViewModel) = JsObject(
       "head" -> tree.head.toJson,
-      "supportedFunctions" -> tree.supportedFunctions.toJson
+      "supportedFunctions" -> tree.supportedFunctions.toJson,
+      "evaluatedResults" -> tree.evaluatedResults.toJson,
     )
 
     def read(value: JsValue) = null

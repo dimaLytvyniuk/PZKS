@@ -4,11 +4,12 @@ import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
-
   def openTreeBraces(): Unit = {
     val nodeStack = new mutable.Stack[ExpressionNode]
     var node = _head
     var lastVisitedNode: ExpressionNode = null
+
+    evaluatedResults = new ArrayBuffer[String]()
 
     while (!nodeStack.isEmpty || node != null) {
       if (node != null) {
@@ -21,6 +22,8 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
         } else {
           if (isOperationBeforeBraces(peekNode)) {
             peekNode = openBraces(peekNode)
+            evaluatedResults += evaluateWithoutBracesStr()
+
             nodeStack.pop()
             lastVisitedNode = peekNode
           } else {
@@ -37,10 +40,8 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
       openSubtractionBraces(node)
     } else if (nodeType == NodeType.Sum) {
       openSumBraces(node)
-    } else if (nodeType == NodeType.Division) {
-      openDivisionBraces(node)
-    } else if (nodeType == NodeType.Multiplication) {
-      openMultiplicationBraces(node)
+    } else if (nodeType == NodeType.Division || nodeType == NodeType.Multiplication) {
+      openMultiplicationDivisionBraces(node, nodeType)
     } else {
       throw new IllegalArgumentException
     }
@@ -91,34 +92,12 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
     newSubtreeHead
   }
 
-  protected def openDivisionBraces(node: ExpressionNode): ExpressionNode = {
+  protected def openMultiplicationDivisionBraces(node: ExpressionNode, operation: NodeType.Value): ExpressionNode = {
     val nodeParent = node.parent
 
     val leftSubtreeNodes = dropOnSimpleNodesSubtree(node.leftNode)
     val rightSubtreeNodes = dropOnSimpleNodesSubtree(node.rightNode)
-    val newSubtreeHead = buildDivisionMultiplicationTree(leftSubtreeNodes, rightSubtreeNodes, NodeType.Division, node.braceNumber + 1)
-
-    if (nodeParent == null) {
-      _head = newSubtreeHead
-      newSubtreeHead.braceNumber = newSubtreeHead.braceNumber - 1
-      val i = 0
-    } else {
-      if (node.isRightChild) {
-        nodeParent.rightNode = newSubtreeHead
-      } else {
-        nodeParent.leftNode = newSubtreeHead
-      }
-    }
-
-    newSubtreeHead
-  }
-
-  protected def openMultiplicationBraces(node: ExpressionNode): ExpressionNode = {
-    val nodeParent = node.parent
-
-    val leftSubtreeNodes = dropOnSimpleNodesSubtree(node.leftNode)
-    val rightSubtreeNodes = dropOnSimpleNodesSubtree(node.rightNode)
-    val newSubtreeHead = buildDivisionMultiplicationTree(leftSubtreeNodes, rightSubtreeNodes, NodeType.Multiplication, node.braceNumber + 1)
+    val newSubtreeHead = buildDivisionMultiplicationTree(leftSubtreeNodes, rightSubtreeNodes, operation, node.braceNumber + 1)
 
     if (nodeParent == null) {
       _head = newSubtreeHead

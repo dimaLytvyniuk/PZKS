@@ -26,8 +26,11 @@ class ExpressionTree {
   protected var _currentFunctionName: String = null
   protected var _currentFunctionParameters = new ArrayBuffer[TokenValue]()
 
+
   def head = _head
   def usedVariables = _usedVariables
+
+  var evaluatedResults = new ArrayBuffer[String]()
 
   def addChar(ch: Char): Unit = {
     if (ch == '(') {
