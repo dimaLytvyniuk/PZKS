@@ -245,10 +245,28 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     }
   }
 
+  def complexity(operationComplexities: Map[NodeType.Value, Int]): Int = {
+    var complexity = operationComplexities(nodeType)
+    if (leftNode != null) {
+      complexity += rightNode.complexity(operationComplexities)
+    }
+
+    if (rightNode != null) {
+      complexity += leftNode.complexity(operationComplexities)
+    }
+
+    complexity
+  }
+
   def isSum = nodeType == NodeType.Sum
   def isSubtraction = nodeType == NodeType.Subtraction
   def isMultiplication = nodeType == NodeType.Multiplication
   def isDivision = nodeType == NodeType.Division
+  def isHasValue = nodeType == NodeType.HasValue
+
+  def isLeftNodeInSameBraces = leftNode != null && leftNode.braceNumber == braceNumber
+  def isRightNodeInSameBraces = rightNode != null && rightNode.braceNumber == braceNumber
+  def isChildsInSameBraces = isLeftNodeInSameBraces && isRightNodeInSameBraces
 }
 
 object ExpressionNode {
