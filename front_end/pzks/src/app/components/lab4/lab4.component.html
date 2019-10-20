@@ -1,0 +1,28 @@
+<div class="container">
+  <div>
+    Expresion:
+  </div>
+  <div class="expression-container">
+    <input class="form-control mr-sm-2" type="search" placeholder="Expression" aria-label="Expression"
+      (change)="onChangeExpressionField($event)">
+    <button type="button" class="btn btn-info" id="submit-btn" (click)="onSubmit()">Submit</button>
+  </div>
+  <div class="result-container">
+    <div>
+      Result:
+    </div>
+    <div class="error-container" *ngIf="errors">
+      Errors:
+      <div>
+        {{ errors }}
+      </div>
+    </div>
+    <div class="evaluated-container" *ngIf="evaluatedResult">
+      Evaluated result:
+      <div *ngFor="let result of outputResult.expressionTree.evaluatedResults">
+        {{ result }}
+      </div>
+    </div>
+  </div>
+</div>
+<div id="mynetwork"></div>

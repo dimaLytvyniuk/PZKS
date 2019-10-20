@@ -9,13 +9,15 @@ import { HttpClientModule } from '@angular/common/http';
 import { Lab2Component } from './components/lab2/lab2.component';
 import { Lab3Component } from './components/lab3/lab3.component';
 import { TreeBuilderService } from './services/tree-builder.service';
+import { Lab4Component } from './components/lab4/lab4.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     Lab1Component,
     Lab2Component,
-    Lab3Component
+    Lab3Component,
+    Lab4Component
   ],
   imports: [
     BrowserModule,

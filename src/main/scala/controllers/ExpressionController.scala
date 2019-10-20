@@ -78,7 +78,13 @@ class ExpressionController extends Directives with JsonSupport {
           entity(as[InputExpressionModel]) { inputExpressionModel =>
             parseThirdLabExpression(inputExpressionModel)
           }
-        }))
+        },
+        path("expression" / "lab4") {
+          entity(as[InputExpressionModel]) { inputExpressionModel =>
+            parseFourthLabExpression(inputExpressionModel)
+          }
+        }
+        ))
       },
       options {
         cors.corsHandler(concat(
@@ -90,7 +96,11 @@ class ExpressionController extends Directives with JsonSupport {
           },
           path("expression" / "lab3") {
             complete(StatusCodes.OK)
-          }))
+          },
+          path("expression" / "lab4") {
+            complete(StatusCodes.OK)
+          },
+        ))
       }
     )
 
@@ -111,6 +121,13 @@ class ExpressionController extends Directives with JsonSupport {
   def parseThirdLabExpression(inputExpressionModel: InputExpressionModel): Route = {
     val service = new ExpressionParsingService
     val outputModel = service.parseWithOpenBracesExpression(inputExpressionModel)
+
+    complete(outputModel)
+  }
+
+  def parseFourthLabExpression(inputExpressionModel: InputExpressionModel): Route = {
+    val service = new ExpressionParsingService
+    val outputModel = service.parseCommutativeExpression(inputExpressionModel)
 
     complete(outputModel)
   }

@@ -55,6 +55,23 @@ class ExpressionParsingService {
     new OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
   }
 
+  def parseCommutativeExpression(expressionModel: InputExpressionModel): OutputParsedExpressionModel = {
+    var exceptionModel: ExceptionModel = null
+    var treeViewModel: ExpressionTreeViewModel = null
+    var evaluatedResult: String = null
+
+    try {
+      val tree = buildCommutativeExpressionTree(expressionModel.expression)
+      evaluatedResult = tree.evaluateWithoutBracesStr()
+
+      treeViewModel = ExpressionTreeViewModel.createFromExpressionTree(tree)
+    } catch {
+      case e: Exception => {exceptionModel = new ExceptionModel(e.getMessage); println(e)}
+    }
+
+    new OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
+  }
+
   private def buildExpressionTree(expression: String): ExpressionTree = {
     val tree = new ExpressionTree
 
@@ -113,6 +130,26 @@ class ExpressionParsingService {
     tree.endBuildingExpression()
 
     tree.openTreeBraces()
+
+    tree
+  }
+
+  private def buildCommutativeExpressionTree(expression: String): ExpressionTree = {
+    val tree = new CommutativeExpressionTree
+
+    for (i <- 0 until expression.length) {
+      if (expression(i) != ' ') {
+        try {
+          tree.addChar(expression(i))
+        } catch {
+          case e: Exception => {
+            println(e)
+            throw new Exception(s"Exception at ${i + 1}: ${e.getMessage}.")
+          }
+        }
+      }
+    }
+    tree.endBuildingExpression()
 
     tree
   }
