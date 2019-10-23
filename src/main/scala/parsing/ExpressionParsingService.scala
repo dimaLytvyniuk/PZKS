@@ -1,5 +1,6 @@
 package parsing
 
+import parsing.models.exceptions.BaseParsingException
 import parsing.models.tree._
 import parsing.models.views._
 
@@ -15,10 +16,11 @@ class ExpressionParsingService {
 
       treeViewModel = ExpressionTreeViewModel.createFromExpressionTree(tree)
     } catch {
-      case e: Exception => exceptionModel = new ExceptionModel(e.getMessage)
+      case parsing: BaseParsingException => { exceptionModel = ExceptionModel(parsing.getMessage); println(parsing); }
+      case e: Throwable => throw e
     }
 
-    new OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
+    OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
   }
 
   def parseOptimizedExpression(expressionModel: InputExpressionModel): OutputParsedExpressionModel = {
@@ -32,10 +34,11 @@ class ExpressionParsingService {
 
       treeViewModel = ExpressionTreeViewModel.createFromExpressionTree(tree)
     } catch {
-      case e: Exception => exceptionModel = new ExceptionModel(e.getMessage)
+      case parsing: BaseParsingException => { exceptionModel = ExceptionModel(parsing.getMessage); println(parsing); }
+      case e: Throwable => throw e
     }
 
-    new OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
+    OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
   }
 
   def parseWithOpenBracesExpression(expressionModel: InputExpressionModel): OutputParsedExpressionModel = {
@@ -49,10 +52,11 @@ class ExpressionParsingService {
 
       treeViewModel = ExpressionTreeViewModel.createFromExpressionTree(tree)
     } catch {
-      case e: Exception => {exceptionModel = new ExceptionModel(e.getMessage); println(e)}
+      case parsing: BaseParsingException => { exceptionModel = ExceptionModel(parsing.getMessage); println(parsing); }
+      case e: Throwable => throw e
     }
 
-    new OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
+    OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
   }
 
   def parseCommutativeExpression(expressionModel: InputExpressionModel): OutputParsedExpressionModel = {
@@ -66,10 +70,11 @@ class ExpressionParsingService {
 
       treeViewModel = ExpressionTreeViewModel.createFromExpressionTree(tree)
     } catch {
-      case e: Exception => {exceptionModel = new ExceptionModel(e.getMessage); println(e)}
+      case parsing: BaseParsingException => { exceptionModel = ExceptionModel(parsing.getMessage); println(parsing); }
+      case e: Throwable => throw e
     }
 
-    new OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
+    OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
   }
 
   private def buildExpressionTree(expression: String): ExpressionTree = {
@@ -80,10 +85,8 @@ class ExpressionParsingService {
         try {
           tree.addChar(expression(i))
         } catch {
-          case e: Exception => {
-            println(e)
-            throw new Exception(s"Exception at ${i + 1}: ${e.getMessage}.")
-          }
+          case parsing: BaseParsingException => throw new BaseParsingException(s"Exception at ${i + 1}: ${parsing.getMessage}.")
+          case e: Throwable => throw e
         }
       }
     }
@@ -100,10 +103,8 @@ class ExpressionParsingService {
         try {
           tree.addChar(expression(i))
         } catch {
-          case e: Exception => {
-            println(e)
-            throw new Exception(s"Exception at ${i + 1}: ${e.getMessage}.")
-          }
+          case parsing: BaseParsingException => throw new BaseParsingException(s"Exception at ${i + 1}: ${parsing.getMessage}.")
+          case e: Throwable => throw e
         }
       }
     }
@@ -120,10 +121,8 @@ class ExpressionParsingService {
         try {
           tree.addChar(expression(i))
         } catch {
-          case e: Exception => {
-            println(e)
-            throw new Exception(s"Exception at ${i + 1}: ${e.getMessage}.")
-          }
+          case parsing: BaseParsingException => throw new BaseParsingException(s"Exception at ${i + 1}: ${parsing.getMessage}.")
+          case e: Throwable => throw e
         }
       }
     }
@@ -142,14 +141,13 @@ class ExpressionParsingService {
         try {
           tree.addChar(expression(i))
         } catch {
-          case e: Exception => {
-            println(e)
-            throw new Exception(s"Exception at ${i + 1}: ${e.getMessage}.")
-          }
+          case parsing: BaseParsingException => throw new BaseParsingException(s"Exception at ${i + 1}: ${parsing.getMessage}.")
+          case e: Throwable => throw e
         }
       }
     }
     tree.endBuildingExpression()
+    tree.calculateCommutative()
 
     tree
   }
