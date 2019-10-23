@@ -216,7 +216,7 @@ class ExpressionTree {
     }
   }
 
-  def addNewLeaf(): Unit = {
+  protected def addNewLeaf(): Unit = {
     val newNode = getNewValueNode()
 
     if (_head == null) {

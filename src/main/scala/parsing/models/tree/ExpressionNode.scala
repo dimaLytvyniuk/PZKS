@@ -245,6 +245,21 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     }
   }
 
+  def lastLeftNodeSameOperationSameBraces(): ExpressionNode = {
+    if (leftNode == null || leftNode.isHasValue) {
+      leftNode
+    } else {
+      var lastNode = leftNode
+      while (lastNode.leftNode != null &&
+          lastNode.leftNode.braceNumber == lastNode.braceNumber &&
+          lastNode.leftNode.nodeType == nodeType) {
+        lastNode = lastNode.leftNode
+      }
+
+      lastNode.leftNode
+    }
+  }
+
   def complexity(operationComplexities: Map[NodeType.Value, Int]): Int = {
     var complexity = operationComplexities(nodeType)
     if (leftNode != null) {
@@ -267,6 +282,7 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   def isLeftNodeInSameBraces = leftNode != null && leftNode.braceNumber == braceNumber
   def isRightNodeInSameBraces = rightNode != null && rightNode.braceNumber == braceNumber
   def isChildsInSameBraces = isLeftNodeInSameBraces && isRightNodeInSameBraces
+  def isParentInSameBraces = parent != null && parent.braceNumber == braceNumber
 }
 
 object ExpressionNode {
