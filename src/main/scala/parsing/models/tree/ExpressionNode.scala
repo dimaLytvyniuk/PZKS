@@ -2,6 +2,8 @@ package parsing.models.tree
 
 import NodeType._
 
+import scala.collection.mutable.ArrayBuffer
+
 class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var value: NodeValue, private var _braceNumber: Int) {
   private var _rightNode: ExpressionNode = null
   private var _leftNode: ExpressionNode = null
@@ -245,14 +247,15 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     }
   }
 
-  def lastLeftNodeSameOperationSameBraces(): ExpressionNode = {
+  def lastLeftSubtractionNodeSameBraces(): ExpressionNode = {
     if (leftNode == null || leftNode.isHasValue) {
       leftNode
     } else {
+      val startBraceNumber = braceNumber
       var lastNode = leftNode
       while (lastNode.leftNode != null &&
-          lastNode.leftNode.braceNumber == lastNode.braceNumber &&
-          lastNode.leftNode.nodeType == nodeType) {
+          lastNode.leftNode.braceNumber == startBraceNumber &&
+          lastNode.leftNode.isSubtraction) {
         lastNode = lastNode.leftNode
       }
 
@@ -271,6 +274,23 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     }
 
     complexity
+  }
+
+  def getAllSubtractionChilds(): ArrayBuffer[ExpressionNode] = {
+    val nodes = new ArrayBuffer[ExpressionNode]()
+
+    if (leftNode != null && isLeftNodeInSameBraces && leftNode.isSubtraction) {
+      var lastNode = leftNode
+      nodes += lastNode
+      while (lastNode.leftNode != null &&
+        lastNode.leftNode.braceNumber == lastNode.braceNumber &&
+        lastNode.leftNode.nodeType == nodeType) {
+        lastNode = lastNode.leftNode
+        nodes += lastNode
+      }
+    }
+
+    nodes.reverse
   }
 
   def isSum = nodeType == NodeType.Sum

@@ -39,7 +39,7 @@ class CommutativeExpressionTree extends ExpressionTree {
   protected def applyCommutativity(node: ExpressionNode): Unit = {
     node.nodeType match {
       case NodeType.Sum => applySumCommutativity(node)
-      case NodeType.Subtraction => checkSubtractionOnSameCommutativity(node)
+      case NodeType.Subtraction => applySubtractionCommutativity(node)
       case NodeType.Division => checkDivisionOnSameCommutativity(node)
       case NodeType.Multiplication => checkMultiplicationOnSameCommutativity(node)
       case _ => {}
@@ -47,6 +47,7 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def applySumCommutativity(expressionNode: ExpressionNode): Unit = {
+    applySubtractionCommutativity(expressionNode)
     val allSumNodes = getAllSumNodesInSameBraces(expressionNode)
 
     for (i <- 1 until allSumNodes.length) {
@@ -61,7 +62,13 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def applySubtractionCommutativity(expressionNode: ExpressionNode): Unit = {
+    val allSubtractionNodes = getAllSubtractionNodesInSameBraces(expressionNode)
 
+    for (i <- 1 until allSubtractionNodes.length) {
+      for (j <- 0 until allSubtractionNodes.length - i) {
+        compareAndSwapSubtractionNodes(allSubtractionNodes(j), allSubtractionNodes(j+1))
+      }
+    }
   }
 
   protected def applyMultiplicationCommutativity(expressionNode: ExpressionNode): Unit = {
@@ -178,17 +185,47 @@ class CommutativeExpressionTree extends ExpressionTree {
     val startBraces = startNode.braceNumber
     var currentNode = startNode
     while (currentNode != null && currentNode.braceNumber == startBraces && currentNode.isSum) {
-      if (!currentNode.isLeftNodeInSameBraces || currentNode.leftNode.isMultiplication || currentNode.rightNode.isDivision || currentNode.rightNode.isSubtraction) {
+      if (!currentNode.isLeftNodeInSameBraces || currentNode.leftNode.isMultiplication || currentNode.rightNode.isDivision) {
         applyCommutativity(currentNode.leftNode)
       }
 
-      if (!currentNode.isRightNodeInSameBraces || currentNode.rightNode.isMultiplication || currentNode.rightNode.isDivision || currentNode.rightNode.isSubtraction) {
+      if (!currentNode.isRightNodeInSameBraces || currentNode.rightNode.isMultiplication || currentNode.rightNode.isDivision) {
           applyCommutativity(currentNode.rightNode)
       }
       nodes += currentNode
 
       currentNode = currentNode.rightNode
     }
+
+    nodes
+  }
+
+  protected def getAllSubtractionNodesInSameBraces(startNode: ExpressionNode): ArrayBuffer[ExpressionNode] = {
+    val nodes = new ArrayBuffer[ExpressionNode]()
+
+    val startBraces = startNode.braceNumber
+    var currentNode = startNode
+    while (currentNode != null && currentNode.braceNumber == startBraces && (currentNode.isSum|| currentNode.isSubtraction)) {
+      val subtractionChilds = currentNode.getAllSubtractionChilds()
+      nodes ++= subtractionChilds
+      if (currentNode.isSum) {
+        currentNode = currentNode.rightNode
+      }
+      else {
+        nodes += currentNode
+        currentNode = null
+      }
+    }
+
+    nodes.foreach(x => {
+      if (!x.isLeftNodeInSameBraces || x.leftNode.isMultiplication || x.leftNode.isDivision) {
+        applyCommutativity(x.leftNode)
+      }
+
+      if (!x.isRightNodeInSameBraces || x.rightNode.isMultiplication || x.rightNode.isDivision) {
+        applyCommutativity(x.rightNode)
+      }
+    })
 
     nodes
   }
@@ -201,10 +238,10 @@ class CommutativeExpressionTree extends ExpressionTree {
     }
 
     if (firstNode.isLeftNodeInSameBraces && firstNode.leftNode.isSubtraction) {
-      val lastFirstLeftNode = firstNode.leftNode.lastLeftNodeSameOperationSameBraces()
+      val lastFirstLeftNode = firstNode.lastLeftSubtractionNodeSameBraces()
 
       if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction) {
-        val lastSecondLeftNode = secondNode.leftNode.lastLeftNodeSameOperationSameBraces()
+        val lastSecondLeftNode = secondNode.lastLeftSubtractionNodeSameBraces()
 
         if (lastFirstLeftNode.complexity(_operationsComplexity) > lastSecondLeftNode.complexity(_operationsComplexity)) {
           val secondLeftNodeParent = lastSecondLeftNode.parent
@@ -218,7 +255,7 @@ class CommutativeExpressionTree extends ExpressionTree {
         }
       }
     } else if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction) {
-      val lastSecondLeftNode = secondNode.leftNode.lastLeftNodeSameOperationSameBraces()
+      val lastSecondLeftNode = secondNode.lastLeftSubtractionNodeSameBraces()
 
       if (firstNode.leftNode.complexity(_operationsComplexity) > lastSecondLeftNode.complexity(_operationsComplexity)) {
         lastSecondLeftNode.parent.leftNode = firstNode.leftNode
@@ -237,10 +274,11 @@ class CommutativeExpressionTree extends ExpressionTree {
     }
 
     if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction) {
-      val lastSecondLeftNode = secondNode.leftNode.lastLeftNodeSameOperationSameBraces()
+      val lastSecondLeftNode = secondNode.lastLeftSubtractionNodeSameBraces()
+
 
       if (secondNode.isRightNodeInSameBraces && secondNode.rightNode.isSubtraction) {
-        val lastSecondRightLeftNode = secondNode.rightNode.lastLeftNodeSameOperationSameBraces()
+        val lastSecondRightLeftNode = secondNode.rightNode.lastLeftSubtractionNodeSameBraces()
 
         if (lastSecondLeftNode.complexity(_operationsComplexity) > lastSecondRightLeftNode.complexity(_operationsComplexity)) {
           val secondLeftNodeParent = lastSecondLeftNode.parent
@@ -255,13 +293,21 @@ class CommutativeExpressionTree extends ExpressionTree {
       }
     } else {
       if (secondNode.isRightNodeInSameBraces && secondNode.rightNode.isSubtraction) {
-        val lastSecondRightNode = secondNode.rightNode.lastLeftNodeSameOperationSameBraces()
+        val lastSecondRightNode = secondNode.rightNode.lastLeftSubtractionNodeSameBraces()
 
         if (secondNode.leftNode.complexity(_operationsComplexity) > lastSecondRightNode.complexity(_operationsComplexity)) {
           lastSecondRightNode.parent.leftNode = secondNode.leftNode
           secondNode.leftNode = lastSecondRightNode
         }
       }
+    }
+  }
+
+  protected def compareAndSwapSubtractionNodes(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
+    if (firstNode.rightNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
+      val tmp = firstNode.rightNode
+      firstNode.rightNode = secondNode.rightNode
+      secondNode.rightNode = tmp
     }
   }
 }
