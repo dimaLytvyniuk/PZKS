@@ -51,8 +51,8 @@ class CommutativeExpressionTree extends ExpressionTree {
 
     for (i <- 1 until allSumNodes.length) {
       for (j <- 0 until allSumNodes.length - i) {
-        if (!allSumNodes(j+1).isRightNodeInSameBraces || (allSumNodes(j+1).rightNode != null && allSumNodes(j+1).rightNode.isHasValue)) {
-          compareAndSwapSumNodes(allSumNodes(j), allSumNodes(j+1))
+        if (j == allSumNodes.length - i -1) {
+          compareAndSwapSumNodesWithLast(allSumNodes(j), allSumNodes(j+1))
         }
 
         compareAndSwapSumNodes(allSumNodes(j), allSumNodes(j+1))
@@ -217,49 +217,49 @@ class CommutativeExpressionTree extends ExpressionTree {
           secondNode.leftNode = lastFirstLeftNode
         }
       }
-    } else {
-      if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction) {
-        val lastSecondLeftNode = secondNode.leftNode.lastLeftNodeSameOperationSameBraces()
+    } else if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction) {
+      val lastSecondLeftNode = secondNode.leftNode.lastLeftNodeSameOperationSameBraces()
 
-        if (firstNode.leftNode.complexity(_operationsComplexity) > lastSecondLeftNode.complexity(_operationsComplexity)) {
-          lastSecondLeftNode.parent.leftNode = firstNode.leftNode
-          firstNode.leftNode = lastSecondLeftNode
-        }
+      if (firstNode.leftNode.complexity(_operationsComplexity) > lastSecondLeftNode.complexity(_operationsComplexity)) {
+        lastSecondLeftNode.parent.leftNode = firstNode.leftNode
+        firstNode.leftNode = lastSecondLeftNode
       }
     }
+  }
 
-    if (!secondNode.isRightNodeInSameBraces || (secondNode.rightNode != null && secondNode.rightNode.isHasValue)) {
-      if (secondNode.leftNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
-        val tmp = secondNode.leftNode
-        secondNode.leftNode = secondNode.rightNode
-        secondNode.rightNode = tmp
-      }
+  protected def compareAndSwapSumNodesWithLast(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
+    compareAndSwapSumNodes(firstNode, secondNode)
 
-      if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction) {
-        val lastSecondLeftNode = secondNode.leftNode.lastLeftNodeSameOperationSameBraces()
+    if (secondNode.leftNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
+      val tmp = secondNode.leftNode
+      secondNode.leftNode = secondNode.rightNode
+      secondNode.rightNode = tmp
+    }
 
-        if (secondNode.isRightNodeInSameBraces && secondNode.rightNode.isSubtraction) {
-          val lastSecondRightLeftNode = secondNode.rightNode.lastLeftNodeSameOperationSameBraces()
+    if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction) {
+      val lastSecondLeftNode = secondNode.leftNode.lastLeftNodeSameOperationSameBraces()
 
-          if (lastSecondLeftNode.complexity(_operationsComplexity) > lastSecondRightLeftNode.complexity(_operationsComplexity)) {
-            val secondLeftNodeParent = lastSecondLeftNode.parent
-            lastSecondRightLeftNode.parent.leftNode = lastSecondLeftNode
-            secondLeftNodeParent.leftNode = lastSecondRightLeftNode
-          }
-        } else {
-          if (lastSecondLeftNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
-            lastSecondLeftNode.parent.leftNode = secondNode.rightNode
-            secondNode.rightNode = lastSecondLeftNode
-          }
+      if (secondNode.isRightNodeInSameBraces && secondNode.rightNode.isSubtraction) {
+        val lastSecondRightLeftNode = secondNode.rightNode.lastLeftNodeSameOperationSameBraces()
+
+        if (lastSecondLeftNode.complexity(_operationsComplexity) > lastSecondRightLeftNode.complexity(_operationsComplexity)) {
+          val secondLeftNodeParent = lastSecondLeftNode.parent
+          lastSecondRightLeftNode.parent.leftNode = lastSecondLeftNode
+          secondLeftNodeParent.leftNode = lastSecondRightLeftNode
         }
       } else {
-        if (secondNode.isRightNodeInSameBraces && secondNode.rightNode.isSubtraction) {
-          val lastSecondRightNode = secondNode.rightNode.lastLeftNodeSameOperationSameBraces()
+        if (lastSecondLeftNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
+          lastSecondLeftNode.parent.leftNode = secondNode.rightNode
+          secondNode.rightNode = lastSecondLeftNode
+        }
+      }
+    } else {
+      if (secondNode.isRightNodeInSameBraces && secondNode.rightNode.isSubtraction) {
+        val lastSecondRightNode = secondNode.rightNode.lastLeftNodeSameOperationSameBraces()
 
-          if (secondNode.leftNode.complexity(_operationsComplexity) > lastSecondRightNode.complexity(_operationsComplexity)) {
-            lastSecondRightNode.parent.leftNode = secondNode.leftNode
-            secondNode.leftNode = lastSecondRightNode
-          }
+        if (secondNode.leftNode.complexity(_operationsComplexity) > lastSecondRightNode.complexity(_operationsComplexity)) {
+          lastSecondRightNode.parent.leftNode = secondNode.leftNode
+          secondNode.leftNode = lastSecondRightNode
         }
       }
     }
