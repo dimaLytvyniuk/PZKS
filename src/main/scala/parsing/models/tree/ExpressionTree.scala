@@ -33,30 +33,14 @@ class ExpressionTree {
   var evaluatedResults = new ArrayBuffer[String]()
 
   def addChar(ch: Char): Unit = {
-    if (ch == '(') {
-      addOpenBrace()
-    }
-    else if (ch == ')') {
-      addClosedBrace()
-    }
-    else if (operations.contains(ch)) {
-      addOperation(ch)
-    }
-    else if (numbers.contains(ch)) {
-      if (_previousCharType == CharType.Variable) {
-        addVariableName(ch)
-      } else {
-        addNumber(ch)
-      }
-    }
-    else if (ch == ',') {
-      addComa()
-    }
-    else if (ch == '.') {
-      addDot()
-    }
-    else {
-      addVariableName(ch)
+    ch match {
+      case '(' => addOpenBrace()
+      case ')' => addClosedBrace()
+      case x if (operations.contains(x)) => addOperation(x)
+      case x if (numbers.contains(x)) => if (_previousCharType == CharType.Variable) addVariableName(x) else addNumber(x)
+      case ',' => addComa()
+      case '.' => addDot()
+      case _ => addVariableName(ch)
     }
   }
 
