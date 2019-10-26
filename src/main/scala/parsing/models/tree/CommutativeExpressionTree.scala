@@ -273,9 +273,7 @@ class CommutativeExpressionTree extends ExpressionTree {
 
   protected def compareAndSwapSumNodes(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
     if (firstNode.leftNode.complexity(_operationsComplexity) > secondNode.leftNode.complexity(_operationsComplexity)) {
-      val tmp = secondNode.leftNode
-      secondNode.leftNode = firstNode.leftNode
-      firstNode.leftNode = tmp
+      swapNodes(firstNode.leftNode, secondNode.leftNode)
     }
 
     if (firstNode.isLeftNodeInSameBraces && firstNode.leftNode.isSubtraction) {
@@ -285,49 +283,39 @@ class CommutativeExpressionTree extends ExpressionTree {
         val lastSecondLeftNode = secondNode.lastLeftSubtractionNodeSameBraces()
 
         if (lastFirstLeftNode.complexity(_operationsComplexity) > lastSecondLeftNode.complexity(_operationsComplexity)) {
-          val secondLeftNodeParent = lastSecondLeftNode.parent
-          lastFirstLeftNode.parent.leftNode = lastSecondLeftNode
-          secondLeftNodeParent.leftNode = lastFirstLeftNode
+          swapNodes(lastFirstLeftNode, lastSecondLeftNode)
         }
       } else {
         if (lastFirstLeftNode.complexity(_operationsComplexity) > secondNode.leftNode.complexity(_operationsComplexity)) {
-          lastFirstLeftNode.parent.leftNode = secondNode.leftNode
-          secondNode.leftNode = lastFirstLeftNode
+          swapNodes(lastFirstLeftNode, secondNode.leftNode)
         }
       }
     } else if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction) {
       val lastSecondLeftNode = secondNode.lastLeftSubtractionNodeSameBraces()
 
       if (firstNode.leftNode.complexity(_operationsComplexity) > lastSecondLeftNode.complexity(_operationsComplexity)) {
-        lastSecondLeftNode.parent.leftNode = firstNode.leftNode
-        firstNode.leftNode = lastSecondLeftNode
+        swapNodes(firstNode.leftNode, lastSecondLeftNode)
       }
     }
   }
 
   protected def compareAndSwapLastSumNode(secondNode: ExpressionNode): Unit = {
     if (secondNode.leftNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
-      val tmp = secondNode.leftNode
-      secondNode.leftNode = secondNode.rightNode
-      secondNode.rightNode = tmp
+      swapNodes(secondNode.leftNode, secondNode.rightNode)
     }
 
     if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction) {
       val lastSecondLeftNode = secondNode.lastLeftSubtractionNodeSameBraces()
 
-
       if (secondNode.isRightNodeInSameBraces && secondNode.rightNode.isSubtraction) {
         val lastSecondRightLeftNode = secondNode.rightNode.lastLeftSubtractionNodeSameBraces()
 
         if (lastSecondLeftNode.complexity(_operationsComplexity) > lastSecondRightLeftNode.complexity(_operationsComplexity)) {
-          val secondLeftNodeParent = lastSecondLeftNode.parent
-          lastSecondRightLeftNode.parent.leftNode = lastSecondLeftNode
-          secondLeftNodeParent.leftNode = lastSecondRightLeftNode
+          swapNodes(lastSecondLeftNode, lastSecondRightLeftNode)
         }
       } else {
         if (lastSecondLeftNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
-          lastSecondLeftNode.parent.leftNode = secondNode.rightNode
-          secondNode.rightNode = lastSecondLeftNode
+          swapNodes(lastSecondLeftNode, secondNode.rightNode)
         }
       }
     } else {
@@ -335,8 +323,7 @@ class CommutativeExpressionTree extends ExpressionTree {
         val lastSecondRightNode = secondNode.rightNode.lastLeftSubtractionNodeSameBraces()
 
         if (secondNode.leftNode.complexity(_operationsComplexity) > lastSecondRightNode.complexity(_operationsComplexity)) {
-          lastSecondRightNode.parent.leftNode = secondNode.leftNode
-          secondNode.leftNode = lastSecondRightNode
+          swapNodes(secondNode.leftNode, lastSecondRightNode)
         }
       }
     }
@@ -352,17 +339,31 @@ class CommutativeExpressionTree extends ExpressionTree {
 
   protected def compareAndSwapMultiplicationNodes(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
     if (firstNode.leftNode.complexity(_operationsComplexity) > secondNode.leftNode.complexity(_operationsComplexity)) {
-      val tmp = firstNode.leftNode
-      firstNode.leftNode = secondNode.leftNode
-      secondNode.leftNode = tmp
+      swapNodes(firstNode.leftNode, secondNode.leftNode)
     }
   }
 
   protected def compareAndSwapLastMultiplicationNode(secondNode: ExpressionNode): Unit = {
     if (secondNode.leftNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
-      val tmp = secondNode.rightNode
-      secondNode.rightNode = secondNode.leftNode
-      secondNode.leftNode = tmp
+      swapNodes(secondNode.leftNode, secondNode.rightNode)
+    }
+  }
+
+  protected def swapNodes(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
+    val firstParentNode = firstNode.parent
+    val secondParentNode = secondNode.parent
+    val isSecondRightChild = secondNode.isRightChild
+
+    if (firstNode.isRightChild) {
+      firstParentNode.rightNode = secondNode
+    } else {
+      firstParentNode.leftNode = secondNode
+    }
+
+    if (isSecondRightChild) {
+      secondParentNode.rightNode = firstNode
+    } else {
+      secondParentNode.leftNode = firstNode
     }
   }
 }

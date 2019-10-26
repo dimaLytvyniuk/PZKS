@@ -284,7 +284,7 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
       nodes += lastNode
       while (lastNode.leftNode != null &&
         lastNode.leftNode.braceNumber == lastNode.braceNumber &&
-        lastNode.leftNode.nodeType == nodeType) {
+        lastNode.leftNode.nodeType == NodeType.Subtraction) {
         lastNode = lastNode.leftNode
         nodes += lastNode
       }
