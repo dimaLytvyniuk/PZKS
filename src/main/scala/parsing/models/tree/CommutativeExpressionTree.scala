@@ -40,8 +40,8 @@ class CommutativeExpressionTree extends ExpressionTree {
     node.nodeType match {
       case NodeType.Sum => applySumCommutativity(node)
       case NodeType.Subtraction => applySubtractionCommutativity(node)
-      case NodeType.Division => checkDivisionOnSameCommutativity(node)
-      case NodeType.Multiplication => checkMultiplicationOnSameCommutativity(node)
+      case NodeType.Division => applyDivisionCommutativity(node)
+      case NodeType.Multiplication => applyMultiplicationCommutativity(node)
       case _ => {}
     }
   }
@@ -50,13 +50,18 @@ class CommutativeExpressionTree extends ExpressionTree {
     applySubtractionCommutativity(expressionNode)
     val allSumNodes = getAllSumNodesInSameBraces(expressionNode)
 
-    for (i <- 1 until allSumNodes.length) {
-      for (j <- 0 until allSumNodes.length - i) {
-        if (j == allSumNodes.length - i -1) {
-          compareAndSwapSumNodesWithLast(allSumNodes(j), allSumNodes(j+1))
-        }
+    if (allSumNodes.length == 1) {
+      compareAndSwapLastSumNode(allSumNodes(0))
+    } else {
+      for (i <- 1 until allSumNodes.length) {
+        for (j <- 0 until allSumNodes.length - i) {
+          if (j == allSumNodes.length - i - 1) {
+            compareAndSwapSumNodes(allSumNodes(j), allSumNodes(j + 1))
+            compareAndSwapLastSumNode(allSumNodes(j + 1))
+          }
 
-        compareAndSwapSumNodes(allSumNodes(j), allSumNodes(j+1))
+          compareAndSwapSumNodes(allSumNodes(j), allSumNodes(j + 1))
+        }
       }
     }
   }
@@ -72,7 +77,22 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def applyMultiplicationCommutativity(expressionNode: ExpressionNode): Unit = {
+    val allMultiplicationNodes = getAllMultiplicationNodes(expressionNode)
 
+    if (allMultiplicationNodes.length == 1) {
+      compareAndSwapLastMultiplicationNode(allMultiplicationNodes(0))
+    } else {
+      for (i <- 1 until allMultiplicationNodes.length) {
+        for (j <- 0 until allMultiplicationNodes.length - i) {
+          if (j == allMultiplicationNodes.length - i - 1) {
+            compareAndSwapMultiplicationNodes(allMultiplicationNodes(j), allMultiplicationNodes(j + 1))
+            compareAndSwapLastMultiplicationNode(allMultiplicationNodes(j + 1))
+          }
+
+          compareAndSwapMultiplicationNodes(allMultiplicationNodes(j), allMultiplicationNodes(j + 1))
+        }
+      }
+    }
   }
 
   protected def applyDivisionCommutativity(expressionNode: ExpressionNode): Unit = {
@@ -230,6 +250,27 @@ class CommutativeExpressionTree extends ExpressionTree {
     nodes
   }
 
+  protected def getAllMultiplicationNodes(startNode: ExpressionNode): ArrayBuffer[ExpressionNode] = {
+    val nodes = new ArrayBuffer[ExpressionNode]()
+
+    val startBraces = startNode.braceNumber
+    var currentNode = startNode
+    while (currentNode != null && currentNode.braceNumber == startBraces && currentNode.isMultiplication) {
+      if (!currentNode.isLeftNodeInSameBraces || currentNode.leftNode.isDivision) {
+        applyCommutativity(currentNode.leftNode)
+      }
+
+      if (!currentNode.isRightNodeInSameBraces || currentNode.rightNode.isDivision) {
+        applyCommutativity(currentNode.rightNode)
+      }
+      nodes += currentNode
+
+      currentNode = currentNode.rightNode
+    }
+
+    nodes
+  }
+
   protected def compareAndSwapSumNodes(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
     if (firstNode.leftNode.complexity(_operationsComplexity) > secondNode.leftNode.complexity(_operationsComplexity)) {
       val tmp = secondNode.leftNode
@@ -264,9 +305,7 @@ class CommutativeExpressionTree extends ExpressionTree {
     }
   }
 
-  protected def compareAndSwapSumNodesWithLast(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
-    compareAndSwapSumNodes(firstNode, secondNode)
-
+  protected def compareAndSwapLastSumNode(secondNode: ExpressionNode): Unit = {
     if (secondNode.leftNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
       val tmp = secondNode.leftNode
       secondNode.leftNode = secondNode.rightNode
@@ -308,6 +347,22 @@ class CommutativeExpressionTree extends ExpressionTree {
       val tmp = firstNode.rightNode
       firstNode.rightNode = secondNode.rightNode
       secondNode.rightNode = tmp
+    }
+  }
+
+  protected def compareAndSwapMultiplicationNodes(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
+    if (firstNode.leftNode.complexity(_operationsComplexity) > secondNode.leftNode.complexity(_operationsComplexity)) {
+      val tmp = firstNode.leftNode
+      firstNode.leftNode = secondNode.leftNode
+      secondNode.leftNode = tmp
+    }
+  }
+
+  protected def compareAndSwapLastMultiplicationNode(secondNode: ExpressionNode): Unit = {
+    if (secondNode.leftNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
+      val tmp = secondNode.rightNode
+      secondNode.rightNode = secondNode.leftNode
+      secondNode.leftNode = tmp
     }
   }
 }
