@@ -1,6 +1,6 @@
 package parsing.models.tree
 
-import scala.collection.mutable
+import scala.collection.{immutable, mutable}
 import scala.collection.mutable.ArrayBuffer
 
 class CommutativeExpressionTree extends ExpressionTree {
@@ -34,6 +34,19 @@ class CommutativeExpressionTree extends ExpressionTree {
     applyCommutativity(_head)
 
     evaluatedResults += evaluateWithoutBracesStr()
+
+    calculateAllAvailableCommutativeVariants()
+  }
+
+  def calculateAllAvailableCommutativeVariants(): Unit = {
+    val node = _head
+    node.nodeType match {
+      case NodeType.Sum => applySumCommutativity(node)
+      case NodeType.Subtraction => applySubtractionCommutativity(node)
+      case NodeType.Division => applyDivisionCommutativity(node)
+      case NodeType.Multiplication => applyMultiplicationCommutativity(node)
+      case _ => {}
+    }
   }
 
   protected def applyCommutativity(node: ExpressionNode): Unit = {
@@ -47,8 +60,7 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def applySumCommutativity(expressionNode: ExpressionNode): Unit = {
-    val allSumNodes = getAllSumNodesInSameBraces(expressionNode)
-
+    val allSumNodes = getAllSumNodesInSameBraces(expressionNode, applyCommutativityForChilds)
 
     if (allSumNodes.length == 1) {
       compareAndSwapLastSumNode(allSumNodes(0))
@@ -70,7 +82,7 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def applySubtractionCommutativity(expressionNode: ExpressionNode): Unit = {
-    val allSubtractionNodes = getAllSubtractionNodesInSameBraces(expressionNode)
+    val allSubtractionNodes = getAllSubtractionNodesInSameBraces(expressionNode, applyCommutativityForChilds)
 
     for (i <- 1 until allSubtractionNodes.length) {
       for (j <- 0 until allSubtractionNodes.length - i) {
@@ -80,7 +92,7 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def applyMultiplicationCommutativity(expressionNode: ExpressionNode): Unit = {
-    val allMultiplicationNodes = getAllMultiplicationNodes(expressionNode)
+    val allMultiplicationNodes = getAllMultiplicationNodes(expressionNode, applyCommutativityForChilds)
 
     if (allMultiplicationNodes.length == 1) {
       compareAndSwapLastMultiplicationNode(allMultiplicationNodes(0))
@@ -100,7 +112,7 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def applyDivisionCommutativity(expressionNode: ExpressionNode): Unit = {
-    val allDivisionNodes = getAllDivisionNodes(expressionNode)
+    val allDivisionNodes = getAllDivisionNodes(expressionNode, applyCommutativityForChilds)
 
     for (i <- 1 until allDivisionNodes.length) {
       for (j <- 0 until allDivisionNodes.length - i) {
@@ -109,19 +121,14 @@ class CommutativeExpressionTree extends ExpressionTree {
     }
   }
 
-  protected def getAllSumNodesInSameBraces(startNode: ExpressionNode): ArrayBuffer[ExpressionNode] = {
+  protected def getAllSumNodesInSameBraces(startNode: ExpressionNode, onAcceptedNode: (ExpressionNode, ExpressionNode => Boolean) => Unit): ArrayBuffer[ExpressionNode] = {
     val nodes = new ArrayBuffer[ExpressionNode]()
 
     val startBraces = startNode.braceNumber
     var currentNode = startNode
     while (currentNode != null && currentNode.braceNumber == startBraces && currentNode.isSum) {
-      if (!currentNode.isLeftNodeInSameBraces || currentNode.leftNode.isMultiplication || currentNode.rightNode.isDivision) {
-        applyCommutativity(currentNode.leftNode)
-      }
+      onAcceptedNode(currentNode, (node) => node.isMultiplication || node.isDivision)
 
-      if (!currentNode.isRightNodeInSameBraces || currentNode.rightNode.isMultiplication || currentNode.rightNode.isDivision) {
-          applyCommutativity(currentNode.rightNode)
-      }
       nodes += currentNode
 
       currentNode = currentNode.rightNode
@@ -130,7 +137,7 @@ class CommutativeExpressionTree extends ExpressionTree {
     nodes
   }
 
-  protected def getAllSubtractionNodesInSameBraces(startNode: ExpressionNode): ArrayBuffer[ExpressionNode] = {
+  protected def getAllSubtractionNodesInSameBraces(startNode: ExpressionNode, onAcceptedNode: (ExpressionNode, ExpressionNode => Boolean) => Unit): ArrayBuffer[ExpressionNode] = {
     val nodes = new ArrayBuffer[ExpressionNode]()
 
     val startBraces = startNode.braceNumber
@@ -148,31 +155,20 @@ class CommutativeExpressionTree extends ExpressionTree {
     }
 
     nodes.foreach(x => {
-      if (!x.isLeftNodeInSameBraces || x.leftNode.isMultiplication || x.leftNode.isDivision) {
-        applyCommutativity(x.leftNode)
-      }
-
-      if (!x.isRightNodeInSameBraces || x.rightNode.isMultiplication || x.rightNode.isDivision) {
-        applyCommutativity(x.rightNode)
-      }
+      onAcceptedNode(x, (node) => node.isMultiplication || node.isDivision)
     })
 
     nodes
   }
 
-  protected def getAllMultiplicationNodes(startNode: ExpressionNode): ArrayBuffer[ExpressionNode] = {
+  protected def getAllMultiplicationNodes(startNode: ExpressionNode, onAcceptedNode: (ExpressionNode, ExpressionNode => Boolean) => Unit): ArrayBuffer[ExpressionNode] = {
     val nodes = new ArrayBuffer[ExpressionNode]()
 
     val startBraces = startNode.braceNumber
     var currentNode = startNode
     while (currentNode != null && currentNode.braceNumber == startBraces && currentNode.isMultiplication) {
-      if (!currentNode.isLeftNodeInSameBraces || currentNode.leftNode.isDivision) {
-        applyCommutativity(currentNode.leftNode)
-      }
+      onAcceptedNode(currentNode, node => node.isDivision)
 
-      if (!currentNode.isRightNodeInSameBraces || currentNode.rightNode.isDivision) {
-        applyCommutativity(currentNode.rightNode)
-      }
       nodes += currentNode
 
       currentNode = currentNode.rightNode
@@ -181,19 +177,14 @@ class CommutativeExpressionTree extends ExpressionTree {
     nodes
   }
 
-  protected def getAllDivisionNodes(startNode: ExpressionNode): ArrayBuffer[ExpressionNode] = {
+  protected def getAllDivisionNodes(startNode: ExpressionNode, onAcceptedNode: (ExpressionNode, ExpressionNode => Boolean) => Unit): ArrayBuffer[ExpressionNode] = {
     val nodes = new ArrayBuffer[ExpressionNode]()
 
     val startBraces = startNode.braceNumber
     var currentNode = startNode
     while (currentNode != null && currentNode.braceNumber == startBraces && currentNode.isDivision) {
-      if (!currentNode.isLeftNodeInSameBraces || currentNode.leftNode.isMultiplication) {
-        applyCommutativity(currentNode.leftNode)
-      }
+      onAcceptedNode(currentNode, node => node.isMultiplication)
 
-      if (!currentNode.isRightNodeInSameBraces || currentNode.rightNode.isMultiplication) {
-        applyCommutativity(currentNode.rightNode)
-      }
       nodes += currentNode
 
       currentNode = currentNode.leftNode
@@ -295,5 +286,33 @@ class CommutativeExpressionTree extends ExpressionTree {
     } else {
       secondParentNode.leftNode = firstNode
     }
+  }
+
+  protected def applyCommutativityForChilds(currentNode: ExpressionNode, isApplicableChild: ExpressionNode => Boolean):Unit = {
+    if (!currentNode.isLeftNodeInSameBraces || isApplicableChild(currentNode.leftNode)) {
+      applyCommutativity(currentNode.leftNode)
+    }
+
+    if (!currentNode.isRightNodeInSameBraces || isApplicableChild(currentNode.rightNode)) {
+      applyCommutativity(currentNode.rightNode)
+    }
+  }
+}
+
+object CommutativeExpressionTree {
+  def getCopy(tree: CommutativeExpressionTree): CommutativeExpressionTree = {
+    val newTree = new CommutativeExpressionTree
+    newTree._head = tree.head.getCopy()
+    newTree._usedVariables ++= tree.usedVariables
+
+    newTree
+  }
+
+  def getCopy(tree: ExpressionTree): CommutativeExpressionTree = {
+    val newTree = new CommutativeExpressionTree
+    newTree._head = tree.head.getCopy()
+    newTree._usedVariables ++= tree.usedVariables
+
+    newTree
   }
 }
