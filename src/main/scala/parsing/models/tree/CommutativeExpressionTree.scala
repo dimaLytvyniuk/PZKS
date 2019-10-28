@@ -100,7 +100,13 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def applyDivisionCommutativity(expressionNode: ExpressionNode): Unit = {
+    val allDivisionNodes = getAllDivisionNodes(expressionNode)
 
+    for (i <- 1 until allDivisionNodes.length) {
+      for (j <- 0 until allDivisionNodes.length - i) {
+        compareAndSwapDivisionNodes(allDivisionNodes(j), allDivisionNodes(j+1))
+      }
+    }
   }
 
   protected def checkOnSameCommutativity(node: ExpressionNode): Unit = {
@@ -275,6 +281,27 @@ class CommutativeExpressionTree extends ExpressionTree {
     nodes
   }
 
+  protected def getAllDivisionNodes(startNode: ExpressionNode): ArrayBuffer[ExpressionNode] = {
+    val nodes = new ArrayBuffer[ExpressionNode]()
+
+    val startBraces = startNode.braceNumber
+    var currentNode = startNode
+    while (currentNode != null && currentNode.braceNumber == startBraces && currentNode.isDivision) {
+      if (!currentNode.isLeftNodeInSameBraces || currentNode.leftNode.isMultiplication) {
+        applyCommutativity(currentNode.leftNode)
+      }
+
+      if (!currentNode.isRightNodeInSameBraces || currentNode.rightNode.isMultiplication) {
+        applyCommutativity(currentNode.rightNode)
+      }
+      nodes += currentNode
+
+      currentNode = currentNode.leftNode
+    }
+
+    nodes.reverse
+  }
+
   protected def compareAndSwapSumNodes(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
     compareAndSwapSumSumNode(firstNode.leftNode, secondNode.leftNode)
 
@@ -343,6 +370,12 @@ class CommutativeExpressionTree extends ExpressionTree {
   protected def compareAndSwapSumSumNode(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
     if (firstNode.complexity(_operationsComplexity) > secondNode.complexity(_operationsComplexity)) {
       swapNodes(firstNode, secondNode)
+    }
+  }
+
+  protected def compareAndSwapDivisionNodes(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
+    if (firstNode.rightNode.complexity(_operationsComplexity) > secondNode.rightNode.complexity(_operationsComplexity)) {
+      swapNodes(firstNode.rightNode, secondNode.rightNode)
     }
   }
 
