@@ -131,7 +131,7 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def calculateAllSumCommutativityVariants(expressionNode: ExpressionNode): Array[ExpressionNode] = {
-    val allSumNodes = getAllSumNodesInSameBraces(expressionNode, calculateAllCommutativityVariantsForChilds)
+    val allSumNodes = getAllNodesInSameBracesForCommutative(expressionNode, NodeType.Sum)
     val complexityMap = getSumMultiplicationComplexitiesPermutationsMap(allSumNodes)
 
     val totalCountOfVariants = complexityMap.foldLeft(1)((x, y) => x * y._2.length)
@@ -155,7 +155,7 @@ class CommutativeExpressionTree extends ExpressionTree {
     val resultArray = new Array[ExpressionNode](totalCountOfVariants)
     for (i <- 0 until totalCountOfVariants) {
       val newNode = expressionNode.getCopy()
-      val allNewSumNodes = getAllSumNodesInSameBraces(newNode, calculateAllCommutativityVariantsForChilds)
+      val allNewSumNodes = getAllNodesInSameBracesForCommutative(newNode, NodeType.Sum)
 
       var complexityIndex = 0
       var nodeIndex = 0
@@ -205,6 +205,16 @@ class CommutativeExpressionTree extends ExpressionTree {
     val allDivisionNodes = getAllDivisionNodes(expressionNode, calculateAllCommutativityVariantsForChilds)
 
     new Array[ExpressionNode](1)
+  }
+
+  protected def getAllNodesInSameBracesForCommutative(startNode: ExpressionNode, nodeType: NodeType.Value): ArrayBuffer[ExpressionNode] = {
+    nodeType match {
+      case NodeType.Sum => getAllSumNodesInSameBraces(startNode, calculateAllCommutativityVariantsForChilds)
+      case NodeType.Subtraction => getAllSubtractionNodesInSameBraces(startNode, calculateAllCommutativityVariantsForChilds)
+      case NodeType.Multiplication => getAllMultiplicationNodes(startNode, calculateAllCommutativityVariantsForChilds)
+      case NodeType.Division => getAllDivisionNodes(startNode, calculateAllCommutativityVariantsForChilds)
+      case _ => throw new IllegalArgumentException
+    }
   }
 
   protected def getAllSumNodesInSameBraces(startNode: ExpressionNode, onAcceptedNode: (ExpressionNode, ExpressionNode => Boolean) => Unit): ArrayBuffer[ExpressionNode] = {
@@ -386,6 +396,12 @@ class CommutativeExpressionTree extends ExpressionTree {
 
   protected def calculateAllCommutativityVariantsForChilds(currentNode: ExpressionNode, isApplicableChild: ExpressionNode => Boolean):Unit = {
 
+  }
+
+  protected def getComplexitiesPermutationsMap(nodes: ArrayBuffer[ExpressionNode], nodeType: NodeType.Value): SortedMap[Int, ArrayBuffer[Array[ExpressionNode]]] = {
+    nodeType match {
+      case NodeType.Sum => getSumMultiplicationComplexitiesPermutationsMap()
+    }
   }
 
   protected def getSumMultiplicationComplexitiesPermutationsMap(nodes: ArrayBuffer[ExpressionNode]): SortedMap[Int, ArrayBuffer[Array[ExpressionNode]]] = {
