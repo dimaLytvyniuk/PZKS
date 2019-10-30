@@ -412,7 +412,11 @@ class CommutativeExpressionTree extends ExpressionTree {
     var permutationMap = SortedMap[Int, ArrayBuffer[Array[ExpressionNode]]]()
 
     for ((complexity, values) <- complexitiesMap) {
-      permutationMap += (complexity -> getAllPermutationValues(values))
+      if (complexity == 0) {
+        permutationMap += (complexity -> ArrayBuffer(values.toArray))
+      } else {
+        permutationMap += (complexity -> getAllPermutationValues(values))
+      }
     }
 
     permutationMap
