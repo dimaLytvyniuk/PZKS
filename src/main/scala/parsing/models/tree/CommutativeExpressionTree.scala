@@ -145,6 +145,7 @@ class CommutativeExpressionTree extends ExpressionTree {
       if (leftCountOfVariants == 0) {
         leftCountOfVariants = 1
       }
+
       lenMap += (index -> leftCountOfVariants)
       currentIndexMap += (index -> -1)
 
@@ -387,7 +388,7 @@ class CommutativeExpressionTree extends ExpressionTree {
 
   }
 
-  protected def getSumMultiplicationComplexitiesPermutationsMap(nodes: ArrayBuffer[ExpressionNode]): SortedMap[Int, Array[ArrayBuffer[ExpressionNode]]] = {
+  protected def getSumMultiplicationComplexitiesPermutationsMap(nodes: ArrayBuffer[ExpressionNode]): SortedMap[Int, ArrayBuffer[Array[ExpressionNode]]] = {
     var complexitiesMap = HashMap[Int, ArrayBuffer[ExpressionNode]]()
 
     for (node <- nodes) {
@@ -395,6 +396,7 @@ class CommutativeExpressionTree extends ExpressionTree {
       if (!complexitiesMap.contains(nodeComplexity)) {
         complexitiesMap += (nodeComplexity -> new ArrayBuffer[ExpressionNode]())
       }
+
       complexitiesMap(nodeComplexity) += node.leftNode
 
       if (!node.isRightNodeInSameBraces || !node.rightNode.isSum) {
@@ -402,17 +404,74 @@ class CommutativeExpressionTree extends ExpressionTree {
         if (!complexitiesMap.contains(rightNodeComplexity)) {
           complexitiesMap += (rightNodeComplexity -> new ArrayBuffer[ExpressionNode]())
         }
+
         complexitiesMap(rightNodeComplexity) += node.rightNode
       }
     }
 
-    var permutationMap = SortedMap[Int, Array[ArrayBuffer[ExpressionNode]]]()
+    var permutationMap = SortedMap[Int, ArrayBuffer[Array[ExpressionNode]]]()
 
     for ((complexity, values) <- complexitiesMap) {
-      permutationMap += (complexity -> values.permutations.toArray)
+      permutationMap += (complexity -> getAllPermutationValues(values))
     }
 
     permutationMap
+  }
+
+  protected def getAllPermutationValues(nodes: ArrayBuffer[ExpressionNode]): ArrayBuffer[Array[ExpressionNode]] = {
+    val nodeVariants = new Array[ArrayBuffer[ExpressionNode]](nodes.length)
+
+    for (i <- nodes.indices) {
+      nodeVariants(i) = new ArrayBuffer[ExpressionNode]()
+
+      if (nodes(i).isOperation) {
+        val allVariants = calculateAllAvailableCommutativeVariants(nodes(i))
+        allVariants.foreach(x => nodeVariants(i) += x)
+      } else {
+        nodeVariants(i) += nodes(i)
+      }
+    }
+
+    val totalCountOfVariants = nodeVariants.foldLeft(1)((x, y) => x * y.length)
+
+    var leftCountOfVariants = totalCountOfVariants
+    val lenMap = new Array[Int](nodeVariants.length)
+    val currentIndexArray = new Array[Int](nodeVariants.length)
+    for (i <- nodeVariants.indices) {
+      leftCountOfVariants /= nodeVariants(i).length
+      if (leftCountOfVariants == 0) {
+        leftCountOfVariants = 1
+      }
+
+      lenMap(i) = leftCountOfVariants
+      currentIndexArray(i) = -1
+    }
+
+    val combinations = new Array[Array[ExpressionNode]](totalCountOfVariants)
+    for (i <- 0 until totalCountOfVariants) {
+      combinations(i) = new Array[ExpressionNode](nodeVariants.length)
+
+      for (j <- nodeVariants.indices) {
+        var currentNodeVariantIndex = currentIndexArray(j)
+        if (i % lenMap(j) == 0) {
+          currentNodeVariantIndex += 1
+          if (currentNodeVariantIndex == nodeVariants(j).length) {
+            currentNodeVariantIndex = 0
+          }
+
+          currentIndexArray(j) =  currentNodeVariantIndex
+        }
+
+        combinations(i)(j) = nodeVariants(j)(currentNodeVariantIndex)
+      }
+    }
+
+    var permutations = new ArrayBuffer[Array[ExpressionNode]]()
+    for (combination <- combinations) {
+      permutations ++= combination.permutations
+    }
+
+    permutations
   }
 }
 

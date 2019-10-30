@@ -298,6 +298,7 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   def isMultiplication = nodeType == NodeType.Multiplication
   def isDivision = nodeType == NodeType.Division
   def isHasValue = nodeType == NodeType.HasValue
+  def isOperation = isSum || isSubtraction || isMultiplication || isDivision
 
   def isLeftNodeInSameBraces = leftNode != null && leftNode.braceNumber == braceNumber
   def isRightNodeInSameBraces = rightNode != null && rightNode.braceNumber == braceNumber
