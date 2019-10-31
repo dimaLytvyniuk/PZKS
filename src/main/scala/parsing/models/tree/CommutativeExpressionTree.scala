@@ -50,10 +50,10 @@ class CommutativeExpressionTree extends ExpressionTree {
 
   protected def calculateAllAvailableCommutativeVariants(node: ExpressionNode): Array[ExpressionNode] = {
     node.nodeType match {
-      case NodeType.Sum => calculateAllSumCommutativityVariants(node)
-      case NodeType.Subtraction => calculateAllSubtractionCommutativityVariants(node)
-      case NodeType.Division => calculateAllDivisionCommutativityVariants(node)
-      case NodeType.Multiplication => calculateAllMultiplicationCommutativityVariants(node)
+      case NodeType.Sum => calculateAllCommutativityVariants(node, NodeType.Sum)
+      case NodeType.Subtraction => calculateAllCommutativityVariants(node, NodeType.Subtraction)
+      case NodeType.Division => calculateAllCommutativityVariants(node, NodeType.Division)
+      case NodeType.Multiplication => calculateAllCommutativityVariants(node, NodeType.Multiplication)
       case _ => new Array[ExpressionNode](0)
     }
   }
@@ -130,9 +130,9 @@ class CommutativeExpressionTree extends ExpressionTree {
     }
   }
 
-  protected def calculateAllSumCommutativityVariants(expressionNode: ExpressionNode): Array[ExpressionNode] = {
-    val allSumNodes = getAllNodesInSameBracesForCommutative(expressionNode, NodeType.Sum)
-    val complexityMap = getSumMultiplicationComplexitiesPermutationsMap(allSumNodes)
+  protected def calculateAllCommutativityVariants(expressionNode: ExpressionNode, nodeType: NodeType.Value): Array[ExpressionNode] = {
+    val allCommutativeNodes = getAllNodesInSameBracesForCommutative(expressionNode, nodeType)
+    val complexityMap = getComplexitiesPermutationsMap(allCommutativeNodes, nodeType)
 
     val totalCountOfVariants = complexityMap.foldLeft(1)((x, y) => x * y._2.length)
 
@@ -155,7 +155,7 @@ class CommutativeExpressionTree extends ExpressionTree {
     val resultArray = new Array[ExpressionNode](totalCountOfVariants)
     for (i <- 0 until totalCountOfVariants) {
       val newNode = expressionNode.getCopy()
-      val allNewSumNodes = getAllNodesInSameBracesForCommutative(newNode, NodeType.Sum)
+      val allNewNodes = getAllNodesInSameBracesForCommutative(newNode, nodeType)
 
       var complexityIndex = 0
       var nodeIndex = 0
@@ -172,11 +172,7 @@ class CommutativeExpressionTree extends ExpressionTree {
 
         val currentPermutation = permutations(currentPermutationIndex)
         for (node <- currentPermutation) {
-          if (nodeIndex < allNewSumNodes.length) {
-            allNewSumNodes(nodeIndex).leftNode = node.getCopy()
-          } else {
-            allNewSumNodes(nodeIndex - 1).rightNode = node.getCopy()
-          }
+          setNewCommutativeNode(nodeType, nodeIndex, allNewNodes, node.getCopy())
 
           nodeIndex += 1
         }
@@ -187,6 +183,21 @@ class CommutativeExpressionTree extends ExpressionTree {
     }
 
     resultArray
+  }
+
+  protected def setNewCommutativeNode(nodeType: NodeType.Value, nodeIndex: Int, sourceNodes: ArrayBuffer[ExpressionNode], newNode: ExpressionNode): Unit = {
+    nodeType match {
+      case NodeType.Sum => setNewSumMultiplicationCommutativeNode(nodeIndex, sourceNodes, newNode)
+      case NodeType.Multiplication => setNewSumMultiplicationCommutativeNode(nodeIndex, sourceNodes, newNode)
+    }
+  }
+
+  protected def setNewSumMultiplicationCommutativeNode(nodeIndex: Int, sourceNodes: ArrayBuffer[ExpressionNode], newNode: ExpressionNode): Unit = {
+    if (nodeIndex < sourceNodes.length) {
+      sourceNodes(nodeIndex).leftNode = newNode
+    } else {
+      sourceNodes(nodeIndex - 1).rightNode = newNode
+    }
   }
 
   protected def calculateAllSubtractionCommutativityVariants(expressionNode: ExpressionNode): Array[ExpressionNode] = {
@@ -400,11 +411,12 @@ class CommutativeExpressionTree extends ExpressionTree {
 
   protected def getComplexitiesPermutationsMap(nodes: ArrayBuffer[ExpressionNode], nodeType: NodeType.Value): SortedMap[Int, ArrayBuffer[Array[ExpressionNode]]] = {
     nodeType match {
-      case NodeType.Sum => getSumMultiplicationComplexitiesPermutationsMap()
+      case NodeType.Sum => getSumMultiplicationComplexitiesPermutationsMap(nodes, NodeType.Sum)
+      case NodeType.Multiplication => getSumMultiplicationComplexitiesPermutationsMap(nodes, NodeType.Multiplication)
     }
   }
 
-  protected def getSumMultiplicationComplexitiesPermutationsMap(nodes: ArrayBuffer[ExpressionNode]): SortedMap[Int, ArrayBuffer[Array[ExpressionNode]]] = {
+  protected def getSumMultiplicationComplexitiesPermutationsMap(nodes: ArrayBuffer[ExpressionNode], nodeType: NodeType.Value): SortedMap[Int, ArrayBuffer[Array[ExpressionNode]]] = {
     var complexitiesMap = HashMap[Int, ArrayBuffer[ExpressionNode]]()
 
     for (node <- nodes) {
@@ -415,7 +427,7 @@ class CommutativeExpressionTree extends ExpressionTree {
 
       complexitiesMap(nodeComplexity) += node.leftNode
 
-      if (!node.isRightNodeInSameBraces || !node.rightNode.isSum) {
+      if (!node.isRightNodeInSameBraces || node.rightNode.nodeType != nodeType) {
         val rightNodeComplexity = node.rightNode.complexity(_operationsComplexity)
         if (!complexitiesMap.contains(rightNodeComplexity)) {
           complexitiesMap += (rightNodeComplexity -> new ArrayBuffer[ExpressionNode]())
@@ -425,6 +437,10 @@ class CommutativeExpressionTree extends ExpressionTree {
       }
     }
 
+    getPermutationComplexitiesMap(complexitiesMap)
+  }
+
+  protected def getPermutationComplexitiesMap(complexitiesMap: HashMap[Int, ArrayBuffer[ExpressionNode]]): SortedMap[Int, ArrayBuffer[Array[ExpressionNode]]] = {
     var permutationMap = SortedMap[Int, ArrayBuffer[Array[ExpressionNode]]]()
 
     for ((complexity, values) <- complexitiesMap) {
