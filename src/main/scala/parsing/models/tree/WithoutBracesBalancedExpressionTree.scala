@@ -40,7 +40,7 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
       openSubtractionBraces(node)
     } else if (nodeType == NodeType.Sum) {
       openSumBraces(node)
-    } else if (nodeType == NodeType.Division || nodeType == NodeType.Multiplication) {
+    } else if (nodeType == NodeType.Multiplication || nodeType == NodeType.Division) {
       openMultiplicationDivisionBraces(node, nodeType)
     } else {
       throw new IllegalArgumentException
@@ -96,8 +96,14 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
     val nodeParent = node.parent
 
     val leftSubtreeNodes = dropOnSimpleNodesSubtree(node.leftNode)
-    val rightSubtreeNodes = dropOnSimpleNodesSubtree(node.rightNode)
-    val newSubtreeHead = buildDivisionMultiplicationTree(leftSubtreeNodes, rightSubtreeNodes, operation, node.braceNumber + 1)
+
+    var newSubtreeHead: ExpressionNode = null
+    if (operation == NodeType.Multiplication) {
+      val rightSubtreeNodes = dropOnSimpleNodesSubtree(node.rightNode)
+      newSubtreeHead = buildDivisionMultiplicationTree(leftSubtreeNodes, rightSubtreeNodes, operation, node.braceNumber + 1)
+    } else {
+      newSubtreeHead = buildDivisionTree(leftSubtreeNodes, node.rightNode, node.braceNumber + 1)
+    }
 
     if (nodeParent == null) {
       _head = newSubtreeHead
@@ -264,6 +270,57 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
     newSubtreeHead
   }
 
+  protected def buildDivisionTree(leftSubtreeNodes: ArrayBuffer[ExpressionNode], rightSubtree: ExpressionNode, braceNumber: Int): ExpressionNode = {
+    var newSubtreeHead:ExpressionNode = null
+    var currentSubtreeNode:ExpressionNode = null
+    var currentLeftOperation = NodeType.Sum
+
+    for (leftChild <- leftSubtreeNodes) {
+      if (leftChild.isSum || leftChild.isSubtraction) {
+        currentLeftOperation = leftChild.nodeType
+      } else {
+        val mainNode = ExpressionNode.getEmptyNode(braceNumber, currentLeftOperation)
+        mainNode.rightNode = applyOperationForDivisionNodes(leftChild, rightSubtree, braceNumber)
+
+        if (currentSubtreeNode != null) {
+          if (currentSubtreeNode.isDivision || currentSubtreeNode.isMultiplication) {
+            mainNode.leftNode = currentSubtreeNode
+            currentSubtreeNode = mainNode
+            newSubtreeHead = currentSubtreeNode
+          } else if (currentSubtreeNode.isSum) {
+            mainNode.leftNode = currentSubtreeNode.rightNode
+            currentSubtreeNode.rightNode = mainNode
+            currentSubtreeNode = mainNode
+          } else {
+            var targetNode = currentSubtreeNode
+            while (targetNode.parent != null && targetNode.parent.isSubtraction) {
+              targetNode = targetNode.parent
+            }
+            val targetParent = targetNode.parent
+
+            if (targetParent == null) {
+              newSubtreeHead = mainNode
+            } else {
+              if (targetNode.isRightChild) {
+                targetParent.rightNode = mainNode
+              } else {
+                targetParent.leftNode = mainNode
+              }
+            }
+
+            mainNode.leftNode = targetNode
+            currentSubtreeNode = mainNode
+          }
+        } else {
+          currentSubtreeNode = mainNode.rightNode
+          newSubtreeHead = currentSubtreeNode
+        }
+      }
+    }
+
+    newSubtreeHead
+  }
+
   protected def applyOperationForNodes(leftNode: ExpressionNode, rightNode: ExpressionNode, operation: NodeType.Value, braceNumber: Int): ExpressionNode = {
     val newNode = ExpressionNode.getEmptyNode(braceNumber, operation)
     newNode.leftNode = leftNode.getCopy()
@@ -274,6 +331,16 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
     if (rightNode.isMultiplication || rightNode.isDivision) {
       newNode.rightNode.braceNumber = braceNumber + 1
     }
+
+    newNode
+  }
+
+  protected def applyOperationForDivisionNodes(leftNode: ExpressionNode, rightNode: ExpressionNode, braceNumber: Int): ExpressionNode = {
+    val newNode = ExpressionNode.getEmptyNode(braceNumber, NodeType.Division)
+    newNode.leftNode = leftNode.getCopy()
+    newNode.rightNode = rightNode.getCopy()
+    newNode.leftNode.braceNumber = braceNumber
+    newNode.rightNode.braceNumber = braceNumber + 1
 
     newNode
   }
