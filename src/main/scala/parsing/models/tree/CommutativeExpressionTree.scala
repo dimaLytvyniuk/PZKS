@@ -3,6 +3,7 @@ package parsing.models.tree
 import scala.collection.immutable.HashMap
 import scala.collection.{SortedMap, immutable, mutable}
 import scala.collection.mutable.ArrayBuffer
+import scala.util.control.Breaks._
 
 class CommutativeExpressionTree extends ExpressionTree {
   private val _operationsComplexity = Map(
@@ -51,6 +52,7 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def applySumCommutativity(expressionNode: ExpressionNode): Unit = {
+    applySubtractionCommutativity(expressionNode)
     val allSumNodes = getAllSumNodesInSameBraces(expressionNode, applyCommutativityForChilds)
 
     if (allSumNodes.length == 1) {
@@ -68,8 +70,6 @@ class CommutativeExpressionTree extends ExpressionTree {
         }
       }
     }
-
-    applySubtractionCommutativity(expressionNode)
   }
 
   protected def applySubtractionCommutativity(expressionNode: ExpressionNode): Unit = {
@@ -188,30 +188,12 @@ class CommutativeExpressionTree extends ExpressionTree {
     sourceNodes(nodeIndex).rightNode = newNode
   }
 
-  protected def calculateAllSubtractionCommutativityVariants(expressionNode: ExpressionNode): Array[ExpressionNode] = {
-    val allSubtractionNodes = getAllSubtractionNodesInSameBraces(expressionNode, calculateAllCommutativityVariantsForChilds)
-
-    new Array[ExpressionNode](1)
-  }
-
-  protected def calculateAllMultiplicationCommutativityVariants(expressionNode: ExpressionNode): Array[ExpressionNode] = {
-    val allMultiplicationNodes = getAllMultiplicationNodes(expressionNode, calculateAllCommutativityVariantsForChilds)
-
-    new Array[ExpressionNode](1)
-  }
-
-  protected def calculateAllDivisionCommutativityVariants(expressionNode: ExpressionNode): Array[ExpressionNode] = {
-    val allDivisionNodes = getAllDivisionNodes(expressionNode, calculateAllCommutativityVariantsForChilds)
-
-    new Array[ExpressionNode](1)
-  }
-
   protected def getAllNodesInSameBracesForCommutative(startNode: ExpressionNode, nodeType: NodeType.Value): ArrayBuffer[ExpressionNode] = {
     nodeType match {
-      case NodeType.Sum => getAllSumNodesInSameBraces(startNode, calculateAllCommutativityVariantsForChilds)
-      case NodeType.Subtraction => getAllSubtractionNodesInSameBraces(startNode, calculateAllCommutativityVariantsForChilds)
-      case NodeType.Multiplication => getAllMultiplicationNodes(startNode, calculateAllCommutativityVariantsForChilds)
-      case NodeType.Division => getAllDivisionNodes(startNode, calculateAllCommutativityVariantsForChilds)
+      case NodeType.Sum => getAllSumNodesInSameBraces(startNode, doNothingForChilds)
+      case NodeType.Subtraction => getAllSubtractionNodesInSameBraces(startNode, doNothingForChilds)
+      case NodeType.Multiplication => getAllMultiplicationNodes(startNode, doNothingForChilds)
+      case NodeType.Division => getAllDivisionNodes(startNode, doNothingForChilds)
       case _ => throw new IllegalArgumentException
     }
   }
@@ -289,24 +271,44 @@ class CommutativeExpressionTree extends ExpressionTree {
   }
 
   protected def compareAndSwapSumNodes(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
-    compareAndSwapSumSumNode(firstNode.leftNode, secondNode.leftNode)
+    //compareAndSwapSumSumNode(firstNode.leftNode, secondNode.leftNode)
 
     (firstNode, secondNode) match {
-      case x if (x._1.isLeftNodeInSameBraces && x._1.leftNode.isSubtraction && x._2.isLeftNodeInSameBraces && x._2.leftNode.isSubtraction) => compareAndSwapSubtractionSubtractionNode(x._1.leftNode, x._2.leftNode)
-      case x if (x._1.isLeftNodeInSameBraces && x._1.leftNode.isSubtraction) => compareAndSwapSubtractionSumNode(x._1.leftNode, x._2.leftNode)
-      case x if (x._2.isLeftNodeInSameBraces && x._2.leftNode.isSubtraction) => compareAndSwapSumSubtractionNode(x._1.leftNode, x._2.leftNode)
-      case _ => {}
+      case x if (x._1.isLeftNodeInSameBraces && x._1.leftNode.isSubtraction && x._2.isLeftNodeInSameBraces && x._2.leftNode.isSubtraction) => {
+        compareAndSwapSubtractionSubtractionNode(x._1.leftNode, x._2.leftNode)
+        compareAndSwapSubtractionSubtreeSumNode(x._1.leftNode, x._2.leftNode)
+        compareAndSwapSumSubtractionSubtreeNode(x._1.leftNode, x._2.leftNode)
+      }
+      case x if (x._1.isLeftNodeInSameBraces && x._1.leftNode.isSubtraction) => {
+        compareAndSwapSubtractionSumNode(x._1.leftNode, x._2.leftNode)
+        compareAndSwapSubtractionSubtreeSumNode(x._1.leftNode, x._2.leftNode)
+      }
+      case x if (x._2.isLeftNodeInSameBraces && x._2.leftNode.isSubtraction) => {
+        compareAndSwapSumSubtractionNode(x._1.leftNode, x._2.leftNode)
+        compareAndSwapSumSubtractionSubtreeNode(x._1.leftNode, x._2.leftNode)
+      }
+      case _ => compareAndSwapSumSumNode(firstNode.leftNode, secondNode.leftNode)
     }
   }
 
   protected def compareAndSwapLastSumNode(secondNode: ExpressionNode): Unit = {
-    compareAndSwapSumSumNode(secondNode.leftNode, secondNode.rightNode)
+    //compareAndSwapSumSumNode(secondNode.leftNode, secondNode.rightNode)
 
     secondNode match {
-      case x if (x.isLeftNodeInSameBraces && x.leftNode.isSubtraction && x.isRightNodeInSameBraces && x.rightNode.isSubtraction) => compareAndSwapSubtractionSubtractionNode(x.leftNode, x.rightNode)
-      case x if (x.isLeftNodeInSameBraces && x.leftNode.isSubtraction) =>  compareAndSwapSubtractionSumNode(x.leftNode, x.rightNode)
-      case x if (x.isRightNodeInSameBraces && x.rightNode.isSubtraction) => compareAndSwapSumSubtractionNode(x.leftNode, x.rightNode)
-      case _ => {}
+      case x if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction && secondNode.isRightNodeInSameBraces && secondNode.rightNode.isSubtraction) => {
+        compareAndSwapSubtractionSubtractionNode(secondNode.leftNode, secondNode.rightNode)
+        compareAndSwapSubtractionSubtreeSumNode(secondNode.leftNode, secondNode.rightNode)
+        compareAndSwapSumSubtractionSubtreeNode(secondNode.leftNode, secondNode.rightNode)
+      }
+      case x if (secondNode.isLeftNodeInSameBraces && secondNode.leftNode.isSubtraction) =>  {
+          compareAndSwapSubtractionSumNode(secondNode.leftNode, secondNode.rightNode)
+          compareAndSwapSubtractionSubtreeSumNode(secondNode.leftNode, secondNode.rightNode)
+        }
+      case x if (secondNode.isRightNodeInSameBraces && secondNode.rightNode.isSubtraction) => {
+        compareAndSwapSumSubtractionNode(secondNode.leftNode, secondNode.rightNode)
+        compareAndSwapSumSubtractionSubtreeNode(secondNode.leftNode, secondNode.rightNode)
+      }
+      case _ => compareAndSwapSumSumNode(secondNode.leftNode, secondNode.rightNode)
     }
   }
 
@@ -345,11 +347,64 @@ class CommutativeExpressionTree extends ExpressionTree {
     }
   }
 
+  protected def compareAndSwapSubtractionSubtreeSumNode(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
+    val secondNodeComplexity = secondNode.complexity(_operationsComplexity)
+    var rightSubtreeHead = secondNode
+    val subtractionNodes = getAllSubtractionNodesInSameBraces(firstNode, doNothingForChilds)
+
+    for (i <- subtractionNodes.indices) {
+      if (secondNodeComplexity < subtractionNodes(i).rightNode.complexity(_operationsComplexity)) {
+        if (rightSubtreeHead.isSum) {
+          moveSubtractionNode(subtractionNodes(i), rightSubtreeHead)
+          rightSubtreeHead = subtractionNodes(i)
+        } else {
+          if (rightSubtreeHead.rightNode.complexity(_operationsComplexity) <= subtractionNodes(i).rightNode.complexity(_operationsComplexity)) {
+            moveSubtractionNode(subtractionNodes(i), rightSubtreeHead)
+            rightSubtreeHead = subtractionNodes(i)
+          } else {
+            var targetNode = rightSubtreeHead
+            while (targetNode.isSubtraction && targetNode.rightNode.complexity(_operationsComplexity) > subtractionNodes(i).rightNode.complexity(_operationsComplexity)) {
+              targetNode = targetNode.leftNode
+            }
+            moveSubtractionNode(subtractionNodes(i), targetNode)
+          }
+        }
+      }
+    }
+  }
+
   protected def compareAndSwapSumSubtractionNode(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
     val lastSecondLeftNode = secondNode.lastLeftSubtractionNodeSameBraces()
 
     if (firstNode.complexity(_operationsComplexity) > lastSecondLeftNode.complexity(_operationsComplexity)) {
       swapNodes(firstNode, lastSecondLeftNode)
+    }
+  }
+
+  protected def compareAndSwapSumSubtractionSubtreeNode(firstNode: ExpressionNode, secondNode: ExpressionNode): Unit = {
+    val lastSecondNode = secondNode.lastLeftSubtractionNodeSameBraces()
+    val lastSecondNodeComplexity = lastSecondNode.complexity(_operationsComplexity)
+    var leftSubtreeHead = firstNode
+    val subtractionNodes = getAllSubtractionNodesInSameBraces(secondNode, doNothingForChilds)
+
+    for (i <- subtractionNodes.indices) {
+      if (lastSecondNodeComplexity > subtractionNodes(i).rightNode.complexity(_operationsComplexity)) {
+        if (leftSubtreeHead.isSum) {
+          moveSubtractionNode(subtractionNodes(i), leftSubtreeHead)
+          leftSubtreeHead = subtractionNodes(i)
+        } else {
+          if (leftSubtreeHead.rightNode.complexity(_operationsComplexity) <= subtractionNodes(i).rightNode.complexity(_operationsComplexity)) {
+            moveSubtractionNode(subtractionNodes(i), leftSubtreeHead)
+            leftSubtreeHead = subtractionNodes(i)
+          } else {
+            var targetNode = leftSubtreeHead
+            while (targetNode.isSubtraction && targetNode.rightNode.complexity(_operationsComplexity) > subtractionNodes(i).rightNode.complexity(_operationsComplexity)) {
+              targetNode = targetNode.leftNode
+            }
+            moveSubtractionNode(subtractionNodes(i), targetNode)
+          }
+        }
+      }
     }
   }
 
@@ -383,6 +438,26 @@ class CommutativeExpressionTree extends ExpressionTree {
     }
   }
 
+  protected def moveSubtractionNode(subtractionNode: ExpressionNode, targetNode: ExpressionNode): Unit = {
+    val subtractionParent = subtractionNode.parent
+    val targetParent = targetNode.parent
+    val isTargetRightChild = targetNode.isRightChild
+
+    if (subtractionNode.isRightChild) {
+      subtractionParent.rightNode = subtractionNode.leftNode
+    } else {
+      subtractionParent.leftNode = subtractionNode.leftNode
+    }
+
+    subtractionNode.leftNode = targetNode
+
+    if (isTargetRightChild) {
+      targetParent.rightNode = subtractionNode
+    } else {
+      targetParent.leftNode = subtractionNode
+    }
+  }
+
   protected def applyCommutativityForChilds(currentNode: ExpressionNode, isApplicableChild: ExpressionNode => Boolean):Unit = {
     if (!currentNode.isLeftNodeInSameBraces || isApplicableChild(currentNode.leftNode)) {
       applyCommutativity(currentNode.leftNode)
@@ -393,7 +468,7 @@ class CommutativeExpressionTree extends ExpressionTree {
     }
   }
 
-  protected def calculateAllCommutativityVariantsForChilds(currentNode: ExpressionNode, isApplicableChild: ExpressionNode => Boolean):Unit = {
+  protected def doNothingForChilds(currentNode: ExpressionNode, isApplicableChild: ExpressionNode => Boolean):Unit = {
 
   }
 

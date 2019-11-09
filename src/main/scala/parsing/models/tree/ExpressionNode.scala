@@ -248,7 +248,7 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
   }
 
   def lastLeftSubtractionNodeSameBraces(): ExpressionNode = {
-    if (leftNode == null || leftNode.isHasValue || !isLeftNodeInSameBraces) {
+    if (leftNode == null || leftNode.isHasValue || !isLeftNodeInSameBraces || !leftNode.isSubtraction) {
       leftNode
     } else {
       val startBraceNumber = braceNumber
