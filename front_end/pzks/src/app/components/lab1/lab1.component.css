@@ -17,3 +17,10 @@
 #submit-btn {
     margin-top: 10px;
 }
+
+#mynetwork {
+    width: 1200px;
+    height: 1600px;
+    border: 1px solid lightgray;
+    margin-top: 40px;
+}
