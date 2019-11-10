@@ -354,7 +354,7 @@ class CommutativeExpressionTree extends ExpressionTree {
 
     for (i <- subtractionNodes.indices) {
       if (secondNodeComplexity < subtractionNodes(i).rightNode.complexity(_operationsComplexity)) {
-        if (rightSubtreeHead.isSum) {
+        if (!rightSubtreeHead.isSubtraction || rightSubtreeHead.braceNumber != subtractionNodes(i).braceNumber) {
           moveSubtractionNode(subtractionNodes(i), rightSubtreeHead)
           rightSubtreeHead = subtractionNodes(i)
         } else {
@@ -388,8 +388,8 @@ class CommutativeExpressionTree extends ExpressionTree {
     val subtractionNodes = getAllSubtractionNodesInSameBraces(secondNode, doNothingForChilds)
 
     for (i <- subtractionNodes.indices) {
-      if (lastSecondNodeComplexity > subtractionNodes(i).rightNode.complexity(_operationsComplexity)) {
-        if (leftSubtreeHead.isSum) {
+      if (lastSecondNodeComplexity >= subtractionNodes(i).rightNode.complexity(_operationsComplexity)) {
+        if (!leftSubtreeHead.isSubtraction || leftSubtreeHead.braceNumber != subtractionNodes(i).braceNumber) {
           moveSubtractionNode(subtractionNodes(i), leftSubtreeHead)
           leftSubtreeHead = subtractionNodes(i)
         } else {
