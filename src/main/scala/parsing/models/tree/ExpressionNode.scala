@@ -293,6 +293,14 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     nodes.reverse
   }
 
+  def maxLevel: Int = {
+    if (_leftNode == null || _rightNode == null) {
+      _level
+    } else {
+      if (_leftNode.level > _rightNode.level) _leftNode.level else _rightNode.level
+    }
+  }
+
   def isSum = nodeType == NodeType.Sum
   def isSubtraction = nodeType == NodeType.Subtraction
   def isMultiplication = nodeType == NodeType.Multiplication

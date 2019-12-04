@@ -61,6 +61,11 @@ class ExpressionTree {
     }
   }
 
+  def maxLevel: Int = {
+    adjustLevels()
+    head.maxLevel
+  }
+
   protected def addOpenBrace(): Unit = {
     if (!isOpenBraceAllowed)
     {
@@ -352,6 +357,10 @@ class ExpressionTree {
 
   protected def isDotAllowed: Boolean = {
     _previousCharType == CharType.IntValue
+  }
+
+  protected def adjustLevels(): Unit = {
+    _head.level = 0
   }
 }
 
