@@ -18,8 +18,6 @@ class CommutativeExpressionTree extends ExpressionTree {
   def calculateCommutative(): Unit = {
     applyCommutativity(_head)
 
-    evaluatedResults += evaluateWithoutBracesStr()
-
     calculateAllAvailableCommutativeVariants()
   }
 
