@@ -77,7 +77,7 @@ class ExpressionParsingService {
     OutputParsedExpressionModel(treeViewModel, exceptionModel, evaluatedResult, expressionModel.expression)
   }
 
-  private def buildExpressionTree(expression: String): ExpressionTree = {
+  def buildExpressionTree(expression: String): ExpressionTree = {
     val tree = new ExpressionTree
 
     for (i <- 0 until expression.length) {
@@ -95,7 +95,7 @@ class ExpressionParsingService {
     tree
   }
 
-  private def buildBalancedExpressionTree(expression: String): ExpressionTree = {
+  def buildBalancedExpressionTree(expression: String): ExpressionTree = {
     val tree = new BalancedExpressionTree
 
     for (i <- 0 until expression.length) {
@@ -113,7 +113,7 @@ class ExpressionParsingService {
     tree
   }
 
-  private def buildWithoutBracesBalancedExpressionTree(expression: String): ExpressionTree = {
+  def buildWithoutBracesBalancedExpressionTree(expression: String): ExpressionTree = {
     val tree = new WithoutBracesBalancedExpressionTree
 
     for (i <- 0 until expression.length) {
@@ -133,7 +133,7 @@ class ExpressionParsingService {
     tree
   }
 
-  private def buildCommutativeExpressionTree(expression: String): ExpressionTree = {
+  def buildCommutativeExpressionTree(expression: String): ExpressionTree = {
     val tree = new CommutativeExpressionTree
 
     for (i <- 0 until expression.length) {
