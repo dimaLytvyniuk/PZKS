@@ -24,21 +24,41 @@
       </div>
     </div>
   </div>
-  <div>
-      <table class="table">
-        <thead>
-          <tr>
-            <th scope="col">T</th>
-            <th scope="col" *ngFor="let step of pipelineContainer.tactSteps[0] | slice:1; let i = index">{{i + 1}}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr *ngFor="let tact of pipelineContainer.tactSteps">
-            <th scope="row">{{tact[0]}}</th>
-            <td *ngFor="let step of tact | slice:1">{{step}}</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+  <div class="statistic-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Boost</th>
+          <th scope="col">Efficiency</th>
+          <th scope="col">PipelineWorkingTime</th>
+          <th scope="col">SequenceWorkingTime</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td scope="col">{{pipelineContainer.calculationStatistic.boost}}</td>
+          <td scope="col">{{pipelineContainer.calculationStatistic.efficiency}}</td>
+          <td scope="col">{{pipelineContainer.calculationStatistic.pipelineWorkingTime}}</td>
+          <td scope="col">{{pipelineContainer.calculationStatistic.sequenceWorkingTime}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="pipeline-container">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">T</th>
+          <th scope="col" *ngFor="let step of pipelineContainer.tactSteps[0] | slice:1; let i = index">{{i + 1}}</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let tact of pipelineContainer.tactSteps">
+          <th scope="row">{{tact[0]}}</th>
+          <td *ngFor="let step of tact | slice:1">{{step}}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
 </div>
 <div id="mynetwork"></div>
