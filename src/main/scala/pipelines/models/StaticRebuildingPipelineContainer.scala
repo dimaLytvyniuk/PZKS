@@ -12,6 +12,10 @@ class StaticRebuildingPipelineContainer(val expression: String) {
   private var _tactNumbers: ArrayBuffer[Int] = null
   private var _tree: ExpressionTree = null
   private var _byLevelNodes: mutable.HashMap[Int, mutable.HashMap[Int, mutable.Queue[ExpressionNode]]] = null
+  private var _pipelineWorkingTime = 0
+  private var _sequenceWorkingTime = 0
+  private var _boost = 0d
+  private var _efficiency = 0d
 
   private val _operationsComplexity = Map(
     NodeType.HasValue -> 0,
@@ -24,6 +28,11 @@ class StaticRebuildingPipelineContainer(val expression: String) {
   def tactNumbers: ArrayBuffer[Int] = _tactNumbers
   def tree: ExpressionTree = _tree
 
+  def pipelineWorkingTime: Int = _pipelineWorkingTime
+  def sequenceWorkingTime: Int = _sequenceWorkingTime
+  def boost: Double = _boost
+  def efficiency: Double = _efficiency
+
   def emulateCalculating(): Unit = {
     _tree = buildTree()
     _pipelines = new Array[StaticRebuildingPipeline](pipelineCount)
@@ -32,6 +41,7 @@ class StaticRebuildingPipelineContainer(val expression: String) {
     dropNodesByLevels()
     preparePipelines()
     calculate()
+    calculateMathProperties()
   }
 
   private def buildTree(): ExpressionTree = {
@@ -51,7 +61,7 @@ class StaticRebuildingPipelineContainer(val expression: String) {
       var currentNodeLevel = node.level
 
       if (node.rightNode.isHasValue && node.leftNode.isHasValue) {
-        if (node.leftNode.level < (maxLevel - 1)) {
+        if (node.leftNode.level < maxLevel) {
           currentNodeLevel = maxLevel - 1
         }
       } else {
@@ -78,7 +88,7 @@ class StaticRebuildingPipelineContainer(val expression: String) {
 
   private def calculate(): Unit = {
     val maxLevel = tree.maxLevel
-    var tactCount = 0
+    _pipelineWorkingTime = 0
 
     for (i <- (maxLevel - 1) to 0 by -1) {
       if (_byLevelNodes.contains(i)) {
@@ -91,40 +101,32 @@ class StaticRebuildingPipelineContainer(val expression: String) {
         while (!isLevelCalculated) {
           if (_byLevelNodes(i)(currentComplexity).isEmpty) {
             if (_pipelines.exists(x => x.hasNext)) {
-              doTactForAllPipelines(null)
-              tactCount += currentComplexity
-              _tactNumbers += tactCount
+              doTactForAllPipelines(null, currentComplexity)
             } else {
               if (complexityQueue.isEmpty) {
                 isLevelCalculated = true
               } else {
                 currentComplexity = complexityQueue.dequeue()
-                doTactForAllPipelines(_byLevelNodes(i)(currentComplexity).dequeue())
-                tactCount += currentComplexity
-                _tactNumbers += tactCount
+                doTactForAllPipelines(_byLevelNodes(i)(currentComplexity).dequeue(), currentComplexity)
               }
             }
           } else {
-            doTactForAllPipelines(_byLevelNodes(i)(currentComplexity).dequeue())
-            tactCount += currentComplexity
-            _tactNumbers += tactCount
+            doTactForAllPipelines(_byLevelNodes(i)(currentComplexity).dequeue(), currentComplexity)
           }
         }
       }
     }
   }
 
-  def dsadas: Unit = {
-    val maxLevel = tree.maxLevel
-    for (i <- (maxLevel - 1) to 0 by -1) {
-      if (_byLevelNodes.contains(i)) {
-        for ((complexity, nodes) <- _byLevelNodes(i)) {
-          println(s"Level ${i}; Complexity ${complexity}")
-          for (node <- nodes) {
-            println(node.evaluateWithoutBracesStr())
-          }
-        }
-      }
+  private def calculateMathProperties(): Unit = {
+    _sequenceWorkingTime = tree.head.complexity(_operationsComplexity) * pipelineCount
+
+    if (_sequenceWorkingTime == 0 || _pipelineWorkingTime == 0) {
+      _boost = 0
+      _efficiency = 0
+    } else {
+      _boost = _sequenceWorkingTime.toDouble / _pipelineWorkingTime
+      _efficiency = _boost / pipelineCount
     }
   }
 
@@ -144,9 +146,12 @@ class StaticRebuildingPipelineContainer(val expression: String) {
     }
   }
 
-  private def doTactForAllPipelines(newNode: ExpressionNode): Unit = {
+  private def doTactForAllPipelines(newNode: ExpressionNode, currentComplexity: Int): Unit = {
     _pipelines.foreach(x => x.updateState())
     _pipelines(0).currentNode = newNode
     _pipelines.foreach(x => x.tact())
+
+    _pipelineWorkingTime += currentComplexity
+    _tactNumbers += _pipelineWorkingTime
   }
 }

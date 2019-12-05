@@ -8,7 +8,7 @@ import spray.json._
 import DefaultJsonProtocol._
 import akka.http.scaladsl.model.StatusCodes
 import pipelines.PipelineService
-import pipelines.views.PipelineContainerViewModel
+import pipelines.views.{CalculationStatisticViewModel, PipelineContainerViewModel}
 
 trait JsonSupport {
   implicit val inputExpressionModelFormat = jsonFormat1(InputExpressionModel)
@@ -58,15 +58,34 @@ trait JsonSupport {
     def read(value: JsValue) = null
   }
 
+  implicit object CalculationStatisticViewModelJsonFormat extends RootJsonFormat[CalculationStatisticViewModel] {
+    def write(calculationStatistic: CalculationStatisticViewModel) = {
+      if (calculationStatistic != null) {
+        JsObject(
+          "sequenceWorkingTime" -> calculationStatistic.sequenceWorkingTime.toJson,
+          "pipelineWorkingTime" -> calculationStatistic.pipelineWorkingTime.toJson,
+          "boost" -> calculationStatistic.boost.toJson,
+          "efficiency" -> calculationStatistic.efficiency.toJson,
+        )
+      } else {
+        null
+      }
+    }
+
+    def read(value: JsValue) = null
+  }
+
   implicit object PipelineContainerViewModelJsonFormat extends RootJsonFormat[PipelineContainerViewModel] {
     def write(pipelineContainerViewModel: PipelineContainerViewModel) = {
       if (pipelineContainerViewModel != null) {
         val tactSteps = if (pipelineContainerViewModel.tactSteps != null) pipelineContainerViewModel.tactSteps.toJson else JsNull
         val expressionTree = if (pipelineContainerViewModel.expressionTree != null) pipelineContainerViewModel.expressionTree.toJson else JsNull
+        val calculationStatistic = if (pipelineContainerViewModel.calculationStatistic != null) pipelineContainerViewModel.calculationStatistic.toJson else JsNull
 
         JsObject(
           "tactSteps" -> tactSteps,
           "expressionTree" -> expressionTree,
+          "calculationStatistic" -> calculationStatistic,
         )
       } else {
         null
