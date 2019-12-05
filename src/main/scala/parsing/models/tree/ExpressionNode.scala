@@ -171,6 +171,55 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     result
   }
 
+  def evaluateWithBracesOnlyForCurrentNodeStr(): String = {
+    var result = ""
+    if (nodeType == NodeType.None) {
+      throw new Exception("Incorrect evaluated expression")
+    }
+
+    var nodeValue: String = ""
+
+    if (nodeType == NodeType.HasValue) {
+      nodeValue = value.getStrValue
+    } else {
+      nodeType match {
+        case NodeType.Sum => nodeValue = "+"
+        case NodeType.Subtraction => nodeValue = "-"
+        case NodeType.Multiplication => nodeValue = "*"
+        case NodeType.Division => nodeValue = "/"
+        case _ => throw new Exception("Incorrect node type of node")
+      }
+    }
+
+    if (nodeType != NodeType.HasValue) {
+      var leftNodeResult = ""
+      if (leftNode != null) {
+        if (leftNode.braceNumber > braceNumber) {
+          leftNodeResult = s"(${leftNode.evaluateWithoutBracesStr()})"
+        } else {
+          leftNodeResult = leftNode.evaluateWithoutBracesStr()
+        }
+      }
+
+      var rightNodeResult = ""
+      if (rightNode != null) {
+        if (rightNode.braceNumber > braceNumber) {
+          rightNodeResult = s"(${rightNode.evaluateWithoutBracesStr()})"
+        } else {
+          rightNodeResult = rightNode.evaluateWithoutBracesStr()
+        }
+      }
+
+      result += s"(${leftNodeResult})"
+      result += nodeValue
+      result += s"(${rightNodeResult})"
+    } else {
+      result = nodeValue
+    }
+
+    result
+  }
+
   def height: Int = {
     val leftHeight = if (_leftNode == null) 0 else _leftNode.height
     val rightHeight = if (_rightNode == null) 0 else _rightNode.height
@@ -297,7 +346,9 @@ class ExpressionNode(private var _level: Int, var nodeType: NodeType.Value, var 
     if (_leftNode == null || _rightNode == null) {
       _level
     } else {
-      if (_leftNode.level > _rightNode.level) _leftNode.level else _rightNode.level
+      val leftMaxLevel = _leftNode.maxLevel
+      val rightMaxLevel = _rightNode.maxLevel
+      if (leftMaxLevel > rightMaxLevel) leftMaxLevel else rightMaxLevel
     }
   }
 

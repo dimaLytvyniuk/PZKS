@@ -1,6 +1,5 @@
 package pipelines.views
 
-import parsing.models.tree.ExpressionTree
 import parsing.models.views.{ExceptionModel, ExpressionNodeViewModel, ExpressionTreeViewModel, OutputParsedExpressionModel}
 import pipelines.models.StaticRebuildingPipelineContainer
 
@@ -22,9 +21,9 @@ object PipelineContainerViewModel {
   }
 
   private def getTactSteps(pipelineContainer: StaticRebuildingPipelineContainer): Array[Array[String]] = {
-    val tactSteps = Array.ofDim[String](pipelineContainer.tactNumbers.length, pipelineContainer.pipelineCount + 1)
+    val tactSteps = new Array[Array[String]](pipelineContainer.tactNumbers.length)
     for (i <- pipelineContainer.tactNumbers.indices) {
-      tactSteps(i) = new Array[String](pipelineContainer.pipelineCount)
+      tactSteps(i) = new Array[String](pipelineContainer.pipelineCount + 1)
       tactSteps(i)(0) = pipelineContainer.tactNumbers(i).toString
 
       for (j <- pipelineContainer.pipelines.indices) {
