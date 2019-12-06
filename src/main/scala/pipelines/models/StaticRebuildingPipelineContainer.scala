@@ -6,11 +6,10 @@ import parsing.models.tree.{ExpressionNode, ExpressionTree, NodeType}
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class StaticRebuildingPipelineContainer(val expression: String) {
+class StaticRebuildingPipelineContainer(val tree: ExpressionTree) {
   val pipelineCount = 3
   private var _pipelines: Array[StaticRebuildingPipeline] = null
   private var _tactNumbers: ArrayBuffer[Int] = null
-  private var _tree: ExpressionTree = null
   private var _byLevelNodes: mutable.HashMap[Int, mutable.HashMap[Int, mutable.Queue[ExpressionNode]]] = null
   private var _pipelineWorkingTime = 0
   private var _sequenceWorkingTime = 0
@@ -26,7 +25,6 @@ class StaticRebuildingPipelineContainer(val expression: String) {
 
   def pipelines:Array[StaticRebuildingPipeline] = _pipelines
   def tactNumbers: ArrayBuffer[Int] = _tactNumbers
-  def tree: ExpressionTree = _tree
 
   def pipelineWorkingTime: Int = _pipelineWorkingTime
   def sequenceWorkingTime: Int = _sequenceWorkingTime
@@ -34,7 +32,6 @@ class StaticRebuildingPipelineContainer(val expression: String) {
   def efficiency: Double = _efficiency
 
   def emulateCalculating(): Unit = {
-    _tree = buildTree()
     _pipelines = new Array[StaticRebuildingPipeline](pipelineCount)
     _tactNumbers = new ArrayBuffer[Int]()
 
@@ -42,11 +39,6 @@ class StaticRebuildingPipelineContainer(val expression: String) {
     preparePipelines()
     calculate()
     calculateMathProperties()
-  }
-
-  private def buildTree(): ExpressionTree = {
-    val parsingService = new ExpressionParsingService()
-    parsingService.buildBalancedExpressionTree(expression)
   }
 
   private def dropNodesByLevels(): Unit = {
