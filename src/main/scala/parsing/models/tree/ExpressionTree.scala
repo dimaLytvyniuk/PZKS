@@ -26,11 +26,13 @@ class ExpressionTree {
   protected var _currentFunctionName: String = null
   protected var _currentFunctionParameters = new ArrayBuffer[TokenValue]()
 
+  protected var _treeVariants = new ArrayBuffer[ExpressionTree]()
+  protected var _evaluatedResults = new ArrayBuffer[String]()
 
-  def head = _head
-  def usedVariables = _usedVariables
-
-  var evaluatedResults = new ArrayBuffer[String]()
+  def head: ExpressionNode = _head
+  def usedVariables: immutable.HashSet[String] = _usedVariables
+  def evaluatedResults: ArrayBuffer[String] = _evaluatedResults
+  def treeVariants: ArrayBuffer[ExpressionTree] = _treeVariants
 
   def addChar(ch: Char): Unit = {
     ch match {
@@ -367,7 +369,7 @@ class ExpressionTree {
 object ExpressionTree {
   def getCopy(tree: ExpressionTree): ExpressionTree = {
     val newTree = new ExpressionTree
-    newTree._head = tree.head
+    newTree._head = tree.head.getCopy()
     newTree._usedVariables = tree.usedVariables
 
     newTree

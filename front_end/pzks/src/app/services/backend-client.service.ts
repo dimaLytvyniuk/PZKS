@@ -15,6 +15,7 @@ export class BackendClientService {
   private readonly lab3Path: string;
   private readonly lab4Path: string;
   private readonly lab5Path: string;
+  private readonly lab6Path: string;
 
   constructor(private http: HttpClient) { 
     this.apiBaseUrl = environment['ApiBaseUrl']
@@ -23,6 +24,7 @@ export class BackendClientService {
     this.lab3Path = this.apiBaseUrl.concat('/expression/lab3')
     this.lab4Path = this.apiBaseUrl.concat('/expression/lab4')
     this.lab5Path = this.apiBaseUrl.concat('/expression/lab5')
+    this.lab6Path = this.apiBaseUrl.concat('/expression/lab6')
   }
 
   lab1(inputModel: InputExpression) {
@@ -43,5 +45,9 @@ export class BackendClientService {
 
   lab5(inputModel: InputExpression) {
     return this.http.post<PipelineContainerModel>(this.lab5Path, inputModel)
+  }
+
+  lab6(inputModel: InputExpression) {
+    return this.http.post<PipelineContainerModel[]>(this.lab6Path, inputModel)
   }
 }

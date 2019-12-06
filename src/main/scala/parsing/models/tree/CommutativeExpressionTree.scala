@@ -25,7 +25,11 @@ class CommutativeExpressionTree extends ExpressionTree {
     val headVariants = calculateAllAvailableCommutativeVariants(_head)
 
     for (variant <- headVariants) {
-      evaluatedResults += variant.evaluateWithoutBracesStr()
+      _evaluatedResults += variant.evaluateWithoutBracesStr()
+
+      _treeVariants += new ExpressionTree {
+        _head = variant.getCopy()
+      }
     }
   }
 

@@ -17,17 +17,12 @@
         {{ errors }}
       </div>
     </div>
-    <div class="evaluated-container" *ngIf="evaluatedResult">
-      Evaluated result:
-      <div>
-        {{ evaluatedResult }}
-      </div>
-    </div>
   </div>
   <div class="statistic-container">
-    <table class="table" *ngIf="pipelineContainer.calculationStatistic">
+    <table class="table" *ngIf="pipelineContainers">
       <thead>
         <tr>
+          <th scope="col">Expresion</th>
           <th scope="col">Boost</th>
           <th scope="col">Efficiency</th>
           <th scope="col">PipelineWorkingTime</th>
@@ -35,17 +30,18 @@
         </tr>
       </thead>
       <tbody>
-        <tr>
-          <td scope="col">{{pipelineContainer.calculationStatistic.boost}}</td>
-          <td scope="col">{{pipelineContainer.calculationStatistic.efficiency}}</td>
-          <td scope="col">{{pipelineContainer.calculationStatistic.pipelineWorkingTime}}</td>
-          <td scope="col">{{pipelineContainer.calculationStatistic.sequenceWorkingTime}}</td>
+        <tr *ngFor="let container of pipelineContainers">
+          <td scope="col">{{container.expressionTree.evaluatedResult}}</td>
+          <td scope="col">{{container.calculationStatistic.boost}}</td>
+          <td scope="col">{{container.calculationStatistic.efficiency}}</td>
+          <td scope="col">{{container.calculationStatistic.pipelineWorkingTime}}</td>
+          <td scope="col">{{container.calculationStatistic.sequenceWorkingTime}}</td>
         </tr>
       </tbody>
     </table>
   </div>
   <div class="pipeline-container">
-    <table class="table"  *ngIf="pipelineContainer.tactSteps">
+    <table class="table"  *ngIf="pipelineContainer">
       <thead>
         <tr>
           <th scope="col">T</th>
@@ -61,4 +57,3 @@
     </table>
   </div>
 </div>
-<div id="mynetwork"></div>

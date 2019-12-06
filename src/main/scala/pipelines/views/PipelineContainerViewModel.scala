@@ -12,7 +12,7 @@ object PipelineContainerViewModel {
     var calculationStatistic: CalculationStatisticViewModel = null
 
     if (exceptionModel != null) {
-      expressionTree = new OutputParsedExpressionModel(null, exceptionModel, null, null)
+      expressionTree = new OutputParsedExpressionModel(null, exceptionModel, null, expression)
     } else {
       tactSteps = getTactSteps(pipelineContainer)
       expressionTree = getParsedExpressionModel(pipelineContainer, expression)

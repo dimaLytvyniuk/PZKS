@@ -9,7 +9,7 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
     var node = _head
     var lastVisitedNode: ExpressionNode = null
 
-    evaluatedResults = new ArrayBuffer[String]()
+    _evaluatedResults = new ArrayBuffer[String]()
 
     while (!nodeStack.isEmpty || node != null) {
       if (node != null) {
@@ -22,7 +22,8 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
         } else {
           if (isOperationBeforeBraces(peekNode)) {
             peekNode = openBraces(peekNode)
-            evaluatedResults += evaluateWithoutBracesStr()
+            _evaluatedResults += evaluateWithoutBracesStr()
+            _treeVariants += WithoutBracesBalancedExpressionTree.getCopy(this)
 
             nodeStack.pop()
             lastVisitedNode = peekNode
@@ -355,7 +356,7 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
 object WithoutBracesBalancedExpressionTree {
   def getCopy(tree: WithoutBracesBalancedExpressionTree): WithoutBracesBalancedExpressionTree = {
     val newTree = new WithoutBracesBalancedExpressionTree
-    newTree._head = tree.head
+    newTree._head = tree.head.getCopy()
     newTree._usedVariables = tree.usedVariables
 
     newTree
@@ -363,7 +364,7 @@ object WithoutBracesBalancedExpressionTree {
 
   def getCopy(tree: ExpressionTree): WithoutBracesBalancedExpressionTree = {
     val newTree = new WithoutBracesBalancedExpressionTree
-    newTree._head = tree.head
+    newTree._head = tree.head.getCopy()
     newTree._usedVariables = tree.usedVariables
 
     newTree

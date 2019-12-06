@@ -103,31 +103,36 @@ class ExpressionController extends Directives with JsonSupport {
     concat(
       post {
         cors.corsHandler(concat(
-        path("expression" / "lab1") {
-          entity(as[InputExpressionModel]) { inputExpressionModel =>
-            parseFirstLabExpression(inputExpressionModel)
-          }
-        },
-        path("expression" / "lab2") {
-          entity(as[InputExpressionModel]) { inputExpressionModel =>
-            parseSecondLabExpression(inputExpressionModel)
-          }
-        },
-        path("expression" / "lab3") {
-          entity(as[InputExpressionModel]) { inputExpressionModel =>
-            parseThirdLabExpression(inputExpressionModel)
-          }
-        },
-        path("expression" / "lab4") {
-          entity(as[InputExpressionModel]) { inputExpressionModel =>
-            parseFourthLabExpression(inputExpressionModel)
-          }
-        },
-        path("expression" / "lab5") {
-          entity(as[InputExpressionModel]) { inputExpressionModel =>
-            emulateFifthLabCalculation(inputExpressionModel)
-          }
-        },
+          path("expression" / "lab1") {
+            entity(as[InputExpressionModel]) { inputExpressionModel =>
+              parseFirstLabExpression(inputExpressionModel)
+            }
+          },
+          path("expression" / "lab2") {
+            entity(as[InputExpressionModel]) { inputExpressionModel =>
+              parseSecondLabExpression(inputExpressionModel)
+            }
+          },
+          path("expression" / "lab3") {
+            entity(as[InputExpressionModel]) { inputExpressionModel =>
+              parseThirdLabExpression(inputExpressionModel)
+            }
+          },
+          path("expression" / "lab4") {
+            entity(as[InputExpressionModel]) { inputExpressionModel =>
+              parseFourthLabExpression(inputExpressionModel)
+            }
+          },
+          path("expression" / "lab5") {
+            entity(as[InputExpressionModel]) { inputExpressionModel =>
+              emulateFifthLabCalculation(inputExpressionModel)
+            }
+          },
+          path("expression" / "lab6") {
+            entity(as[InputExpressionModel]) { inputExpressionModel =>
+              emulateSixthLabCalculation(inputExpressionModel)
+            }
+          },
         ))
       },
       options {
@@ -145,6 +150,9 @@ class ExpressionController extends Directives with JsonSupport {
             complete(StatusCodes.OK)
           },
           path("expression" / "lab5") {
+            complete(StatusCodes.OK)
+          },
+          path("expression" / "lab6") {
             complete(StatusCodes.OK)
           },
         ))
@@ -184,5 +192,12 @@ class ExpressionController extends Directives with JsonSupport {
     val outputModel = service.emulateStaticRebuildingPipeline(inputExpressionModel)
 
     complete(outputModel)
+  }
+
+  def emulateSixthLabCalculation(inputExpressionModel: InputExpressionModel): Route = {
+    val service = new PipelineService
+    val outputModels = service.emulateAllVariantsStaticRebuildingPipeline(inputExpressionModel)
+
+    complete(outputModels)
   }
 }
