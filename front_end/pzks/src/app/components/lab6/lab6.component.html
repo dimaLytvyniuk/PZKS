@@ -23,6 +23,7 @@
       <thead>
         <tr>
           <th scope="col">Expresion</th>
+          <th scope="col">Tree type</th>
           <th scope="col">Boost</th>
           <th scope="col">Efficiency</th>
           <th scope="col">PipelineWorkingTime</th>
@@ -32,6 +33,7 @@
       <tbody>
         <tr *ngFor="let container of pipelineContainers">
           <td scope="col">{{container.expressionTree.evaluatedResult}}</td>
+          <td scope="col">{{container.expressionTree.expressionTree.treeType}}</td>
           <td scope="col">{{container.calculationStatistic.boost}}</td>
           <td scope="col">{{container.calculationStatistic.efficiency}}</td>
           <td scope="col">{{container.calculationStatistic.pipelineWorkingTime}}</td>

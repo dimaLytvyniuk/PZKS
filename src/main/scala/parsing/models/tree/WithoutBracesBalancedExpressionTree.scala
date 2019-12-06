@@ -3,7 +3,9 @@ package parsing.models.tree
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
+class WithoutBracesBalancedExpressionTree extends NewBalancedTree {
+  override def treeType = "without braces"
+  
   def openTreeBraces(): Unit = {
     val nodeStack = new mutable.Stack[ExpressionNode]
     var node = _head
@@ -23,7 +25,9 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
           if (isOperationBeforeBraces(peekNode)) {
             peekNode = openBraces(peekNode)
             _evaluatedResults += evaluateWithoutBracesStr()
-            _treeVariants += WithoutBracesBalancedExpressionTree.getCopy(this)
+            val newTree = WithoutBracesBalancedExpressionTree.getCopy(this)
+            newTree.newBalanceTree()
+            _treeVariants += newTree
 
             nodeStack.pop()
             lastVisitedNode = peekNode
@@ -33,6 +37,8 @@ class WithoutBracesBalancedExpressionTree extends BalancedExpressionTree {
         }
       }
     }
+
+    newBalanceTree()
   }
 
   protected def openBraces(node: ExpressionNode): ExpressionNode = {

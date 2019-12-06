@@ -5,7 +5,9 @@ import scala.collection.{SortedMap, immutable, mutable}
 import scala.collection.mutable.ArrayBuffer
 import scala.util.control.Breaks._
 
-class CommutativeExpressionTree extends ExpressionTree {
+class CommutativeExpressionTree extends NewBalancedTree {
+  override def treeType = "commutative"
+
   private val _operationsComplexity = Map(
     NodeType.HasValue -> 0,
     NodeType.Sum -> 1,
@@ -18,7 +20,16 @@ class CommutativeExpressionTree extends ExpressionTree {
   def calculateCommutative(): Unit = {
     applyCommutativity(_head)
 
+    _evaluatedResults += evaluateWithoutBracesStr()
+    val headCopy = _head.getCopy()
     calculateAllAvailableCommutativeVariants()
+
+    val newTree = new CommutativeExpressionTree {
+      _head = headCopy
+    }
+    newTree.newBalanceTree()
+    _treeVariants += newTree
+    newBalanceTree()
   }
 
   protected def calculateAllAvailableCommutativeVariants(): Unit = {
@@ -27,9 +38,12 @@ class CommutativeExpressionTree extends ExpressionTree {
     for (variant <- headVariants) {
       _evaluatedResults += variant.evaluateWithoutBracesStr()
 
-      _treeVariants += new ExpressionTree {
-        _head = variant.getCopy()
+      val newVariant = variant.getCopy()
+      val newTree = new CommutativeExpressionTree {
+        _head = newVariant
       }
+      newTree.newBalanceTree()
+      _treeVariants += newTree
     }
   }
 

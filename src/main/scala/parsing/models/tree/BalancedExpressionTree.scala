@@ -1,6 +1,8 @@
 package parsing.models.tree
 
 class BalancedExpressionTree extends ExpressionTree {
+  override def treeType = "balanced"
+
   protected override def addOperationNode(operation: Char): Unit = {
     val newNode = ExpressionNode.getEmptyNode(0, _countOfOpenedBraces)
     operation match {

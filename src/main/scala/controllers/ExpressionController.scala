@@ -36,6 +36,7 @@ trait JsonSupport {
       "head" -> tree.head.toJson,
       "supportedFunctions" -> tree.supportedFunctions.toJson,
       "evaluatedResults" -> tree.evaluatedResults.toJson,
+      "treeType" -> JsString(tree.treeType)
     )
 
     def read(value: JsValue) = null

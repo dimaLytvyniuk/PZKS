@@ -34,6 +34,8 @@ class ExpressionTree {
   def evaluatedResults: ArrayBuffer[String] = _evaluatedResults
   def treeVariants: ArrayBuffer[ExpressionTree] = _treeVariants
 
+  def treeType = "base"
+
   def addChar(ch: Char): Unit = {
     ch match {
       case '(' => addOpenBrace()

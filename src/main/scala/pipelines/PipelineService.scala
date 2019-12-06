@@ -67,10 +67,6 @@ class PipelineService {
     allVariants ++= withoutBracesTree.treeVariants
     allVariants ++= commutativeTree.treeVariants
 
-    for (tree <- allVariants) {
-      println(tree.evaluateWithoutBracesStr())
-    }
-
     allVariants.toArray
   }
 }
