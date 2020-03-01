@@ -12,6 +12,8 @@ import { TreeBuilderService } from './services/tree-builder.service';
 import { Lab4Component } from './components/lab4/lab4.component';
 import { Lab5Component } from './components/lab5/lab5.component';
 import { Lab6Component } from './components/lab6/lab6.component';
+import { Part2Module } from './part2/part2.module';
+import { NavbarComponent } from './components/navbar/navbar.component';
 
 @NgModule({
   declarations: [
@@ -21,12 +23,14 @@ import { Lab6Component } from './components/lab6/lab6.component';
     Lab3Component,
     Lab4Component,
     Lab5Component,
-    Lab6Component
+    Lab6Component,
+    NavbarComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    HttpClientModule
+    HttpClientModule,
+    Part2Module
   ],
   providers: [
     BackendClientService,
