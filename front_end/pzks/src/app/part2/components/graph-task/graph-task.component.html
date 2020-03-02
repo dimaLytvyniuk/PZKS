@@ -1,16 +1,36 @@
 <p>
-  graph-task works!
+  <label for="locale">Select a locale:</label>
+  <select id="locale" onchange="draw();">
+    <option value="en">en</option>
+    <option value="cn">cn</option>
+    <option value="cs">cs</option>
+    <option value="de">de</option>
+    <option value="es">es</option>
+    <option value="fr">fr</option>
+    <option value="it">it</option>
+    <option value="nl">nl</option>
+    <option value="pt-br">pt</option>
+    <option value="ru">ru</option>
+    <option value="uk">uk</option>
+  </select>
 </p>
-<p>
-  graph-task works!
-</p>
-<br>
-<p>
-  graph-task works!
-</p>
-<p>
-  graph-task works!
-</p>
-<p>
-  graph-task works!
-</p>
+
+<div id="network-popUp">
+  <span id="operation">node</span> <br />
+  <table style="margin:auto;">
+    <tbody>
+      <tr>
+        <td>id</td>
+        <td><input id="node-id" value="new value" /></td>
+      </tr>
+      <tr>
+        <td>label</td>
+        <td><input type="text" id="node-label" value="new value" /></td>
+      </tr>
+    </tbody>
+  </table>
+  <input type="button" value="save" id="saveButton" />
+  <input type="button" value="cancel" id="cancelButton" />
+</div>
+<br />
+<div id="mynetwork"></div>
