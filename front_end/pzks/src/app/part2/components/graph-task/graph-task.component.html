@@ -20,12 +20,8 @@
   <table style="margin:auto;">
     <tbody>
       <tr>
-        <td>id</td>
-        <td><input id="node-id" value="new value" /></td>
-      </tr>
-      <tr>
         <td>label</td>
-        <td><input type="text" id="node-label" value="new value" /></td>
+        <td><input type="text" id="node-label" (change)="onChagedNodeLabelBox($event)"/></td>
       </tr>
     </tbody>
   </table>

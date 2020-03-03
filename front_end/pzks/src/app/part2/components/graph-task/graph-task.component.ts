@@ -13,6 +13,8 @@ export class GraphTaskComponent implements OnInit {
 
   data = this.getDefaultData();
   seed = 2;
+  
+  nodeName = "";
 
   constructor() { }
 
@@ -31,6 +33,8 @@ export class GraphTaskComponent implements OnInit {
     document.getElementById("saveButton").onclick = null;
     document.getElementById("cancelButton").onclick = null;
     document.getElementById("network-popUp").style.display = "none";
+    document.getElementById("node-label").setAttribute("value", "");
+    this.nodeName = "";
   }
   
   cancelEdit(callback) {
@@ -39,10 +43,12 @@ export class GraphTaskComponent implements OnInit {
   }
   
   saveData = (data, callback) => {
-    data.id = document.getElementById("node-id").nodeValue;
-    //data.id = document.getElementById("node-id").value;
-    data.label = document.getElementById("node-label").getAttribute("value");
-    console.log(document.getElementById("node-id").nodeValue);
+    data.label = this.nodeName;
+    if (data.id == null) {
+      data.id = this.nodeName;  
+    }
+    
+    console.log(data);
     this.clearPopUp();
     callback(data);
     return 0;
@@ -62,8 +68,8 @@ export class GraphTaskComponent implements OnInit {
         addNode: (data, callback) => {
           // filling in the popup DOM elements
           document.getElementById("operation").innerHTML = "Add Node";
-          document.getElementById("node-id").nodeValue = data.id;
-          document.getElementById("node-label").nodeValue = data.label;
+          data.id = null;
+          document.getElementById("node-label").setAttribute("value", data.label);
           document.getElementById("saveButton").onclick = () => this.saveData(data,callback);
           document.getElementById("cancelButton").onclick = () => this.clearPopUp();
           document.getElementById("network-popUp").style.display = "block";
@@ -71,9 +77,9 @@ export class GraphTaskComponent implements OnInit {
         editNode: (data, callback) => {
           // filling in the popup DOM elements
           document.getElementById("operation").innerHTML = "Edit Node";
-          document.getElementById("node-id").nodeValue = data.id;
-          document.getElementById("node-label").nodeValue = data.label;
-          document.getElementById("saveButton").onclick = () => { this.saveData(data,callback); }
+          console.log(data.label);
+          console.log(document.getElementById("node-label"));
+          document.getElementById("saveButton").onclick = () => this.saveData(data,callback);
           document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
           document.getElementById("network-popUp").style.display = "block";
         },
@@ -116,5 +122,10 @@ export class GraphTaskComponent implements OnInit {
     };
 
     return data;
+  }
+
+  onChagedNodeLabelBox($event) {
+    this.nodeName = $event.target.value;
+    console.log(this.nodeName);
   }
 }
