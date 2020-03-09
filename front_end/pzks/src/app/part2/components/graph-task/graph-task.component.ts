@@ -15,6 +15,7 @@ export class GraphTaskComponent implements OnInit {
   seed = 2;
   
   nodeName = "";
+  nodeWeight = "";
 
   constructor() { }
 
@@ -32,8 +33,11 @@ export class GraphTaskComponent implements OnInit {
   clearPopUp() {
     document.getElementById("saveButton").onclick = null;
     document.getElementById("cancelButton").onclick = null;
+    document.getElementById("label-data").style.visibility = "visible";
     document.getElementById("network-popUp").style.display = "none";
     document.getElementById("node-label").setAttribute("value", "");
+    document.getElementById("node-weight").setAttribute("value", "");
+
     this.nodeName = "";
   }
   
@@ -43,14 +47,17 @@ export class GraphTaskComponent implements OnInit {
   }
   
   saveData = (data, callback) => {
-    data.label = this.nodeName;
+    console.log(data);
     if (data.id == null) {
-      data.id = this.nodeName;  
+      data.id = this.nodeName;
     }
     
-    console.log(data);
+    data.weight = this.nodeWeight;
+    data.label = `${data.id} [${data.weight}]`;
+    
     this.clearPopUp();
     callback(data);
+    console.log(this.network.clustering.body.nodes);
     return 0;
   }
 
@@ -68,30 +75,41 @@ export class GraphTaskComponent implements OnInit {
         addNode: (data, callback) => {
           // filling in the popup DOM elements
           document.getElementById("operation").innerHTML = "Add Node";
+          document.getElementById("network-popUp").style.display = "block";
+          document.getElementById("node-label").setAttribute("value", "");
+          document.getElementById("node-weight").setAttribute("value", "");
           data.id = null;
-          document.getElementById("node-label").setAttribute("value", data.label);
+
           document.getElementById("saveButton").onclick = () => this.saveData(data,callback);
           document.getElementById("cancelButton").onclick = () => this.clearPopUp();
-          document.getElementById("network-popUp").style.display = "block";
         },
         editNode: (data, callback) => {
           // filling in the popup DOM elements
           document.getElementById("operation").innerHTML = "Edit Node";
-          console.log(data.label);
-          console.log(document.getElementById("node-label"));
+          document.getElementById("network-popUp").style.display = "block";
+          document.getElementById("label-data").style.visibility = "hidden";
+          
+          this.nodeWeight = data.weight;
+          document.getElementById("node-weight").setAttribute("value", data.weight);
+
           document.getElementById("saveButton").onclick = () => this.saveData(data,callback);
           document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
-          document.getElementById("network-popUp").style.display = "block";
         },
-        addEdge: function(data, callback) {
-          if (data.from == data.to) {
-            var r = confirm("Do you want to connect the node to itself?");
-            if (r == true) {
-              callback(data);
-            }
-          } else {
-            callback(data);
-          }
+        addEdge: (data, callback) => {
+          data.arrows = "to";
+          callback(data);
+          // if (data.from == data.to) {
+          //   var r = confirm("Do you want to connect the node to itself?");
+          //   if (r == true) {
+          //     callback(data);
+          //   }
+          // } else {
+          //   callback(data);
+          // }
+        },
+        deleteNode: (data, callback) => {
+          callback(data);
+          console.log(Object.keys(this.network.clustering.body.nodes));
         }
       }
     };
@@ -100,20 +118,20 @@ export class GraphTaskComponent implements OnInit {
 
   getDefaultData() {
     var nodes = new vis.DataSet([
-      { id: 1, label: "Node 1" },
-      { id: 2, label: "Node 2" },
-      { id: 3, label: "Node 3" },
-      { id: 4, label: "Node 4" },
-      { id: 5, label: "Node 5" }
+      { id: 1, label: "1 [1]", weight: 1 },
+      { id: 2, label: "2 [2]", weight: 2 },
+      { id: 3, label: "3 [2]", weight: 2 },
+      { id: 4, label: "4 [3]", weight: 3 },
+      { id: 5, label: "5 [4]", weight: 4 }
     ]);
   
     // create an array with edges
     var edges = new vis.DataSet([
-      { from: 1, to: 3 },
-      { from: 1, to: 2 },
-      { from: 2, to: 4 },
-      { from: 2, to: 5 },
-      { from: 3, to: 3 }
+      { from: 1, to: 3, arrows: "to" },
+      { from: 1, to: 2, arrows: "to" },
+      { from: 2, to: 4, arrows: "to" },
+      { from: 2, to: 5, arrows: "to" },
+      { from: 3, to: 3, arrows: "to" }
     ]);
 
     var data = {
@@ -127,5 +145,9 @@ export class GraphTaskComponent implements OnInit {
   onChagedNodeLabelBox($event) {
     this.nodeName = $event.target.value;
     console.log(this.nodeName);
+  }
+
+  onChagedNodeWeightBox($event) {
+    this.nodeWeight = $event.target.value;
   }
 }

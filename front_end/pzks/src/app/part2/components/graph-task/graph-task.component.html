@@ -19,9 +19,13 @@
   <span id="operation">node</span> <br />
   <table style="margin:auto;">
     <tbody>
-      <tr>
-        <td>label</td>
+      <tr id="label-data">
+        <td>Id</td>
         <td><input type="text" id="node-label" (change)="onChagedNodeLabelBox($event)"/></td>
+      </tr>
+      <tr>
+        <td>Weight</td>
+        <td><input type="text" id="node-weight" (change)="onChagedNodeWeightBox($event)"/></td>
       </tr>
     </tbody>
   </table>
