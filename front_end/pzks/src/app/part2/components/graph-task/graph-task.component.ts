@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import * as vis from 'vis';
+import { NodeModel } from '../models/nodeModel';
+import { NetworkModel } from '../models/networkModel';
+import { EdgeModel } from '../models/edgeModel';
 
 @Component({
   selector: 'app-graph-task',
@@ -63,7 +66,8 @@ export class GraphTaskComponent implements OnInit {
 
   saveEdge = (data, callback) => {
     data.arrows = "to";
-    data.label = `[${this.nodeWeight}]`;
+    data.weight = this.nodeWeight;
+    data.label = `[${data.weight}]`;
     data.font = { size: 12, color: "red", face: "sans", background: "white" };
     this.clearPopUp();
 
@@ -119,7 +123,9 @@ export class GraphTaskComponent implements OnInit {
         },
         deleteEdge: (data, callback) => {
           callback(data);
-          console.error(Object.keys(this.network.clustering.body.nodes));
+          console.error(this.network.clustering.body.edges);
+          console.error(this.network.clustering.body.nodes);
+          this.saveNetwork();
         }
       }
     };
@@ -137,11 +143,11 @@ export class GraphTaskComponent implements OnInit {
   
     // create an array with edges
     var edges = new vis.DataSet([
-      { from: 1, to: 3, arrows: "to", label: "[3]", font: { size: 12, color: "red", face: "sans", background: "white" } },
-      { from: 1, to: 2, arrows: "to", label: "4" },
-      { from: 2, to: 4, arrows: "to", label: "5" },
-      { from: 2, to: 5, arrows: "to", label: "6" },
-      { from: 3, to: 3, arrows: "to", label: "6" }
+      { from: 1, to: 3, arrows: "to", label: "[3]", font: { size: 12, color: "red", face: "sans", background: "white" }, weight: "1" },
+      { from: 1, to: 2, arrows: "to", label: "[4]" },
+      { from: 2, to: 4, arrows: "to", label: "[5]" },
+      { from: 2, to: 5, arrows: "to", label: "[6]" },
+      { from: 3, to: 3, arrows: "to", label: "[6]" }
     ]);
 
     var data = {
@@ -159,5 +165,60 @@ export class GraphTaskComponent implements OnInit {
 
   onChagedNodeWeightBox($event) {
     this.nodeWeight = $event.target.value;
+  }
+
+  saveNetwork() {
+    let networkModel = this.getJsonObject();
+
+    localStorage.setItem("network", JSON.stringify(networkModel));
+  }
+
+  getJsonObject(): NetworkModel {
+    let networkModel = new NetworkModel();
+    networkModel.edges = this.getEdges();
+    networkModel.nodes = this.getNodes();
+
+    return networkModel;
+  }
+
+  getNodes(): NodeModel[] {
+    let nodes: NodeModel[] = new Array();
+    let objectKeys = Object.keys(this.network.clustering.body.nodes);
+
+    for (let i in objectKeys) {
+      if (objectKeys[i].startsWith("edgeId")) {
+        break;
+      }
+
+      let networkNode = this.network.clustering.body.nodes[objectKeys[i]];
+      let node = new NodeModel();
+      node.id = networkNode.id;
+      node.label = networkNode.options.label;
+      node.weight = parseInt(networkNode.options.weight, 10);
+
+      nodes.push(node);
+    }
+
+    return nodes;
+  }
+
+  getEdges(): EdgeModel[] {
+    let edges: EdgeModel[] = new Array<EdgeModel>();
+    let objectKeys = Object.keys(this.network.clustering.body.edges);
+
+    for (let i in objectKeys) {
+      let networkEdge = this.network.clustering.body.edges[objectKeys[i]];
+      let edge = new EdgeModel();
+
+      edge.from = networkEdge.fromId;
+      edge.to = networkEdge.toId;
+      
+      let edgeLabel = networkEdge.options.label;
+      edge.weight = parseInt(edgeLabel.substring(1, edgeLabel.length));
+
+      edges.push(edge);
+    }
+
+    return edges;
   }
 }
