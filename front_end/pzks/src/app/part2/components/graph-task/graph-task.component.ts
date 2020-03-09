@@ -61,6 +61,15 @@ export class GraphTaskComponent implements OnInit {
     return 0;
   }
 
+  saveEdge = (data, callback) => {
+    data.arrows = "to";
+    data.label = `[${this.nodeWeight}]`;
+    data.font = { size: 12, color: "red", face: "sans", background: "white" };
+    this.clearPopUp();
+
+    callback(data);
+  }
+
   draw() {
     this.destroy();
     this.nodes = [];
@@ -96,20 +105,21 @@ export class GraphTaskComponent implements OnInit {
           document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
         },
         addEdge: (data, callback) => {
-          data.arrows = "to";
-          callback(data);
-          // if (data.from == data.to) {
-          //   var r = confirm("Do you want to connect the node to itself?");
-          //   if (r == true) {
-          //     callback(data);
-          //   }
-          // } else {
-          //   callback(data);
-          // }
+          document.getElementById("operation").innerHTML = "Add Edge";
+          document.getElementById("network-popUp").style.display = "block";
+          document.getElementById("label-data").style.visibility = "hidden";
+          document.getElementById("node-weight").setAttribute("value", "");
+
+          document.getElementById("saveButton").onclick = () => this.saveEdge(data,callback);
+          document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
         },
         deleteNode: (data, callback) => {
           callback(data);
           console.log(Object.keys(this.network.clustering.body.nodes));
+        },
+        deleteEdge: (data, callback) => {
+          callback(data);
+          console.error(Object.keys(this.network.clustering.body.nodes));
         }
       }
     };
@@ -127,11 +137,11 @@ export class GraphTaskComponent implements OnInit {
   
     // create an array with edges
     var edges = new vis.DataSet([
-      { from: 1, to: 3, arrows: "to" },
-      { from: 1, to: 2, arrows: "to" },
-      { from: 2, to: 4, arrows: "to" },
-      { from: 2, to: 5, arrows: "to" },
-      { from: 3, to: 3, arrows: "to" }
+      { from: 1, to: 3, arrows: "to", label: "[3]", font: { size: 12, color: "red", face: "sans", background: "white" } },
+      { from: 1, to: 2, arrows: "to", label: "4" },
+      { from: 2, to: 4, arrows: "to", label: "5" },
+      { from: 2, to: 5, arrows: "to", label: "6" },
+      { from: 3, to: 3, arrows: "to", label: "6" }
     ]);
 
     var data = {
