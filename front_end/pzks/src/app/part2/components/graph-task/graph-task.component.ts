@@ -3,6 +3,8 @@ import * as vis from 'vis';
 import { NodeModel } from '../models/nodeModel';
 import { NetworkModel } from '../models/networkModel';
 import { EdgeModel } from '../models/edgeModel';
+import { read } from 'fs';
+import { NetworkParsingException } from '../../errors/NetworkParsingException';
 
 @Component({
   selector: 'app-graph-task',
@@ -175,8 +177,8 @@ export class GraphTaskComponent implements OnInit {
 
   getJsonObject(): NetworkModel {
     let networkModel = new NetworkModel();
-    networkModel.edges = this.getEdges();
     networkModel.nodes = this.getNodes();
+    networkModel.edges = this.getEdges();
 
     return networkModel;
   }
@@ -208,17 +210,120 @@ export class GraphTaskComponent implements OnInit {
 
     for (let i in objectKeys) {
       let networkEdge = this.network.clustering.body.edges[objectKeys[i]];
-      let edge = new EdgeModel();
 
-      edge.from = networkEdge.fromId;
-      edge.to = networkEdge.toId;
-      
       let edgeLabel = networkEdge.options.label;
-      edge.weight = parseInt(edgeLabel.substring(1, edgeLabel.length));
+      let edgeWeight = parseInt(edgeLabel.substring(1, edgeLabel.length));
+      let edge = new EdgeModel(networkEdge.fromId, networkEdge.toId, edgeWeight);
 
       edges.push(edge);
     }
 
     return edges;
+  }
+
+  onSaveToFile() {
+    let networkModel = this.getJsonObject();
+
+    this.saveFile(networkModel, "graph-task.json");
+  }
+
+  saveFile(jObject, fileName) {
+    var a = document.createElement("a");
+    document.body.appendChild(a);
+    a.style.display = "none";
+    
+    let json = JSON.stringify(jObject,null, '\t');
+    let blob = new Blob([json], {type: "octet/stream"});
+    let url = window.URL.createObjectURL(blob);
+
+    a.href = url;
+    a.download = fileName;
+    a.click();
+    window.URL.revokeObjectURL(url);
+  }
+
+  onFileSelected($event) {
+    let files = $event.target.files;
+    if (files.length == 0) {
+      return;
+    }
+
+    let file = files[0];
+    let reader = new FileReader();
+    reader.addEventListener('load', ($event) => this.onReadedDataFromFile($event));
+    reader.readAsText(file);
+  }
+
+  onReadedDataFromFile($event) {
+    let fileData = $event.target.result;
+
+    this.data = this.parseStringToNetwork(fileData);
+    console.log(this.data);
+
+    this.draw();
+  }
+
+  parseStringToNetwork(fileData: string): NetworkModel {
+    let object = JSON.parse(fileData);
+    let networkModel = new NetworkModel();
+    networkModel.nodes = this.parseObjectToNodes(object.nodes);
+    networkModel.edges = this.parseObjectToEdges(object.edges);
+
+    return networkModel;
+  }
+
+  parseObjectToNodes(objectNodes: any[]): NodeModel[] {
+    let nodeModels: NodeModel[] = new Array<NodeModel>();
+    this.validateProperty(objectNodes, "Nodes aren't exist in parsed object");
+
+    for (let i in objectNodes) {
+      this.validateProperty(objectNodes[i].id, `In node ${i} property 'id' isn't exist`);
+      this.validateProperty(objectNodes[i].label, `In node ${i} property 'label' isn't exist`);
+      this.validateProperty(objectNodes[i].weight, `In node ${i} property 'weight' isnt exist`);
+
+      let weight = this.parseIntProperty(objectNodes[i].weight, `In node ${i} property 'weight' has incorrect value`);
+
+      let nodeModel = new NodeModel();
+      nodeModel.id = objectNodes[i].id;
+      nodeModel.label = objectNodes[i].label;
+      nodeModel.weight = weight;
+
+      nodeModels.push(nodeModel);
+    }
+
+    return nodeModels;
+  }
+
+  parseObjectToEdges(objectEdges: any[]): EdgeModel[] {
+    let edgeModels: EdgeModel[] = new Array<EdgeModel>();
+    this.validateProperty(objectEdges, "Edges aren't exist in parsed object");
+
+    for (let i in objectEdges) {
+      this.validateProperty(objectEdges[i].from, `In edge ${i} property 'from' isn't exist`);
+      this.validateProperty(objectEdges[i].to, `In edge ${i} property 'to' isn't exist`);
+      this.validateProperty(objectEdges[i].weight, `In edge ${i} property 'weight' isn't exist`);
+      
+      let weight = this.parseIntProperty(objectEdges[i].weight, `In edge ${i} property 'weight' has incorrect value`);
+      let edgeModel = new EdgeModel(objectEdges[i].from, objectEdges[i].to, weight);
+
+      edgeModels.push(edgeModel);
+    }
+
+    return edgeModels;
+  }
+
+  validateProperty(property: any, exMessage: string) {
+    if (property === undefined || property === null) {
+      throw new NetworkParsingException(exMessage);
+    }
+  }
+
+  parseIntProperty(property: any, exMessage: string): number {
+    let intProp = parseInt(property, 10);
+    if (intProp == NaN) {
+      throw new NetworkParsingException(exMessage);
+    }
+
+    return intProp;
   }
 }

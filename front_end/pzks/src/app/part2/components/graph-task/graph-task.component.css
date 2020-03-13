@@ -47,3 +47,12 @@ div.table_description {
   padding: 10px;
   text-align: center;
 }
+
+.info-container {
+  margin: 10px;
+}
+
+.read-file {
+  width: 400px;
+  margin: 10px;
+}
