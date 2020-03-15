@@ -1,6 +1,8 @@
 import { Injectable } from '@angular/core';
 import * as vis from 'vis';
 import { GraphColor } from '../models/graph-color';
+import { DisplayNetworkModel } from '../models/display-network-model';
+import { NodeModel } from '../models/nodeModel';
 
 @Injectable({
   providedIn: 'root'
@@ -9,7 +11,7 @@ export class GraphPropsService {
 
   constructor() { }
 
-  isCyclicGraph(graph): Boolean {
+  isCyclicGraph(graph: DisplayNetworkModel): Boolean {
     let nodesMap = this.getNodesMap(graph.nodes);
     let edjes = graph.edges;
     let nodeColors = this.getNodeColors(graph.nodes);
@@ -27,7 +29,7 @@ export class GraphPropsService {
     return false;
   }
 
-  dfsIsCyclic(node, nodesMap: Map<string, any>, edges: vis.Dataset, nodeColors: Map<string, GraphColor>): Boolean {
+  dfsIsCyclic(node: NodeModel, nodesMap: Map<string, any>, edges: vis.Dataset, nodeColors: Map<string, GraphColor>): Boolean {
     nodeColors.set(node.id, GraphColor.Grey);
     let adjacentNodes = this.getAdjacentNodesIds(node, edges);
     
@@ -61,7 +63,7 @@ export class GraphPropsService {
     return whiteNode;
   }
 
-  getNodeColors(nodes): Map<string, GraphColor> {
+  getNodeColors(nodes: vis.DataSet): Map<string, GraphColor> {
     let nodeColors = new Map<string, GraphColor>();
     nodes.forEach(element => {
       nodeColors.set(element.id, GraphColor.White);
@@ -70,7 +72,7 @@ export class GraphPropsService {
     return nodeColors;
   }
 
-  getAdjacentNodesIds(node, edges): any[] {
+  getAdjacentNodesIds(node: NodeModel, edges: vis.DataSet): any[] {
     let adjacentNodes = [];
     let edgesFromNode = edges.forEach(edge => {
       if (edge.from === node.id) {
@@ -81,7 +83,7 @@ export class GraphPropsService {
     return adjacentNodes;
   }
 
-  getNodesMap(nodes): Map<string, any> {
+  getNodesMap(nodes: vis.DataSet): Map<string, any> {
     let nodesMap = new Map<string, any>();
     nodes.forEach(node => {
       nodesMap.set(node.id, node);
