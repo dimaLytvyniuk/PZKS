@@ -1,9 +1,10 @@
 import { Component, OnInit } from '@angular/core';
 import * as vis from 'vis';
-import { NodeModel } from '../models/nodeModel';
-import { NetworkModel } from '../models/networkModel';
-import { EdgeModel } from '../models/edgeModel';
+import { NodeModel } from '../../models/nodeModel';
+import { NetworkModel } from '../../models/networkModel';
+import { EdgeModel } from '../../models/edgeModel';
 import { NetworkParsingException } from '../../errors/NetworkParsingException';
+import { GraphPropsService } from '../../services/graph-props.service';
 
 @Component({
   selector: 'app-graph-task',
@@ -21,7 +22,7 @@ export class GraphTaskComponent implements OnInit {
   nodeName = "";
   nodeWeight = "";
 
-  constructor() { }
+  constructor(private graphPropsService: GraphPropsService) { }
 
   ngOnInit() {
     this.draw();
@@ -66,8 +67,8 @@ export class GraphTaskComponent implements OnInit {
 
     this.clearPopUp();
     callback(data);
-    console.log(this.network.clustering.body.nodes);
-    return 0;
+    
+    this.onDataChanged();
   }
 
   saveEdge = (data, callback) => {
@@ -77,8 +78,9 @@ export class GraphTaskComponent implements OnInit {
     data.font = { size: 12, color: "red", face: "sans", background: "white" };
 
     this.clearPopUp();
-
     callback(data);
+
+    this.onDataChanged();
   }
 
   draw() {
@@ -126,35 +128,35 @@ export class GraphTaskComponent implements OnInit {
         },
         deleteNode: (data, callback) => {
           callback(data);
-          console.log(Object.keys(this.network.clustering.body.nodes));
+          this.onDataChanged();
         },
         deleteEdge: (data, callback) => {
           callback(data);
-          console.error(this.network.clustering.body.edges);
-          console.error(this.network.clustering.body.nodes);
-          this.saveNetwork();
+          this.onDataChanged();
         }
       }
     };
+
     this.network = new vis.Network(container, this.data, options);
+    this.onDataChanged();
   }
 
   getDefaultData() {
     var nodes = new vis.DataSet([
-      { id: 1, label: "1 [1]", weight: 1 },
-      { id: 2, label: "2 [2]", weight: 2 },
-      { id: 3, label: "3 [2]", weight: 2 },
-      { id: 4, label: "4 [3]", weight: 3 },
-      { id: 5, label: "5 [4]", weight: 4 }
+      { id: "1", label: "1 [1]", weight: 1 },
+      { id: "2", label: "2 [2]", weight: 2 },
+      { id: "3", label: "3 [2]", weight: 2 },
+      { id: "4", label: "4 [3]", weight: 3 },
+      { id: "5", label: "5 [4]", weight: 4 }
     ]);
   
     // create an array with edges
     var edges = new vis.DataSet([
-      { from: 1, to: 3, arrows: "to", label: "[3]", font: { size: 12, color: "red", face: "sans", background: "white" }, weight: "1" },
-      { from: 1, to: 2, arrows: "to", label: "[4]" },
-      { from: 2, to: 4, arrows: "to", label: "[5]" },
-      { from: 2, to: 5, arrows: "to", label: "[6]" },
-      { from: 3, to: 3, arrows: "to", label: "[6]" }
+      { from: "1", to: "3", arrows: "to", label: "[3]", font: { size: 12, color: "red", face: "sans", background: "white" }, weight: "1" },
+      { from: "1", to: "2", arrows: "to", label: "[4]" },
+      { from: "2", to: "4", arrows: "to", label: "[5]" },
+      { from: "2", to: "5", arrows: "to", label: "[6]" },
+      { from: "3", to: "3", arrows: "to", label: "[6]" }
     ]);
 
     var data = {
@@ -330,5 +332,10 @@ export class GraphTaskComponent implements OnInit {
     }
 
     return intProp;
+  }
+
+  onDataChanged() {
+    console.log(this.graphPropsService.isCyclicGraph(this.data));
+    this.saveNetwork();
   }
 }

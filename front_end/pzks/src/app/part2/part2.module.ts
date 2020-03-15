@@ -8,6 +8,7 @@ import { GraphSystemComponent } from './components/graph-system/graph-system.com
 import { ModelingComponent } from './components/modeling/modeling.component';
 import { StatisticComponent } from './components/statistic/statistic.component';
 import { GraphErrorHandler } from './services/graph-error-handler';
+import { GraphPropsService } from './services/graph-props.service';
 
 @NgModule({
   declarations: [MainPageComponent, GraphTaskComponent, GraphSystemComponent, ModelingComponent, StatisticComponent],
@@ -19,7 +20,8 @@ import { GraphErrorHandler } from './services/graph-error-handler';
     {
       provide: ErrorHandler,
       useClass: GraphErrorHandler
-    }
+    },
+    GraphPropsService
   ]
 })
 export class Part2Module { }
