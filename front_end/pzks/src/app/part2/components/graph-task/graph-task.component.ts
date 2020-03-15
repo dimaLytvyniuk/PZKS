@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import * as vis from 'vis';
 import { NodeModel } from '../../models/nodeModel';
-import { NetworkModel } from '../../models/networkModel';
+import { StoreNetworkModel } from '../../models/store-network-model';
 import { EdgeModel } from '../../models/edgeModel';
 import { NetworkParsingException } from '../../errors/NetworkParsingException';
 import { GraphPropsService } from '../../services/graph-props.service';
+import { DisplayNetworkModel } from '../../models/display-network-model';
 
 @Component({
   selector: 'app-graph-task',
@@ -16,7 +17,7 @@ export class GraphTaskComponent implements OnInit {
   edges = null;
   network = null;
 
-  data = this.getDefaultData();
+  data: DisplayNetworkModel = this.getDefaultData();
   seed = 2;
   
   nodeName = "";
@@ -141,7 +142,7 @@ export class GraphTaskComponent implements OnInit {
     this.onDataChanged();
   }
 
-  getDefaultData() {
+  getDefaultData(): DisplayNetworkModel {
     var nodes = new vis.DataSet([
       { id: "1", label: "1 [1]", weight: 1 },
       { id: "2", label: "2 [2]", weight: 2 },
@@ -159,10 +160,9 @@ export class GraphTaskComponent implements OnInit {
       { from: "3", to: "3", arrows: "to", label: "[6]" }
     ]);
 
-    var data = {
-      nodes: nodes,
-      edges: edges
-    };
+    var data = new DisplayNetworkModel();
+    data.nodes = nodes;
+    data.edges = edges;
 
     return data;
   }
@@ -177,20 +177,20 @@ export class GraphTaskComponent implements OnInit {
   }
 
   saveNetwork() {
-    let networkModel = this.getJsonObject();
+    let networkModel = this.getStoreNetworkModel();
 
     localStorage.setItem("network", JSON.stringify(networkModel));
   }
 
-  getJsonObject(): NetworkModel {
-    let networkModel = new NetworkModel();
-    networkModel.nodes = this.getNodes();
-    networkModel.edges = this.getEdges();
+  getStoreNetworkModel(): StoreNetworkModel {
+    let networkModel = new StoreNetworkModel();
+    networkModel.nodes = this.getNodesToStore();
+    networkModel.edges = this.getEdgesToStore();
 
     return networkModel;
   }
 
-  getNodes(): NodeModel[] {
+  getNodesToStore(): NodeModel[] {
     let nodes: NodeModel[] = new Array();
     let objectKeys = Object.keys(this.network.clustering.body.nodes);
 
@@ -211,7 +211,7 @@ export class GraphTaskComponent implements OnInit {
     return nodes;
   }
 
-  getEdges(): EdgeModel[] {
+  getEdgesToStore(): EdgeModel[] {
     let edges: EdgeModel[] = new Array<EdgeModel>();
     let objectKeys = Object.keys(this.network.clustering.body.edges);
 
@@ -229,7 +229,7 @@ export class GraphTaskComponent implements OnInit {
   }
 
   onSaveToFile() {
-    let networkModel = this.getJsonObject();
+    let networkModel = this.getStoreNetworkModel();
 
     this.saveFile(networkModel, "graph-task.json");
   }
@@ -264,22 +264,22 @@ export class GraphTaskComponent implements OnInit {
   onReadedDataFromFile($event) {
     let fileData = $event.target.result;
 
-    this.data = this.parseStringToNetwork(fileData);
+    this.data = this.parseStringToDisplayNetwork(fileData);
     console.log(this.data);
 
     this.draw();
   }
 
-  parseStringToNetwork(fileData: string): NetworkModel {
+  parseStringToDisplayNetwork(fileData: string): DisplayNetworkModel {
     let object = JSON.parse(fileData);
-    let networkModel = new NetworkModel();
+    let networkModel = new DisplayNetworkModel();
     networkModel.nodes = this.parseObjectToNodes(object.nodes);
     networkModel.edges = this.parseObjectToEdges(object.edges);
 
     return networkModel;
   }
 
-  parseObjectToNodes(objectNodes: any[]): NodeModel[] {
+  parseObjectToNodes(objectNodes: any[]): vis.DataSet {
     let nodeModels = new vis.DataSet();
     this.validateProperty(objectNodes, "Nodes aren't exist in parsed object");
 
@@ -301,7 +301,7 @@ export class GraphTaskComponent implements OnInit {
     return nodeModels;
   }
 
-  parseObjectToEdges(objectEdges: any[]): EdgeModel[] {
+  parseObjectToEdges(objectEdges: any[]): vis.DataSet {
     let edgeModels = new vis.DataSet();
     this.validateProperty(objectEdges, "Edges aren't exist in parsed object");
 
