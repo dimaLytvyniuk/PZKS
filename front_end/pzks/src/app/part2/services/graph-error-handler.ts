@@ -5,11 +5,11 @@ import { NetworkParsingException } from '../errors/NetworkParsingException';
 export class GraphErrorHandler implements ErrorHandler {
     constructor () { }
 
-    handleError(error) {
-        if (error instanceof NetworkParsingException) {
-            alert(error.message);
+    handleError(err) {
+        if (err instanceof NetworkParsingException) {
+            alert(err.message);
         } else {
-            throw error;
+            throw err;
         }
     }
 }

@@ -3,7 +3,6 @@ import * as vis from 'vis';
 import { NodeModel } from '../models/nodeModel';
 import { NetworkModel } from '../models/networkModel';
 import { EdgeModel } from '../models/edgeModel';
-import { read } from 'fs';
 import { NetworkParsingException } from '../../errors/NetworkParsingException';
 
 @Component({
@@ -55,11 +54,16 @@ export class GraphTaskComponent implements OnInit {
     console.log(data);
     if (data.id == null) {
       data.id = this.nodeName;
+
+      let isExists = this.data.nodes.getIds().find(x => x.toString() === data.id);
+      if (isExists) {
+        throw new NetworkParsingException("Node with the same id is already exists");
+      }
     }
-    
-    data.weight = this.nodeWeight;
+
+    data.weight = this.parseIntProperty(this.nodeWeight, "Weight should be int");
     data.label = `${data.id} [${data.weight}]`;
-    
+
     this.clearPopUp();
     callback(data);
     console.log(this.network.clustering.body.nodes);
@@ -68,9 +72,10 @@ export class GraphTaskComponent implements OnInit {
 
   saveEdge = (data, callback) => {
     data.arrows = "to";
-    data.weight = this.nodeWeight;
+    data.weight = this.parseIntProperty(this.nodeWeight, "Weight should be int");;
     data.label = `[${data.weight}]`;
     data.font = { size: 12, color: "red", face: "sans", background: "white" };
+
     this.clearPopUp();
 
     callback(data);
@@ -273,7 +278,7 @@ export class GraphTaskComponent implements OnInit {
   }
 
   parseObjectToNodes(objectNodes: any[]): NodeModel[] {
-    let nodeModels: NodeModel[] = new Array<NodeModel>();
+    let nodeModels = new vis.DataSet();
     this.validateProperty(objectNodes, "Nodes aren't exist in parsed object");
 
     for (let i in objectNodes) {
@@ -288,14 +293,14 @@ export class GraphTaskComponent implements OnInit {
       nodeModel.label = objectNodes[i].label;
       nodeModel.weight = weight;
 
-      nodeModels.push(nodeModel);
+      nodeModels.add(nodeModel);
     }
 
     return nodeModels;
   }
 
   parseObjectToEdges(objectEdges: any[]): EdgeModel[] {
-    let edgeModels: EdgeModel[] = new Array<EdgeModel>();
+    let edgeModels = new vis.DataSet();
     this.validateProperty(objectEdges, "Edges aren't exist in parsed object");
 
     for (let i in objectEdges) {
@@ -306,7 +311,7 @@ export class GraphTaskComponent implements OnInit {
       let weight = this.parseIntProperty(objectEdges[i].weight, `In edge ${i} property 'weight' has incorrect value`);
       let edgeModel = new EdgeModel(objectEdges[i].from, objectEdges[i].to, weight);
 
-      edgeModels.push(edgeModel);
+      edgeModels.add(edgeModel);
     }
 
     return edgeModels;
@@ -320,7 +325,7 @@ export class GraphTaskComponent implements OnInit {
 
   parseIntProperty(property: any, exMessage: string): number {
     let intProp = parseInt(property, 10);
-    if (intProp == NaN) {
+    if (isNaN(intProp)) {
       throw new NetworkParsingException(exMessage);
     }
 
