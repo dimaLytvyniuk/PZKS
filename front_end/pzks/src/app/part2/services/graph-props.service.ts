@@ -4,6 +4,8 @@ import { GraphColor } from '../models/graph-color';
 import { DisplayNetworkModel } from '../models/display-network-model';
 import { NodeModel } from '../models/nodeModel';
 import { GraphConnectionType } from '../models/graph-connection-type';
+import { TimeObject } from '../models/time-object';
+import { EdgeModel } from '../models/edgeModel';
 
 @Injectable({
   providedIn: 'root'
@@ -31,56 +33,72 @@ export class GraphPropsService {
   }
 
   public getGraphConnectionType(graph: DisplayNetworkModel): GraphConnectionType {
+    let isConnectedUnirected = this.isConnectedUnirected(graph);
+    if (!isConnectedUnirected) {
+      return GraphConnectionType.NotConnected;
+    }
+
     let nodesMap = this.getNodesMap(graph.nodes);
     let edjes = graph.edges;
-    let nodeToNodesMap = this.getNodesToNodesMap(graph.nodes);
+    let nodeColors = this.getNodeColors(graph.nodes);
+    let timeMap = new Map<number, string>();
+    let time = new TimeObject(0);
 
-    graph.nodes.forEach(node => {
-      let nodeColors = this.getNodeColors(graph.nodes);
-      let connectedNodes = this.dfsGraphConnectionType(node, nodesMap, edjes, nodeColors);
-      
-      connectedNodes.forEach(connectedNodeId => {
-        nodeToNodesMap.get(node.id).set(connectedNodeId, true);
-      });
-    });
-
-    console.log(nodeToNodesMap);
-
-    let isStronglyConnected = true;
-    let isWeaklyConnected = true;
+    let whiteNode = nodesMap.get(this.getWhiteNode(nodeColors));
     
-    graph.nodes.forEach(node => {
-      graph.nodes.forEach(targetNode => {
-        if (node.id != targetNode.id) {
-          let isNodeToTargetNode = nodeToNodesMap.get(node.id).get(targetNode.id);
-          let isTargetNodeToNode = nodeToNodesMap.get(targetNode.id).get(node.id);
-          
-          if (!isNodeToTargetNode && !isTargetNodeToNode) {
-            isStronglyConnected = false;
-            isWeaklyConnected = false;
-            console.log(`${node.id} ${targetNode.id}`)
-          } 
-          else if (isNodeToTargetNode || isTargetNodeToNode) {
-            isStronglyConnected = false;
-          }
-        }
-      });
-    });
+    while (whiteNode != null) {
+      this.dfsGraphConnectionType(whiteNode, nodesMap, edjes, nodeColors, timeMap, time);
 
-    if (isStronglyConnected) {
-      return GraphConnectionType.StronglyConnected;
+      whiteNode = nodesMap.get(this.getWhiteNode(nodeColors));
     }
 
-    if (isWeaklyConnected) {
+    let reversedEdges = this.getReverseEdges(edjes);
+    let sortedTimes = Array.from(timeMap.keys()).sort().reverse();
+    nodeColors = this.getNodeColors(graph.nodes);
+    let newTimeMap = new Map<number, string>();
+    time = new TimeObject(0);
+    let N = 0;
+    
+    sortedTimes.forEach(sortedTime => {
+      let currentNodeId = timeMap.get(sortedTime);
+
+      if (nodeColors.get(currentNodeId) === GraphColor.White) {
+        N++;
+        this.dfsGraphConnectionType(nodesMap.get(currentNodeId), nodesMap, reversedEdges, nodeColors, newTimeMap, time);
+      }
+    });
+
+    if (N === 1) {
+      return GraphConnectionType.StronglyConnected;
+    } else {
       return GraphConnectionType.WeaklyConnected;
     }
+  }
 
-    return GraphConnectionType.NotConnected;
+  private isConnectedUnirected(graph: DisplayNetworkModel): Boolean {
+    let N = 0;
+    let nodesMap = this.getNodesMap(graph.nodes);
+    let edjes = graph.edges;
+    let nodeColors = this.getNodeColors(graph.nodes);
+
+    let whiteNode = nodesMap.get(this.getWhiteNode(nodeColors));
+    
+    while (whiteNode != null) {
+      this.bfsUndirectedGraphConnectionType(whiteNode, nodesMap, edjes, nodeColors);
+      N += 1; 
+      whiteNode = nodesMap.get(this.getWhiteNode(nodeColors));
+    }
+
+    if (N == 1) {
+      return true;
+    } else {
+      return false;
+    }
   }
 
   private dfsIsCyclic(node: NodeModel, nodesMap: Map<string, any>, edges: vis.Dataset, nodeColors: Map<string, GraphColor>): Boolean {
     nodeColors.set(node.id, GraphColor.Grey);
-    let adjacentNodes = this.getAdjacentNodesIds(node, edges);
+    let adjacentNodes = this.getAdjacentNodesIds(node.id, edges);
     
     for (let adjacentNodeId in adjacentNodes) {
       let adjacentNode = nodesMap.get(adjacentNodes[adjacentNodeId]);
@@ -104,26 +122,44 @@ export class GraphPropsService {
       node: NodeModel,
       nodesMap: Map<string, any>, 
       edges: vis.Dataset, 
-      nodeColors: Map<string, GraphColor>): Array<string> {
-    
-    nodeColors.set(node.id, GraphColor.Grey);
-    let connectedNodes = new Array<string>();
-    let adjacentNodes = this.getAdjacentNodesIds(node, edges);
+      nodeColors: Map<string, GraphColor>,
+      timeMap: Map<number, string>,
+      time: TimeObject
+  ): void {
+     let adjacentNodesIds = this.getAdjacentNodesIds(node.id, edges);
 
-    for (let adjacentNodeId in adjacentNodes) {
-      let adjacentNode = nodesMap.get(adjacentNodes[adjacentNodeId]);
-      let adjacentNodeColor = nodeColors.get(adjacentNode.id);
+     nodeColors.set(node.id, GraphColor.Grey);
 
-      if (adjacentNodeColor === GraphColor.White) {
-        let adjacentNodeConnectedNodes = this.dfsGraphConnectionType(adjacentNode, nodesMap, edges, nodeColors);
-        connectedNodes.push(adjacentNode.id);
-        connectedNodes = connectedNodes.concat(adjacentNodeConnectedNodes);
-      } else if (adjacentNodeColor === GraphColor.Grey) {
-        connectedNodes.push(adjacentNode.id);
+     adjacentNodesIds.forEach(adjacentNodeId => {
+      if (nodeColors.get(adjacentNodeId) === GraphColor.White) {
+        this.dfsGraphConnectionType(nodesMap.get(adjacentNodeId), nodesMap, edges, nodeColors, timeMap, time);
       }
-    }
+     });
 
-    return connectedNodes;
+     timeMap.set(time.value, node.id);
+     time.value++;
+  }
+
+  private bfsUndirectedGraphConnectionType(
+    node: NodeModel,
+    nodesMap: Map<string, any>, 
+    edges: vis.Dataset, 
+    nodeColors: Map<string, GraphColor>
+  ): void {
+    let nodeQueue = new Array<string>();
+    nodeQueue.push(node.id);
+
+    while (nodeQueue.length > 0) {
+      let currentNode = nodeQueue.pop();
+      nodeColors.set(currentNode, GraphColor.Grey);
+      let adjacentNodes = this.getUndirectedAdjacentNodesIds(currentNode, edges);
+      
+      adjacentNodes.forEach(adjacentNodeId => {
+        if (nodeColors.get(adjacentNodeId) === GraphColor.White) {
+          nodeQueue.push(adjacentNodeId);
+        }
+      });
+    }
   }
 
   private getWhiteNode(nodeColors: Map<string, GraphColor>): string {
@@ -147,27 +183,27 @@ export class GraphPropsService {
     return nodeColors;
   }
 
-  private getAdjacentNodesIds(node: NodeModel, edges: vis.DataSet): Array<string> {
+  private getAdjacentNodesIds(nodeId: string, edges: vis.DataSet): Array<string> {
     let adjacentNodes = new Array<string>();
     edges.forEach(edge => {
-      if (edge.from === node.id) {
+      if (edge.from === nodeId) {
         adjacentNodes.push(edge.to);
       }
-    })
+    });
 
     return adjacentNodes;
   }
 
-  private getUndirectedAdjacentNodesIds(node: NodeModel, edges: vis.DataSet): Array<string> {
-    let adjacentNodes = this.getAdjacentNodesIds(node, edges);
+  private getUndirectedAdjacentNodesIds(nodeId: string, edges: vis.DataSet): Array<string> {
+    let adjacentNodes = this.getAdjacentNodesIds(nodeId, edges);
     
     edges.forEach(edge => {
-      if (edge.to === node.id) {
-        if (!adjacentNodes.find(x => edge.from)) {
+      if (edge.to === nodeId) {
+        if (!adjacentNodes.find(x => x === edge.from)) {
           adjacentNodes.push(edge.from);
         }
       }
-    })
+    });
 
     return adjacentNodes;
   }
@@ -194,5 +230,17 @@ export class GraphPropsService {
     });
 
     return nodeToNodesMap;
+  }
+
+  private getReverseEdges(edges: vis.DataSet): vis.DataSet {
+    let reverseEdges = new vis.DataSet();
+
+    edges.forEach(edge => {
+      let reversedEdge = new EdgeModel(edge.to, edge.from, edge.weight);
+
+      reverseEdges.add(reversedEdge);
+    });
+
+    return reverseEdges;
   }
 }
