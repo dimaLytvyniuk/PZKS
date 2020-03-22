@@ -336,6 +336,7 @@ export class GraphTaskComponent implements OnInit {
 
   onDataChanged() {
     console.log(this.graphPropsService.isCyclicGraph(this.data));
+    console.log(this.graphPropsService.getGraphConnectionType(this.data));
     this.saveNetwork();
   }
 }
