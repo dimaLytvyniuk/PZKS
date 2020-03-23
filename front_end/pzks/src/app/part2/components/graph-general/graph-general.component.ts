@@ -79,6 +79,12 @@ export class GraphGeneralComponent implements OnInit {
   }
 
   saveEdge = (data, callback) => {
+    this.data.edges.forEach(edge => {
+      if (edge.from === data.from && edge.to === data.to) {
+        throw new NetworkParsingException(`Edge from ${data.from} to ${data.to} is already exists`);
+      }
+    });
+    
     data.arrows = "to";
     data.weight = this.parseIntProperty(this.nodeWeight, "Weight should be int");;
     data.label = `[${data.weight}]`;
@@ -293,6 +299,12 @@ export class GraphGeneralComponent implements OnInit {
       
       let weight = this.parseIntProperty(objectEdges[i].weight, `In edge ${i} property 'weight' has incorrect value`);
       let edgeModel = new EdgeModel(objectEdges[i].from, objectEdges[i].to, weight);
+      
+      edgeModels.forEach(exictedEdge => {
+        if (exictedEdge.from === edgeModel.from && exictedEdge.to === edgeModel.to) {
+          throw new NetworkParsingException(`Edge from ${edgeModel.from} to ${edgeModel.to} added more than once in file`);
+        }
+      });
 
       edgeModels.add(edgeModel);
     }
