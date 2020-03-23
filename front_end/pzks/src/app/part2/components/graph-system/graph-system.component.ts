@@ -8,7 +8,7 @@ import { DisplayNetworkModel } from '../../models/display-network-model';
   styleUrls: ['./graph-system.component.css']
 })
 export class GraphSystemComponent implements OnInit {
-  data: DisplayNetworkModel = this.getDefaultData();
+  graphData: DisplayNetworkModel = this.getDefaultData();
 
   constructor() { }
 
@@ -39,5 +39,10 @@ export class GraphSystemComponent implements OnInit {
     data.edges = edges;
 
     return data;
+  }
+
+  onGraphChanged(graph: DisplayNetworkModel): void {
+    console.log(graph);
+    this.graphData = graph;
   }
 }

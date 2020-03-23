@@ -1,3 +1,7 @@
 <h3>Граф КС</h3>
 
-<app-vis-graph></app-vis-graph>
+<app-vis-graph
+[data]="graphData"
+(graphChanged)="onGraphChanged($event)">
+
+</app-vis-graph>
