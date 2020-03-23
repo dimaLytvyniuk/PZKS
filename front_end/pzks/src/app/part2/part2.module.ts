@@ -9,9 +9,10 @@ import { ModelingComponent } from './components/modeling/modeling.component';
 import { StatisticComponent } from './components/statistic/statistic.component';
 import { GraphErrorHandler } from './services/graph-error-handler';
 import { GraphPropsService } from './services/graph-props.service';
+import { VisGraphComponent } from './components/vis-graph/vis-graph.component';
 
 @NgModule({
-  declarations: [MainPageComponent, GraphTaskComponent, GraphSystemComponent, ModelingComponent, StatisticComponent],
+  declarations: [MainPageComponent, GraphTaskComponent, GraphSystemComponent, ModelingComponent, StatisticComponent, VisGraphComponent],
   imports: [
     CommonModule,
     Part2RoutingModule
