@@ -6,6 +6,7 @@ import { EdgeModel } from '../../models/edgeModel';
 import { NetworkParsingException } from '../../errors/NetworkParsingException';
 import { GraphPropsService } from '../../services/graph-props.service';
 import { DisplayNetworkModel } from '../../models/display-network-model';
+import { GraphConnectionType } from '../../models/graph-connection-type';
 
 @Component({
   selector: 'app-graph-task',
@@ -22,6 +23,9 @@ export class GraphTaskComponent implements OnInit {
   
   nodeName = "";
   nodeWeight = "";
+
+  connectionLabel = "";
+  cyclicLabel = "";
 
   constructor(private graphPropsService: GraphPropsService) { }
 
@@ -335,8 +339,34 @@ export class GraphTaskComponent implements OnInit {
   }
 
   onDataChanged() {
-    console.log(this.graphPropsService.isCyclicGraph(this.data));
-    console.log(this.graphPropsService.getGraphConnectionType(this.data));
+    let isCyclicGraph = this.graphPropsService.isCyclicGraph(this.data);
+    let connectionType = this.graphPropsService.getGraphConnectionType(this.data);
+    
+    this.setCyclicLabel(isCyclicGraph);
+    this.setConnectionLabel(connectionType);
+
     this.saveNetwork();
+  }
+
+  setConnectionLabel(connectionType: GraphConnectionType): void {
+    switch (connectionType) {
+      case GraphConnectionType.NotConnected:
+        this.connectionLabel = "Граф не зв'язаний";
+        break
+      case GraphConnectionType.WeaklyConnected:
+        this.connectionLabel = "Граф слабозв'язаний";
+        break;
+      case GraphConnectionType.StronglyConnected:
+        this.connectionLabel = "Граф сильнозв'язаний";
+        break;
+    }
+  }
+
+  setCyclicLabel(isCyclicGraph: boolean): void {
+    if (isCyclicGraph) {
+      this.cyclicLabel = "Граф має циклічну ділянку";
+    } else {
+      this.cyclicLabel = "Граф ациклічний";
+    }
   }
 }

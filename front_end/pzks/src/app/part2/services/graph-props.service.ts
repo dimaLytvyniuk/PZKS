@@ -14,7 +14,7 @@ export class GraphPropsService {
 
   constructor() { }
 
-  public isCyclicGraph(graph: DisplayNetworkModel): Boolean {
+  public isCyclicGraph(graph: DisplayNetworkModel): boolean {
     let nodesMap = this.getNodesMap(graph.nodes);
     let edjes = graph.edges;
     let nodeColors = this.getNodeColors(graph.nodes);
@@ -75,7 +75,7 @@ export class GraphPropsService {
     }
   }
 
-  private isConnectedUnirected(graph: DisplayNetworkModel): Boolean {
+  private isConnectedUnirected(graph: DisplayNetworkModel): boolean {
     let N = 0;
     let nodesMap = this.getNodesMap(graph.nodes);
     let edjes = graph.edges;
@@ -96,7 +96,7 @@ export class GraphPropsService {
     }
   }
 
-  private dfsIsCyclic(node: NodeModel, nodesMap: Map<string, any>, edges: vis.Dataset, nodeColors: Map<string, GraphColor>): Boolean {
+  private dfsIsCyclic(node: NodeModel, nodesMap: Map<string, any>, edges: vis.Dataset, nodeColors: Map<string, GraphColor>): boolean {
     nodeColors.set(node.id, GraphColor.Grey);
     let adjacentNodes = this.getAdjacentNodesIds(node.id, edges);
     
@@ -217,11 +217,11 @@ export class GraphPropsService {
     return nodesMap;
   }
 
-  private getNodesToNodesMap(nodes: vis.DataSet): Map<string, Map<string, Boolean>> {
-    let nodeToNodesMap = new Map<string, Map<string, Boolean>>();
+  private getNodesToNodesMap(nodes: vis.DataSet): Map<string, Map<string, boolean>> {
+    let nodeToNodesMap = new Map<string, Map<string, boolean>>();
     
     nodes.forEach(node => {
-      let adjacentNodes = new Map<string, Boolean>();
+      let adjacentNodes = new Map<string, boolean>();
       nodes.forEach(node1 => {
         adjacentNodes.set(node1.id, false);
       })

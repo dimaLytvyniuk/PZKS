@@ -1,5 +1,5 @@
 <div>
-  <p>
+  <p id="localSettings">
     <label for="locale">Select a locale:</label>
     <select id="locale" onchange="draw();">
       <option value="en">en</option>
@@ -34,7 +34,19 @@
     <input type="button" value="cancel" id="cancelButton" />
   </div>
   <br />
-  <div id="mynetwork"></div>
+  <div class="graph-container">
+    <div id="mynetwork"></div>
+    <div class="graph-props">
+      <div class="prop-container">
+        <h5>Зв'язність графа:</h5>
+        <h6>{{connectionLabel}}</h6>
+      </div>
+      <div>
+        <h5>Наявність циклу у графі:</h5>
+        <h6>{{cyclicLabel}}</h6>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="info-container">
   <div>

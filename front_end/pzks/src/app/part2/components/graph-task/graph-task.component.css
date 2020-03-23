@@ -56,3 +56,20 @@ div.table_description {
   width: 400px;
   margin: 10px;
 }
+
+#localSettings {
+  visibility: hidden;
+}
+
+.graph-container {
+  display: flex;
+  flex-direction: row;
+}
+
+.graph-props {
+  margin-left: 25px;
+}
+
+.prop-container {
+  margin-bottom: 20px;
+}
