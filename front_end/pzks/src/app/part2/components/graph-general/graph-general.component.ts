@@ -9,11 +9,11 @@ import * as vis from 'vis';
 import { StoreNetworkModel } from '../../models/store-network-model';
 
 @Component({
-  selector: 'app-vis-graph',
-  templateUrl: './vis-graph.component.html',
-  styleUrls: ['./vis-graph.component.css']
+  selector: 'app-graph-general',
+  templateUrl: './graph-general.component.html',
+  styleUrls: ['./graph-general.component.css']
 })
-export class VisGraphComponent implements OnInit {
+export class GraphGeneralComponent implements OnInit {
   nodes = null;
   edges = null;
   network = null;
