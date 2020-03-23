@@ -1,3 +1,61 @@
-<p>
-  vis-graph works!
-</p>
+<div>
+  <p id="localSettings">
+    <label for="locale">Select a locale:</label>
+    <select id="locale" onchange="draw();">
+      <option value="en">en</option>
+      <option value="cn">cn</option>
+      <option value="cs">cs</option>
+      <option value="de">de</option>
+      <option value="es">es</option>
+      <option value="fr">fr</option>
+      <option value="it">it</option>
+      <option value="nl">nl</option>
+      <option value="pt-br">pt</option>
+      <option value="ru">ru</option>
+      <option value="uk">uk</option>
+    </select>
+  </p>
+  
+  <div id="network-popUp">
+    <span id="operation">node</span> <br />
+    <table style="margin:auto;">
+      <tbody>
+        <tr id="label-data">
+          <td>Id</td>
+          <td><input type="text" id="node-label" (change)="onChagedNodeLabelBox($event)"/></td>
+        </tr>
+        <tr>
+          <td>Weight</td>
+          <td><input type="text" id="node-weight" (change)="onChagedNodeWeightBox($event)"/></td>
+        </tr>
+      </tbody>
+    </table>
+    <input type="button" value="save" id="saveButton" />
+    <input type="button" value="cancel" id="cancelButton" />
+  </div>
+  <br />
+
+  <div class="graph-container">
+    <div id="mynetwork"></div>
+    <div class="graph-props">
+      <div class="prop-container">
+        <h5>Зв'язність графа:</h5>
+        <h6>{{connectionLabel}}</h6>
+      </div>
+      <div>
+        <h5>Наявність циклу у графі:</h5>
+        <h6>{{cyclicLabel}}</h6>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="info-container">
+  <div>
+    <button type="button" class="btn btn-info" id="search-btn" (click)="onSaveToFile()">Save to file</button>
+  </div>
+  <div class="custom-file read-file">
+    <input type="file" class="custom-file-input" id="customFile" (change)="onFileSelected($event)" accept=".json">
+    <label class="custom-file-label" for="customFile">Зчитати граф з файлу</label>
+  </div>
+</div>
