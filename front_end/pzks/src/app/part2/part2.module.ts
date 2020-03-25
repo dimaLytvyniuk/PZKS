@@ -10,6 +10,7 @@ import { StatisticComponent } from './components/statistic/statistic.component';
 import { GraphErrorHandler } from './services/graph-error-handler';
 import { GraphPropsService } from './services/graph-props.service';
 import { GraphGeneralComponent } from './components/graph-general/graph-general.component';
+import { OrientedGraphManipulationService } from './services/oriented-graph-manipulation.service';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { GraphGeneralComponent } from './components/graph-general/graph-general.
       provide: ErrorHandler,
       useClass: GraphErrorHandler
     },
-    GraphPropsService
+    GraphPropsService,
+    OrientedGraphManipulationService
   ]
 })
 export class Part2Module { }

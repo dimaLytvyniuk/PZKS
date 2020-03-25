@@ -7,6 +7,8 @@ import { EdgeModel } from '../../models/edgeModel';
 import { NodeModel } from '../../models/nodeModel';
 import * as vis from 'vis';
 import { StoreNetworkModel } from '../../models/store-network-model';
+import { OrientedGraphManipulationService } from '../../services/oriented-graph-manipulation.service';
+import { BaseGraphManipulationService } from '../../services/base-graph-manipulation.service';
 
 @Component({
   selector: 'app-graph-general',
@@ -21,6 +23,8 @@ export class GraphGeneralComponent implements OnInit {
   @Input() data: DisplayNetworkModel;
   @Output() graphChanged = new EventEmitter<DisplayNetworkModel>();
 
+  graphManipulationService: BaseGraphManipulationService;
+
   seed = 2;
   
   nodeName = "";
@@ -29,7 +33,12 @@ export class GraphGeneralComponent implements OnInit {
   connectionLabel = "";
   cyclicLabel = "";
   
-  constructor(private graphPropsService: GraphPropsService) { }
+  constructor(
+    private graphPropsService: GraphPropsService, 
+    private orientedGraphManipulationService: OrientedGraphManipulationService
+  ) { 
+    this.graphManipulationService = orientedGraphManipulationService;
+  }
 
   ngOnInit() {
     this.draw();
@@ -58,40 +67,20 @@ export class GraphGeneralComponent implements OnInit {
     callback(null);
   }
   
-  saveData = (data, callback) => {
-    console.log(data);
-    if (data.id == null) {
-      data.id = this.nodeName;
-
-      let isExists = this.data.nodes.getIds().find(x => x.toString() === data.id);
-      if (isExists) {
-        throw new NetworkParsingException("Node with the same id is already exists");
-      }
-    }
-
-    data.weight = this.parseIntProperty(this.nodeWeight, "Weight should be int");
-    data.label = `${data.id} [${data.weight}]`;
-
+  saveNode = (data, callback) => {
+    let newNode = this.graphManipulationService.getNewNode(data, this.nodeName, this.nodeWeight, this.data);
+  
     this.clearPopUp();
-    callback(data);
+    callback(newNode);
     
     this.onDataChanged();
   }
 
   saveEdge = (data, callback) => {
-    this.data.edges.forEach(edge => {
-      if (edge.from === data.from && edge.to === data.to) {
-        throw new NetworkParsingException(`Edge from ${data.from} to ${data.to} is already exists`);
-      }
-    });
-    
-    data.arrows = "to";
-    data.weight = this.parseIntProperty(this.nodeWeight, "Weight should be int");;
-    data.label = `[${data.weight}]`;
-    data.font = { size: 12, color: "red", face: "sans", background: "white" };
+    let newEdge = this.graphManipulationService.getNewEdge(data, this.nodeWeight, this.data);
 
     this.clearPopUp();
-    callback(data);
+    callback(newEdge);
 
     this.onDataChanged();
   }
@@ -115,7 +104,7 @@ export class GraphGeneralComponent implements OnInit {
           document.getElementById("node-weight").setAttribute("value", "");
           data.id = null;
 
-          document.getElementById("saveButton").onclick = () => this.saveData(data,callback);
+          document.getElementById("saveButton").onclick = () => this.saveNode(data,callback);
           document.getElementById("cancelButton").onclick = () => this.clearPopUp();
         },
         editNode: (data, callback) => {
@@ -127,7 +116,7 @@ export class GraphGeneralComponent implements OnInit {
           this.nodeWeight = data.weight;
           document.getElementById("node-weight").setAttribute("value", data.weight);
 
-          document.getElementById("saveButton").onclick = () => this.saveData(data,callback);
+          document.getElementById("saveButton").onclick = () => this.saveNode(data,callback);
           document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
         },
         addEdge: (data, callback) => {
