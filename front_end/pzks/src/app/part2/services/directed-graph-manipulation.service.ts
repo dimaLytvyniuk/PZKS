@@ -4,7 +4,7 @@ import { Injectable } from '@angular/core';
 @Injectable({
     providedIn: 'root'
 })
-export class OrientedGraphManipulationService extends BaseGraphManipulationService {
+export class DirectedGraphManipulationService extends BaseGraphManipulationService {
     constructor() { 
         super();
     }

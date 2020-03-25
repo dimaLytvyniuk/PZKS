@@ -7,7 +7,7 @@ import { EdgeModel } from '../../models/edgeModel';
 import { NodeModel } from '../../models/nodeModel';
 import * as vis from 'vis';
 import { StoreNetworkModel } from '../../models/store-network-model';
-import { OrientedGraphManipulationService } from '../../services/oriented-graph-manipulation.service';
+import { DirectedGraphManipulationService } from '../../services/directed-graph-manipulation.service';
 import { BaseGraphManipulationService } from '../../services/base-graph-manipulation.service';
 
 @Component({
@@ -21,6 +21,9 @@ export class GraphGeneralComponent implements OnInit {
   network = null;
 
   @Input() data: DisplayNetworkModel;
+  @Input() isNodesHasWeight: boolean;
+  @Input() isEdgesHasWeight: boolean;
+  
   @Output() graphChanged = new EventEmitter<DisplayNetworkModel>();
 
   graphManipulationService: BaseGraphManipulationService;
@@ -35,9 +38,9 @@ export class GraphGeneralComponent implements OnInit {
   
   constructor(
     private graphPropsService: GraphPropsService, 
-    private orientedGraphManipulationService: OrientedGraphManipulationService
+    private directedGraphManipulationService: DirectedGraphManipulationService
   ) { 
-    this.graphManipulationService = orientedGraphManipulationService;
+    this.graphManipulationService = directedGraphManipulationService;
   }
 
   ngOnInit() {
@@ -96,50 +99,73 @@ export class GraphGeneralComponent implements OnInit {
       layout: { randomSeed: this.seed }, // just to make sure the layout is the same when the locale is changed
       //locale: document.getElementById("locale").nodeValue,
       manipulation: {
-        addNode: (data, callback) => {
-          // filling in the popup DOM elements
-          document.getElementById("operation").innerHTML = "Add Node";
-          document.getElementById("network-popUp").style.display = "block";
-          document.getElementById("node-label").setAttribute("value", "");
-          document.getElementById("node-weight").setAttribute("value", "");
-          data.id = null;
-
-          document.getElementById("saveButton").onclick = () => this.saveNode(data,callback);
-          document.getElementById("cancelButton").onclick = () => this.clearPopUp();
-        },
-        editNode: (data, callback) => {
-          // filling in the popup DOM elements
-          document.getElementById("operation").innerHTML = "Edit Node";
-          document.getElementById("network-popUp").style.display = "block";
-          document.getElementById("label-data").style.visibility = "hidden";
-          
-          this.nodeWeight = data.weight;
-          document.getElementById("node-weight").setAttribute("value", data.weight);
-
-          document.getElementById("saveButton").onclick = () => this.saveNode(data,callback);
-          document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
-        },
-        addEdge: (data, callback) => {
-          document.getElementById("operation").innerHTML = "Add Edge";
-          document.getElementById("network-popUp").style.display = "block";
-          document.getElementById("label-data").style.visibility = "hidden";
-          document.getElementById("node-weight").setAttribute("value", "");
-
-          document.getElementById("saveButton").onclick = () => this.saveEdge(data,callback);
-          document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
-        },
-        deleteNode: (data, callback) => {
-          callback(data);
-          this.onDataChanged();
-        },
-        deleteEdge: (data, callback) => {
-          callback(data);
-          this.onDataChanged();
-        }
+        addNode: (data, callback) => this.onAddNode(data, callback),
+        editNode: (data, callback) => this.onEditNode(data, callback),
+        addEdge: (data, callback) => this.onAddEdge(data, callback),
+        deleteNode: (data, callback) => this.onDeleteNode(data, callback),
+        deleteEdge: (data, callback) => this.onDeleteEdge(data, callback)
       }
     };
 
     this.network = new vis.Network(container, this.data, options);
+    this.onDataChanged();
+  }
+
+  private onAddNode = (data, callback) => {
+    // filling in the popup DOM elements
+    document.getElementById("operation").innerHTML = "Add Node";
+    document.getElementById("network-popUp").style.display = "block";
+    document.getElementById("node-label").setAttribute("value", "");
+    
+    if (this.isNodesHasWeight) {
+      document.getElementById("node-weight").setAttribute("value", "");
+    } else {
+      document.getElementById("node-weight").style.visibility = "hidden";
+    }
+
+    data.id = null;
+    document.getElementById("saveButton").onclick = () => this.saveNode(data,callback);
+    document.getElementById("cancelButton").onclick = () => this.clearPopUp();
+  }
+
+  private onEditNode = (data, callback) => {
+    if (!this.isNodesHasWeight) {
+      callback(data);
+      return;
+    }
+
+    document.getElementById("operation").innerHTML = "Edit Node";
+    document.getElementById("network-popUp").style.display = "block";
+    document.getElementById("label-data").style.visibility = "hidden";
+    
+    this.nodeWeight = data.weight;
+    document.getElementById("node-weight").setAttribute("value", data.weight);
+
+    document.getElementById("saveButton").onclick = () => this.saveNode(data,callback);
+    document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
+  }
+
+  private onAddEdge = (data, callback) => {
+    if (this.isEdgesHasWeight) {
+      document.getElementById("operation").innerHTML = "Add Edge";
+      document.getElementById("network-popUp").style.display = "block";
+      document.getElementById("label-data").style.visibility = "hidden";
+      document.getElementById("node-weight").setAttribute("value", "");
+  
+      document.getElementById("saveButton").onclick = () => this.saveEdge(data,callback);
+      document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
+    } else {
+      this.saveEdge(data, callback);
+    }
+  }
+
+  private onDeleteNode = (data, callback) => {
+    callback(data);
+    this.onDataChanged();
+  }
+
+  private onDeleteEdge = (data, callback) => {
+    callback(data);
     this.onDataChanged();
   }
 
