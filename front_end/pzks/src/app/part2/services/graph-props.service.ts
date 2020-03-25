@@ -1,11 +1,11 @@
 import { Injectable } from '@angular/core';
 import * as vis from 'vis';
 import { GraphColor } from '../models/graph-color';
-import { DisplayNetworkModel } from '../models/display-network-model';
-import { NodeModel } from '../models/nodeModel';
+import { DisplayNetworkModel } from '../models/display/display-network.model';
+import { DisplayNodeModel } from '../models/display/display-node.model';
 import { GraphConnectionType } from '../models/graph-connection-type';
 import { TimeObject } from '../models/time-object';
-import { EdgeModel } from '../models/edgeModel';
+import { DisplayEdgeModel } from '../models/display/display-edge.model';
 
 @Injectable({
   providedIn: 'root'
@@ -96,7 +96,7 @@ export class GraphPropsService {
     }
   }
 
-  private dfsIsCyclic(node: NodeModel, nodesMap: Map<string, any>, edges: vis.Dataset, nodeColors: Map<string, GraphColor>): boolean {
+  private dfsIsCyclic(node: DisplayNodeModel, nodesMap: Map<string, any>, edges: vis.Dataset, nodeColors: Map<string, GraphColor>): boolean {
     nodeColors.set(node.id, GraphColor.Grey);
     let adjacentNodes = this.getAdjacentNodesIds(node.id, edges);
     
@@ -119,7 +119,7 @@ export class GraphPropsService {
   }
 
   private dfsGraphConnectionType(
-      node: NodeModel,
+      node: DisplayNodeModel,
       nodesMap: Map<string, any>, 
       edges: vis.Dataset, 
       nodeColors: Map<string, GraphColor>,
@@ -141,7 +141,7 @@ export class GraphPropsService {
   }
 
   private bfsUndirectedGraphConnectionType(
-    node: NodeModel,
+    node: DisplayNodeModel,
     nodesMap: Map<string, any>, 
     edges: vis.Dataset, 
     nodeColors: Map<string, GraphColor>
@@ -236,7 +236,8 @@ export class GraphPropsService {
     let reverseEdges = new vis.DataSet();
 
     edges.forEach(edge => {
-      let reversedEdge = new EdgeModel(edge.to, edge.from, edge.weight);
+      let reversedEdge = new DisplayEdgeModel(edge.to, edge.from);
+      reversedEdge.weight = edge.weight;
 
       reverseEdges.add(reversedEdge);
     });

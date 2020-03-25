@@ -1,6 +1,6 @@
 import { Component, OnInit } from '@angular/core';
 import * as vis from 'vis';
-import { DisplayNetworkModel } from '../../models/display-network-model';
+import { DisplayNetworkModel } from '../../models/display/display-network.model';
 
 @Component({
   selector: 'app-graph-system',

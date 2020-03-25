@@ -1,5 +1,5 @@
-import { DisplayNetworkModel } from '../models/display-network-model';
 import { NetworkParsingException } from '../errors/NetworkParsingException';
+import { DisplayNetworkModel } from '../models/display/display-network.model';
 
 export abstract class BaseGraphManipulationService {
     constructor() { }

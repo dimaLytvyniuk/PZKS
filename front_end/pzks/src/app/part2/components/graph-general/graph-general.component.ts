@@ -1,12 +1,14 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
-import { DisplayNetworkModel } from '../../models/display-network-model';
+import { DisplayNetworkModel } from '../../models/display/display-network.model';
 import { GraphPropsService } from '../../services/graph-props.service';
 import { GraphConnectionType } from '../../models/graph-connection-type';
 import { NetworkParsingException } from '../../errors/NetworkParsingException';
-import { EdgeModel } from '../../models/edgeModel';
-import { NodeModel } from '../../models/nodeModel';
+import { DisplayEdgeModel } from '../../models/display/display-edge.model';
+import { DisplayNodeModel } from '../../models/display/display-node.model';
+import { StoreNodeModel } from '../../models/store/store-node.model';
+import { StoreEdgeModel } from '../../models/store/store-edge.model';
 import * as vis from 'vis';
-import { StoreNetworkModel } from '../../models/store-network-model';
+import { StoreNetworkModel } from '../../models/store/store-network-model';
 import { DirectedGraphManipulationService } from '../../services/directed-graph-manipulation.service';
 import { BaseGraphManipulationService } from '../../services/base-graph-manipulation.service';
 
@@ -192,8 +194,8 @@ export class GraphGeneralComponent implements OnInit {
     return networkModel;
   }
 
-  getNodesToStore(): NodeModel[] {
-    let nodes: NodeModel[] = new Array();
+  getNodesToStore(): StoreNodeModel[] {
+    let nodes: StoreNodeModel[] = new Array();
     let objectKeys = Object.keys(this.network.clustering.body.nodes);
 
     for (let i in objectKeys) {
@@ -202,7 +204,7 @@ export class GraphGeneralComponent implements OnInit {
       }
 
       let networkNode = this.network.clustering.body.nodes[objectKeys[i]];
-      let node = new NodeModel();
+      let node = new StoreNodeModel();
       node.id = networkNode.id;
       node.label = networkNode.options.label;
       node.weight = parseInt(networkNode.options.weight, 10);
@@ -213,8 +215,8 @@ export class GraphGeneralComponent implements OnInit {
     return nodes;
   }
 
-  getEdgesToStore(): EdgeModel[] {
-    let edges: EdgeModel[] = new Array<EdgeModel>();
+  getEdgesToStore(): StoreEdgeModel[] {
+    let edges: StoreEdgeModel[] = new Array<StoreEdgeModel>();
     let objectKeys = Object.keys(this.network.clustering.body.edges);
 
     for (let i in objectKeys) {
@@ -222,7 +224,8 @@ export class GraphGeneralComponent implements OnInit {
 
       let edgeLabel = networkEdge.options.label;
       let edgeWeight = parseInt(edgeLabel.substring(1, edgeLabel.length));
-      let edge = new EdgeModel(networkEdge.fromId, networkEdge.toId, edgeWeight);
+      let edge = new StoreEdgeModel(networkEdge.fromId, networkEdge.toId);
+      edge.weight = edgeWeight;
 
       edges.push(edge);
     }
@@ -292,7 +295,7 @@ export class GraphGeneralComponent implements OnInit {
 
       let weight = this.parseIntProperty(objectNodes[i].weight, `In node ${i} property 'weight' has incorrect value`);
 
-      let nodeModel = new NodeModel();
+      let nodeModel = new DisplayNodeModel();
       nodeModel.id = objectNodes[i].id;
       nodeModel.label = objectNodes[i].label;
       nodeModel.weight = weight;
@@ -313,7 +316,10 @@ export class GraphGeneralComponent implements OnInit {
       this.validateProperty(objectEdges[i].weight, `In edge ${i} property 'weight' isn't exist`);
       
       let weight = this.parseIntProperty(objectEdges[i].weight, `In edge ${i} property 'weight' has incorrect value`);
-      let edgeModel = new EdgeModel(objectEdges[i].from, objectEdges[i].to, weight);
+      let edgeModel = new DisplayEdgeModel(objectEdges[i].from, objectEdges[i].to);
+      edgeModel.edgeWeight = weight;
+      edgeModel.setArrowsDirection();
+      edgeModel.setDefaultFont();
       
       edgeModels.forEach(exictedEdge => {
         if (exictedEdge.from === edgeModel.from && exictedEdge.to === edgeModel.to) {
