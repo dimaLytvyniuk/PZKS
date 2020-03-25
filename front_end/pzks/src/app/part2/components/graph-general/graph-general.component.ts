@@ -181,60 +181,13 @@ export class GraphGeneralComponent implements OnInit {
   }
 
   saveNetwork() {
-    let networkModel = this.getStoreNetworkModel();
+    let networkModel = this.graphManipulationService.getStoreNetworkModel(this.data);
 
     localStorage.setItem("network", JSON.stringify(networkModel));
   }
 
-  getStoreNetworkModel(): StoreNetworkModel {
-    let networkModel = new StoreNetworkModel();
-    networkModel.nodes = this.getNodesToStore();
-    networkModel.edges = this.getEdgesToStore();
-
-    return networkModel;
-  }
-
-  getNodesToStore(): StoreNodeModel[] {
-    let nodes: StoreNodeModel[] = new Array();
-    let objectKeys = Object.keys(this.network.clustering.body.nodes);
-
-    for (let i in objectKeys) {
-      if (objectKeys[i].startsWith("edgeId")) {
-        break;
-      }
-
-      let networkNode = this.network.clustering.body.nodes[objectKeys[i]];
-      let node = new StoreNodeModel();
-      node.id = networkNode.id;
-      node.label = networkNode.options.label;
-      node.weight = parseInt(networkNode.options.weight, 10);
-
-      nodes.push(node);
-    }
-
-    return nodes;
-  }
-
-  getEdgesToStore(): StoreEdgeModel[] {
-    let edges: StoreEdgeModel[] = new Array<StoreEdgeModel>();
-    let objectKeys = Object.keys(this.network.clustering.body.edges);
-
-    for (let i in objectKeys) {
-      let networkEdge = this.network.clustering.body.edges[objectKeys[i]];
-
-      let edgeLabel = networkEdge.options.label;
-      let edgeWeight = parseInt(edgeLabel.substring(1, edgeLabel.length));
-      let edge = new StoreEdgeModel(networkEdge.fromId, networkEdge.toId);
-      edge.weight = edgeWeight;
-
-      edges.push(edge);
-    }
-
-    return edges;
-  }
-
   onSaveToFile() {
-    let networkModel = this.getStoreNetworkModel();
+    let networkModel = this.graphManipulationService.getStoreNetworkModel(this.data);
 
     this.saveFile(networkModel, "graph-task.json");
   }

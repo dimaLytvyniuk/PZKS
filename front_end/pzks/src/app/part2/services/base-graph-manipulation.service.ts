@@ -1,5 +1,9 @@
 import { NetworkParsingException } from '../errors/NetworkParsingException';
 import { DisplayNetworkModel } from '../models/display/display-network.model';
+import { StoreNetworkModel } from '../models/store/store-network-model';
+import { StoreNodeModel } from '../models/store/store-node.model';
+import { StoreEdgeModel } from '../models/store/store-edge.model';
+import * as vis from 'vis';
 
 export abstract class BaseGraphManipulationService {
     constructor() { }
@@ -43,6 +47,42 @@ export abstract class BaseGraphManipulationService {
           newEdgeObject.font = { size: 12, color: "red", face: "sans", background: "white" };
 
           return newEdgeObject;
+    }
+
+    getStoreNetworkModel(graph: DisplayNetworkModel): StoreNetworkModel {
+      let networkModel = new StoreNetworkModel();
+      networkModel.nodes = this.getNodesToStore(graph);
+      networkModel.edges = this.getEdgesToStore(graph);
+  
+      return networkModel;
+    }
+
+    getNodesToStore(graph: DisplayNetworkModel): StoreNodeModel[] {
+      let nodes: StoreNodeModel[] = new Array();
+
+      graph.nodes.forEach(graphNode => {
+        let node = new StoreNodeModel();
+        node.id = graphNode.id;
+        node.label = graphNode.label;
+        node.weight = parseInt(graphNode.weight);
+  
+        nodes.push(node);
+      });
+  
+      return nodes;
+    }
+  
+    getEdgesToStore(graph: DisplayNetworkModel): StoreEdgeModel[] {
+      let edges: StoreEdgeModel[] = new Array<StoreEdgeModel>();
+      
+      graph.edges.forEach(graphEdge => {
+        let edge = new StoreEdgeModel(graphEdge.from, graphEdge.to);
+        edge.weight = parseInt(graphEdge.weight);
+  
+        edges.push(edge);
+      });
+  
+      return edges;
     }
 
     private parseIntProperty(property: any, exMessage: string): number {

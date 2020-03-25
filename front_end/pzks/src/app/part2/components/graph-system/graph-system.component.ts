@@ -27,11 +27,11 @@ export class GraphSystemComponent implements OnInit {
   
     // create an array with edges
     var edges = new vis.DataSet([
-      { from: "1", to: "3", arrows: "to", label: "[3]", font: { size: 12, color: "red", face: "sans", background: "white" }, weight: "1" },
-      { from: "1", to: "2", arrows: "to", label: "[4]" },
-      { from: "2", to: "4", arrows: "to", label: "[5]" },
-      { from: "2", to: "5", arrows: "to", label: "[6]" },
-      { from: "3", to: "3", arrows: "to", label: "[6]" }
+      { from: "1", to: "3", arrows: "to", label: "[3]", font: { size: 12, color: "red", face: "sans", background: "white" }, weight: 1 },
+      { from: "1", to: "2", arrows: "to", label: "[4]", weight: 1 },
+      { from: "2", to: "4", arrows: "to", label: "[5]", weight: 1 },
+      { from: "2", to: "5", arrows: "to", label: "[6]", weight: 1 },
+      { from: "3", to: "3", arrows: "to", label: "[6]", weight: 1 }
     ]);
 
     var data = new DisplayNetworkModel();
