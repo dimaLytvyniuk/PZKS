@@ -11,6 +11,7 @@ import * as vis from 'vis';
 import { StoreNetworkModel } from '../../models/store/store-network-model';
 import { DirectedGraphManipulationService } from '../../services/directed-graph-manipulation.service';
 import { BaseGraphManipulationService } from '../../services/base-graph-manipulation.service';
+import { UndirectedGraphManipulationService } from '../../services/undirected-graph-manipulation.service';
 
 @Component({
   selector: 'app-graph-general',
@@ -41,13 +42,22 @@ export class GraphGeneralComponent implements OnInit {
   
   constructor(
     private graphPropsService: GraphPropsService, 
-    private directedGraphManipulationService: DirectedGraphManipulationService
-  ) { 
-    this.graphManipulationService = directedGraphManipulationService;
+    private directedGraphManipulationService: DirectedGraphManipulationService,
+    private undirectedGraphManipulationService: UndirectedGraphManipulationService
+  ) {
   }
 
   ngOnInit() {
+    if (this.isDirected) {
+      this.graphManipulationService = this.directedGraphManipulationService;
+    } else {
+      this.graphManipulationService = this.undirectedGraphManipulationService;
+    }
+
     this.draw();
+    this.data.isDirected = this.isDirected;
+    this.data.isEdgesHasWeight = this.isEdgesHasWeight;
+    this.data.isNodesHasWeight = this.isNodesHasWeight;
   }
 
   destroy() {
@@ -74,7 +84,8 @@ export class GraphGeneralComponent implements OnInit {
   }
   
   saveNode = (data, callback) => {
-    let newNode = this.graphManipulationService.getNewNode(data, this.nodeName, this.nodeWeight, this.data);
+    let weight = this.getNodeWeight();
+    let newNode = this.graphManipulationService.getNewNode(data, this.nodeName, weight, this.data);
   
     this.clearPopUp();
     callback(newNode);
@@ -83,6 +94,7 @@ export class GraphGeneralComponent implements OnInit {
   }
 
   saveEdge = (data, callback) => {
+    let weight = this.getEdgeWeight();
     let newEdge = this.graphManipulationService.getNewEdge(data, this.nodeWeight, this.data);
 
     this.clearPopUp();
@@ -189,6 +201,7 @@ export class GraphGeneralComponent implements OnInit {
 
   onSaveToFile() {
     let networkModel = this.graphManipulationService.getStoreNetworkModel(this.data);
+    console.log(networkModel);
 
     this.graphManipulationService.saveObjectToFile(networkModel, "graph-task.json");
   }
@@ -254,5 +267,28 @@ export class GraphGeneralComponent implements OnInit {
     } else {
       this.cyclicLabel = "Граф ациклічний";
     }
+  }
+
+  private getNodeWeight(): number {
+    if (this.isNodesHasWeight) {
+      return this.parseIntProperty(this.nodeWeight, "Weight should be int");
+    }
+
+    return undefined;
+  }
+
+  private getEdgeWeight() {
+    if (this.isEdgesHasWeight) {
+      this.parseIntProperty(this.nodeWeight, "Weight should be int");
+    }
+  }
+
+  private parseIntProperty(property: any, exMessage: string): number {
+    let intProp = parseInt(property, 10);
+    if (isNaN(intProp)) {
+      throw new NetworkParsingException(exMessage);
+    }
+
+    return intProp;
   }
 }

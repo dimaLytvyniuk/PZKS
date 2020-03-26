@@ -5,4 +5,6 @@ export class StoreNetworkModel {
     nodes: StoreNodeModel[];
     edges: StoreEdgeModel[];
     isDirected: boolean;
+    isNodesHasWeight: boolean;
+    isEdgesHasWeight: boolean;
 }

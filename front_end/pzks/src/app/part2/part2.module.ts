@@ -11,6 +11,7 @@ import { GraphErrorHandler } from './services/graph-error-handler';
 import { GraphPropsService } from './services/graph-props.service';
 import { GraphGeneralComponent } from './components/graph-general/graph-general.component';
 import { DirectedGraphManipulationService } from './services/directed-graph-manipulation.service';
+import { UndirectedGraphManipulationService } from './services/undirected-graph-manipulation.service';
 
 @NgModule({
   declarations: [
@@ -31,7 +32,8 @@ import { DirectedGraphManipulationService } from './services/directed-graph-mani
       useClass: GraphErrorHandler
     },
     GraphPropsService,
-    DirectedGraphManipulationService
+    DirectedGraphManipulationService,
+    UndirectedGraphManipulationService
   ]
 })
 export class Part2Module { }
