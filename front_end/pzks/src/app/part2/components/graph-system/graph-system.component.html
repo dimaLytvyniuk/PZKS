@@ -1,9 +1,9 @@
 <h3>Граф КС</h3>
 
 <app-graph-general
-[data]="graphData"
-[isNodesHasWeight]="true"
-[isEdgesHasWeight]="true"
-(graphChanged)="onGraphChanged($event)">
-
+    [data]="graphData"
+    [isDirected]="true"
+    [isNodesHasWeight]="true"
+    [isEdgesHasWeight]="true"
+    (graphChanged)="onGraphChanged($event)">
 </app-graph-general>
