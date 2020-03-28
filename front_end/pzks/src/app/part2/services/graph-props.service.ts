@@ -14,7 +14,7 @@ export class GraphPropsService {
 
   constructor() { }
 
-  public isCyclicGraph(graph: DisplayNetworkModel): boolean {
+  public isCyclicDirectedGraph(graph: DisplayNetworkModel): boolean {
     let nodesMap = this.getNodesMap(graph.nodes);
     let edjes = graph.edges;
     let nodeColors = this.getNodeColors(graph.nodes);
@@ -22,7 +22,7 @@ export class GraphPropsService {
     let whiteNode = nodesMap.get(this.getWhiteNode(nodeColors));
     
     while (whiteNode != null) {
-      if (this.dfsIsCyclic(whiteNode, nodesMap, edjes, nodeColors)) {
+      if (this.dfsIsDirectedCyclic(whiteNode, nodesMap, edjes, nodeColors)) {
         return true;
       }
 
@@ -32,9 +32,27 @@ export class GraphPropsService {
     return false;
   }
 
-  public getGraphConnectionType(graph: DisplayNetworkModel): GraphConnectionType {
-    let isConnectedUnirected = this.isConnectedUnirected(graph);
-    if (!isConnectedUnirected) {
+  public isCyclicUndirectedGraph(graph: DisplayNetworkModel): boolean {
+    let nodesMap = this.getNodesMap(graph.nodes);
+    let edjes = this.getUndirectedEdges(graph.edges);
+    let nodeColors = this.getNodeColors(graph.nodes);
+  
+    let whiteNode = nodesMap.get(this.getWhiteNode(nodeColors));
+    
+    while (whiteNode != null) {
+      if (this.dfsIsUndirectedCyclic(whiteNode, null, nodesMap, edjes, nodeColors)) {
+        return true;
+      }
+
+      whiteNode = nodesMap.get(this.getWhiteNode(nodeColors));
+    }
+
+    return false;
+  }
+
+  public getDirectedGraphConnectionType(graph: DisplayNetworkModel): GraphConnectionType {
+    let undirectedGraphConnectionType = this.getUndirectedGraphConnectionType(graph);
+    if (undirectedGraphConnectionType === GraphConnectionType.NotConnected) {
       return GraphConnectionType.NotConnected;
     }
 
@@ -75,7 +93,7 @@ export class GraphPropsService {
     }
   }
 
-  private isConnectedUnirected(graph: DisplayNetworkModel): boolean {
+  public getUndirectedGraphConnectionType(graph: DisplayNetworkModel): GraphConnectionType {
     let N = 0;
     let nodesMap = this.getNodesMap(graph.nodes);
     let edjes = graph.edges;
@@ -90,13 +108,13 @@ export class GraphPropsService {
     }
 
     if (N == 1) {
-      return true;
+      return GraphConnectionType.WeaklyConnected;
     } else {
-      return false;
+      return GraphConnectionType.NotConnected;
     }
   }
 
-  private dfsIsCyclic(node: DisplayNodeModel, nodesMap: Map<string, any>, edges: vis.Dataset, nodeColors: Map<string, GraphColor>): boolean {
+  private dfsIsDirectedCyclic(node: DisplayNodeModel, nodesMap: Map<string, any>, edges: vis.Dataset, nodeColors: Map<string, GraphColor>): boolean {
     nodeColors.set(node.id, GraphColor.Grey);
     let adjacentNodes = this.getAdjacentNodesIds(node.id, edges);
     
@@ -105,7 +123,39 @@ export class GraphPropsService {
       let adjacentNodeColor = nodeColors.get(adjacentNode.id);
 
       if (adjacentNodeColor === GraphColor.White) {
-        if (this.dfsIsCyclic(adjacentNode, nodesMap, edges, nodeColors)) {
+        if (this.dfsIsDirectedCyclic(adjacentNode, nodesMap, edges, nodeColors)) {
+          return true;
+        }
+      } 
+      else if (adjacentNodeColor === GraphColor.Grey) {
+        return true;
+      }
+    }
+
+    nodeColors.set(node.id, GraphColor.Black);
+    return false;
+  }
+
+  private dfsIsUndirectedCyclic(
+    node: DisplayNodeModel, 
+    parentId: string, 
+    nodesMap: Map<string, any>, 
+    edges: vis.Dataset, 
+    nodeColors: Map<string, GraphColor>
+  ): boolean {
+    nodeColors.set(node.id, GraphColor.Grey);
+    let adjacentNodes = this.getAdjacentNodesIds(node.id, edges);
+
+    for (let adjacentNodeIndex in adjacentNodes) {
+      let adjacentNode = nodesMap.get(adjacentNodes[adjacentNodeIndex]);
+      let adjacentNodeColor = nodeColors.get(adjacentNode.id);
+
+      if (adjacentNode.id === parentId) {
+        continue;
+      }
+
+      if (adjacentNodeColor === GraphColor.White) {
+        if (this.dfsIsUndirectedCyclic(adjacentNode, node.id, nodesMap, edges, nodeColors)) {
           return true;
         }
       } 
@@ -208,6 +258,21 @@ export class GraphPropsService {
     return adjacentNodes;
   }
 
+  private getUndirectedEdges(edges: vis.DataSet): vis.DataSet {
+    let undirectedEdges = new vis.DataSet();
+    
+    edges.forEach(edge => {
+      undirectedEdges.add(edge);
+
+      if (!this.includedInDataSet(undirectedEdges,(x) => x.to === edge.from && x.from === edge.to)) {
+        let newEdge = new DisplayEdgeModel(edge.to, edge.from);
+        undirectedEdges.add(newEdge);
+      }
+    });
+
+    return undirectedEdges;
+  }
+
   private getNodesMap(nodes: vis.DataSet): Map<string, any> {
     let nodesMap = new Map<string, any>();
     nodes.forEach(node => {
@@ -243,5 +308,11 @@ export class GraphPropsService {
     });
 
     return reverseEdges;
+  }
+
+  private includedInDataSet(data: vis.DataSet, filter): boolean {
+    return data
+      .get({ filter: (item) =>  filter(item)})
+      .length > 0;
   }
 }

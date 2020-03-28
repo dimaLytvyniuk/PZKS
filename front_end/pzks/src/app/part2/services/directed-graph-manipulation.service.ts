@@ -4,12 +4,14 @@ import { NetworkParsingException } from '../errors/NetworkParsingException';
 import { DisplayNetworkModel } from '../models/display/display-network.model';
 import * as vis from 'vis';
 import { DisplayEdgeModel } from '../models/display/display-edge.model';
+import { GraphConnectionType } from '../models/graph-connection-type';
+import { GraphPropsService } from './graph-props.service';
 
 @Injectable({
     providedIn: 'root'
 })
 export class DirectedGraphManipulationService extends BaseGraphManipulationService {
-    constructor() {
+    constructor(private graphPropsService: GraphPropsService) {
         super();
     }
 
@@ -63,5 +65,13 @@ export class DirectedGraphManipulationService extends BaseGraphManipulationServi
         }
 
         return edgeModels;
+    }
+
+    public isCyclicGraph(graph: DisplayNetworkModel): boolean {
+        return this.graphPropsService.isCyclicDirectedGraph(graph);
+    }
+
+    public getGraphConnectionType(graph: DisplayNetworkModel): GraphConnectionType {
+        return this.graphPropsService.getDirectedGraphConnectionType(graph);
     }
 }

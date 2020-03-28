@@ -4,8 +4,8 @@ import { StoreNetworkModel } from '../models/store/store-network-model';
 import { StoreNodeModel } from '../models/store/store-node.model';
 import { StoreEdgeModel } from '../models/store/store-edge.model';
 import * as vis from 'vis';
-import { DisplayEdgeModel } from '../models/display/display-edge.model';
 import { DisplayNodeModel } from '../models/display/display-node.model';
+import { GraphConnectionType } from '../models/graph-connection-type';
 
 export abstract class BaseGraphManipulationService {
   constructor() { }
@@ -156,6 +156,10 @@ export abstract class BaseGraphManipulationService {
   }
 
   abstract parseObjectToEdges(objectEdges: any[], networkModel: DisplayNetworkModel): vis.DataSet;
+
+  abstract isCyclicGraph(graph: DisplayNetworkModel): boolean;
+
+  abstract getGraphConnectionType(graph: DisplayNetworkModel): GraphConnectionType;
 
   protected validateProperty(property: any, exMessage: string) {
     if (property === undefined || property === null) {

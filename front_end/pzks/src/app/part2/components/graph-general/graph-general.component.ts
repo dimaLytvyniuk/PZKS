@@ -1,14 +1,8 @@
 import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
 import { DisplayNetworkModel } from '../../models/display/display-network.model';
-import { GraphPropsService } from '../../services/graph-props.service';
 import { GraphConnectionType } from '../../models/graph-connection-type';
 import { NetworkParsingException } from '../../errors/NetworkParsingException';
-import { DisplayEdgeModel } from '../../models/display/display-edge.model';
-import { DisplayNodeModel } from '../../models/display/display-node.model';
-import { StoreNodeModel } from '../../models/store/store-node.model';
-import { StoreEdgeModel } from '../../models/store/store-edge.model';
 import * as vis from 'vis';
-import { StoreNetworkModel } from '../../models/store/store-network-model';
 import { DirectedGraphManipulationService } from '../../services/directed-graph-manipulation.service';
 import { BaseGraphManipulationService } from '../../services/base-graph-manipulation.service';
 import { UndirectedGraphManipulationService } from '../../services/undirected-graph-manipulation.service';
@@ -19,6 +13,11 @@ import { UndirectedGraphManipulationService } from '../../services/undirected-gr
   styleUrls: ['./graph-general.component.css']
 })
 export class GraphGeneralComponent implements OnInit {
+  private readonly notConnectedGraphMessage = "Граф не зв'язаний";
+  private readonly weaklyConnectedGraphMessage = "Граф слабозв'язаний";
+  private readonly stronglyConnectedGraphMessage = "Граф сильнозв'язаний";
+  private readonly undirectedConnectedGraphMessage = "Граф зв'язаний"
+  
   nodes = null;
   edges = null;
   network = null;
@@ -41,7 +40,6 @@ export class GraphGeneralComponent implements OnInit {
   cyclicLabel = "";
   
   constructor(
-    private graphPropsService: GraphPropsService, 
     private directedGraphManipulationService: DirectedGraphManipulationService,
     private undirectedGraphManipulationService: UndirectedGraphManipulationService
   ) {
@@ -238,8 +236,8 @@ export class GraphGeneralComponent implements OnInit {
   onDataChanged() {
     this.graphChanged.emit(this.data);
     
-    let isCyclicGraph = this.graphPropsService.isCyclicGraph(this.data);
-    let connectionType = this.graphPropsService.getGraphConnectionType(this.data);
+    let isCyclicGraph = this.graphManipulationService.isCyclicGraph(this.data);
+    let connectionType = this.graphManipulationService.getGraphConnectionType(this.data);
     
     this.setCyclicLabel(isCyclicGraph);
     this.setConnectionLabel(connectionType);
@@ -250,16 +248,16 @@ export class GraphGeneralComponent implements OnInit {
   setConnectionLabel(connectionType: GraphConnectionType): void {
     switch (connectionType) {
       case GraphConnectionType.NotConnected:
-        this.connectionLabel = "Граф не зв'язаний";
+        this.connectionLabel = this.notConnectedGraphMessage;
         break
       case GraphConnectionType.WeaklyConnected:
-        this.connectionLabel = "Граф слабозв'язаний";
+        this.connectionLabel = this.isDirected ? this.weaklyConnectedGraphMessage : this.undirectedConnectedGraphMessage;
         break;
       case GraphConnectionType.StronglyConnected:
-        this.connectionLabel = "Граф сильнозв'язаний";
+        this.connectionLabel = this.isDirected ? this.stronglyConnectedGraphMessage : this.undirectedConnectedGraphMessage;
         break;
     }
-  }
+   }
 
   setCyclicLabel(isCyclicGraph: boolean): void {
     if (isCyclicGraph) {
