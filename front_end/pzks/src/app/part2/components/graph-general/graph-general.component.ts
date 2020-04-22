@@ -6,6 +6,7 @@ import * as vis from 'vis';
 import { DirectedGraphManipulationService } from '../../services/directed-graph-manipulation.service';
 import { BaseGraphManipulationService } from '../../services/base-graph-manipulation.service';
 import { UndirectedGraphManipulationService } from '../../services/undirected-graph-manipulation.service';
+import { StoreNetworkModel } from '../../models/store/store-network-model';
 
 @Component({
   selector: 'app-graph-general',
@@ -21,13 +22,14 @@ export class GraphGeneralComponent implements OnInit {
   nodes = null;
   edges = null;
   network = null;
+  data: DisplayNetworkModel;
 
-  @Input() data: DisplayNetworkModel;
+  @Input() inputData: StoreNetworkModel;
   @Input() isDirected: boolean = false;
   @Input() isNodesHasWeight: boolean = false;
   @Input() isEdgesHasWeight: boolean = false;
   
-  @Output() graphChanged = new EventEmitter<DisplayNetworkModel>();
+  @Output() graphChanged = new EventEmitter<StoreNetworkModel>();
 
   @ViewChild('network') networkRef: ElementRef;
   @ViewChild('operationSpan') operationSpanRef: ElementRef;
@@ -63,7 +65,13 @@ export class GraphGeneralComponent implements OnInit {
   ) {
   }
 
-  ngOnInit() {
+  ngOnInit() {        
+    if (this.isDirected) {
+      this.graphManipulationService = this.directedGraphManipulationService;
+    } else {
+      this.graphManipulationService = this.undirectedGraphManipulationService;
+    }
+
     this.networkElement = this.networkRef.nativeElement as HTMLElement;
     this.operationSpanElement = this.operationSpanRef.nativeElement as HTMLElement;
     this.labelDataElement = this.labelDataRef.nativeElement as HTMLElement;
@@ -73,11 +81,7 @@ export class GraphGeneralComponent implements OnInit {
     this.cancelButtonElement = this.cancelButtonRef.nativeElement as HTMLElement;
     this.netoworkPopUpElement = this.netoworkPopUpRef.nativeElement as HTMLElement;
 
-    if (this.isDirected) {
-      this.graphManipulationService = this.directedGraphManipulationService;
-    } else {
-      this.graphManipulationService = this.undirectedGraphManipulationService;
-    }
+    this.data = this.graphManipulationService.parseObjectToDisplayNetwork(this.inputData);
 
     this.draw();
     this.data.isDirected = this.isDirected;
@@ -216,9 +220,11 @@ export class GraphGeneralComponent implements OnInit {
   onChagedNodeWeightBox($event) {
     this.nodeWeight = $event.target.value;
   }
-
-  saveNetwork() {
-    let networkModel = this.graphManipulationService.getStoreNetworkModel(this.data);
+  
+  saveNetwork(networkModel?: StoreNetworkModel): void {
+    if (networkModel === undefined) {
+      networkModel = this.graphManipulationService.getStoreNetworkModel(this.data);
+    }
 
     localStorage.setItem("network", JSON.stringify(networkModel));
   }
@@ -260,7 +266,8 @@ export class GraphGeneralComponent implements OnInit {
   }
 
   onDataChanged() {
-    this.graphChanged.emit(this.data);
+    let storeNetworkModel = this.graphManipulationService.getStoreNetworkModel(this.data);
+    this.graphChanged.emit(storeNetworkModel);
     
     let isCyclicGraph = this.graphManipulationService.isCyclicGraph(this.data);
     let connectionType = this.graphManipulationService.getGraphConnectionType(this.data);
@@ -268,7 +275,7 @@ export class GraphGeneralComponent implements OnInit {
     this.setCyclicLabel(isCyclicGraph);
     this.setConnectionLabel(connectionType);
 
-    this.saveNetwork();
+    this.saveNetwork(storeNetworkModel);
   }
 
   setConnectionLabel(connectionType: GraphConnectionType): void {
