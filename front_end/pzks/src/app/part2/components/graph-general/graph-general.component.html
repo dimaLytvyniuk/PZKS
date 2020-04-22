@@ -16,27 +16,27 @@
     </select>
   </p>
   
-  <div id="network-popUp">
-    <span id="operation">node</span> <br />
+  <div #netoworkPopUp id="network-popUp">
+    <span #operationSpan id="operation">node</span> <br />
     <table style="margin:auto;">
       <tbody>
-        <tr id="label-data">
+        <tr #labelData id="label-data">
           <td>Id</td>
-          <td><input type="text" id="node-label" (change)="onChagedNodeLabelBox($event)"/></td>
+          <td><input #nodeLabel type="text" id="node-label" (change)="onChagedNodeLabelBox($event)"/></td>
         </tr>
         <tr>
           <td>Weight</td>
-          <td><input type="text" id="node-weight" (change)="onChagedNodeWeightBox($event)"/></td>
+          <td><input #nodeWeight type="text" id="node-weight" (change)="onChagedNodeWeightBox($event)"/></td>
         </tr>
       </tbody>
     </table>
-    <input type="button" value="save" id="saveButton" />
-    <input type="button" value="cancel" id="cancelButton" />
+    <input #saveButton type="button" value="save" id="saveButton" />
+    <input #cancelButton type="button" value="cancel" id="cancelButton" />
   </div>
   <br />
 
   <div class="graph-container">
-    <div id="mynetwork"></div>
+    <div #network id="mynetwork"></div>
     <div class="graph-props">
       <div class="prop-container">
         <h5>Зв'язність графа:</h5>

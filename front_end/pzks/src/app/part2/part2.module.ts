@@ -12,6 +12,7 @@ import { GraphPropsService } from './services/graph-props.service';
 import { GraphGeneralComponent } from './components/graph-general/graph-general.component';
 import { DirectedGraphManipulationService } from './services/directed-graph-manipulation.service';
 import { UndirectedGraphManipulationService } from './services/undirected-graph-manipulation.service';
+import { Lab2Component } from './components/lab2/lab2.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { UndirectedGraphManipulationService } from './services/undirected-graph-
     GraphSystemComponent, 
     ModelingComponent, 
     StatisticComponent, 
-    GraphGeneralComponent
+    GraphGeneralComponent,
+    Lab2Component
   ],
   imports: [
     CommonModule,

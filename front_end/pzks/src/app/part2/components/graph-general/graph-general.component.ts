@@ -1,4 +1,4 @@
-import { Component, OnInit, Input, EventEmitter, Output } from '@angular/core';
+import { Component, OnInit, Input, EventEmitter, Output, ViewChild, ElementRef } from '@angular/core';
 import { DisplayNetworkModel } from '../../models/display/display-network.model';
 import { GraphConnectionType } from '../../models/graph-connection-type';
 import { NetworkParsingException } from '../../errors/NetworkParsingException';
@@ -29,6 +29,24 @@ export class GraphGeneralComponent implements OnInit {
   
   @Output() graphChanged = new EventEmitter<DisplayNetworkModel>();
 
+  @ViewChild('network') networkRef: ElementRef;
+  @ViewChild('operationSpan') operationSpanRef: ElementRef;
+  @ViewChild('labelData') labelDataRef: ElementRef;
+  @ViewChild('nodeLabel') nodeLabelRef: ElementRef;
+  @ViewChild('nodeWeight') nodeWeightRef: ElementRef;
+  @ViewChild('saveButton') saveButtonRef: ElementRef;
+  @ViewChild('cancelButton') cancelButtonRef: ElementRef;
+  @ViewChild('netoworkPopUp') netoworkPopUpRef: ElementRef;
+
+  networkElement: HTMLElement;
+  operationSpanElement: HTMLElement;
+  labelDataElement: HTMLElement;
+  nodeLabelElement: HTMLElement;
+  nodeWeightElement: HTMLElement;
+  saveButtonElement: HTMLElement;
+  cancelButtonElement: HTMLElement;
+  netoworkPopUpElement: HTMLElement;
+
   graphManipulationService: BaseGraphManipulationService;
 
   seed = 2;
@@ -46,6 +64,15 @@ export class GraphGeneralComponent implements OnInit {
   }
 
   ngOnInit() {
+    this.networkElement = this.networkRef.nativeElement as HTMLElement;
+    this.operationSpanElement = this.operationSpanRef.nativeElement as HTMLElement;
+    this.labelDataElement = this.labelDataRef.nativeElement as HTMLElement;
+    this.nodeLabelElement = this.nodeLabelRef.nativeElement as HTMLElement;
+    this.nodeWeightElement = this.nodeWeightRef.nativeElement as HTMLElement;
+    this.saveButtonElement = this.saveButtonRef.nativeElement as HTMLElement;
+    this.cancelButtonElement = this.cancelButtonRef.nativeElement as HTMLElement;
+    this.netoworkPopUpElement = this.netoworkPopUpRef.nativeElement as HTMLElement;
+
     if (this.isDirected) {
       this.graphManipulationService = this.directedGraphManipulationService;
     } else {
@@ -66,12 +93,12 @@ export class GraphGeneralComponent implements OnInit {
   }
 
   clearPopUp() {
-    document.getElementById("saveButton").onclick = null;
-    document.getElementById("cancelButton").onclick = null;
-    document.getElementById("label-data").style.visibility = "visible";
-    document.getElementById("network-popUp").style.display = "none";
-    document.getElementById("node-label").setAttribute("value", "");
-    document.getElementById("node-weight").setAttribute("value", "");
+    this.saveButtonElement.onclick = null;
+    this.cancelButtonElement.onclick = null;
+    this.labelDataElement.style.visibility = "visible";
+    this.netoworkPopUpElement.style.display = "none";
+    this.nodeLabelElement.setAttribute("value", "");
+    this.nodeWeightElement.setAttribute("value", "");
 
     this.nodeName = "";
   }
@@ -107,7 +134,6 @@ export class GraphGeneralComponent implements OnInit {
     this.edges = [];
   
     // create a network
-    var container = document.getElementById("mynetwork");
     var options = {
       layout: { randomSeed: this.seed }, // just to make sure the layout is the same when the locale is changed
       //locale: document.getElementById("locale").nodeValue,
@@ -120,25 +146,25 @@ export class GraphGeneralComponent implements OnInit {
       }
     };
 
-    this.network = new vis.Network(container, this.data, options);
+    this.network = new vis.Network(this.networkElement, this.data, options);
     this.onDataChanged();
   }
 
   private onAddNode = (data, callback) => {
     // filling in the popup DOM elements
-    document.getElementById("operation").innerHTML = "Add Node";
-    document.getElementById("network-popUp").style.display = "block";
-    document.getElementById("node-label").setAttribute("value", "");
+    this.operationSpanElement.innerHTML = "Add Node";
+    this.netoworkPopUpElement.style.display = "block";
+    this.nodeLabelElement.setAttribute("value", "");
     
     if (this.isNodesHasWeight) {
-      document.getElementById("node-weight").setAttribute("value", "");
+      this.nodeWeightElement.setAttribute("value", "");
     } else {
-      document.getElementById("node-weight").style.visibility = "hidden";
+      this.nodeWeightElement.style.visibility = "hidden";
     }
 
     data.id = null;
-    document.getElementById("saveButton").onclick = () => this.saveNode(data,callback);
-    document.getElementById("cancelButton").onclick = () => this.clearPopUp();
+    this.saveButtonElement.onclick = () => this.saveNode(data,callback);
+    this.cancelButtonElement.onclick = () => this.clearPopUp();
   }
 
   private onEditNode = (data, callback) => {
@@ -147,26 +173,26 @@ export class GraphGeneralComponent implements OnInit {
       return;
     }
 
-    document.getElementById("operation").innerHTML = "Edit Node";
-    document.getElementById("network-popUp").style.display = "block";
-    document.getElementById("label-data").style.visibility = "hidden";
+    this.operationSpanElement.innerHTML = "Edit Node";
+    this.netoworkPopUpElement.style.display = "block";
+    this.labelDataElement.style.visibility = "hidden";
     
     this.nodeWeight = data.weight;
-    document.getElementById("node-weight").setAttribute("value", data.weight);
+    this.nodeWeightElement.setAttribute("value", data.weight);
 
-    document.getElementById("saveButton").onclick = () => this.saveNode(data,callback);
-    document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
+    this.saveButtonElement.onclick = () => this.saveNode(data,callback);
+    this.cancelButtonElement.onclick = () => this.cancelEdit(callback);
   }
 
   private onAddEdge = (data, callback) => {
     if (this.isEdgesHasWeight) {
-      document.getElementById("operation").innerHTML = "Add Edge";
-      document.getElementById("network-popUp").style.display = "block";
-      document.getElementById("label-data").style.visibility = "hidden";
-      document.getElementById("node-weight").setAttribute("value", "");
+      this.operationSpanElement.innerHTML = "Add Edge";
+      this.netoworkPopUpElement.style.display = "block";
+      this.labelDataElement.style.visibility = "hidden";
+      this.nodeWeightElement.setAttribute("value", "");
   
-      document.getElementById("saveButton").onclick = () => this.saveEdge(data,callback);
-      document.getElementById("cancelButton").onclick = () => this.cancelEdit(callback);
+      this.saveButtonElement.onclick = () => this.saveEdge(data,callback);
+      this.cancelButtonElement.onclick = () => this.cancelEdit(callback);
     } else {
       this.saveEdge(data, callback);
     }

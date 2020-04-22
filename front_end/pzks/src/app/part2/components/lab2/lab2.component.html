@@ -1,0 +1,32 @@
+<div class="container">
+  <div class="header-container">
+    <button type="button" class="btn btn-primary">Виконати Планування</button>
+  </div>
+  <div class="tab-container">
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+      <li class="nav-item">
+        <a class="nav-link active" id="graph-task-tab" data-toggle="tab" href="#graph-task" role="tab"
+          aria-controls="graph-task" aria-selected="true">Граф задачі</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="graph-system-tab" data-toggle="tab" href="#graph-system" role="tab"
+          aria-controls="graph-system" aria-selected="false">Граф КС</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" id="diagram-tab" data-toggle="tab" href="#diagram" role="tab" aria-controls="diagram"
+          aria-selected="false">Діаграма Ганта</a>
+      </li>
+    </ul>
+    <div class="tab-content" id="myTabContent">
+      <div class="tab-pane fade show active" id="graph-task" role="tabpanel" aria-labelledby="graph-task-tab">
+        <app-graph-task></app-graph-task>
+      </div>
+      <div class="tab-pane fade" id="graph-system" role="tabpanel" aria-labelledby="graph-system-tab">
+        <app-graph-system></app-graph-system>
+      </div>
+      <div class="tab-pane fade" id="diagram" role="tabpanel" aria-labelledby="diagram-tab">
+
+      </div>
+    </div>
+  </div>
+</div>
