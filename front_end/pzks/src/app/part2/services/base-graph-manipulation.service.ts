@@ -57,9 +57,7 @@ export abstract class BaseGraphManipulationService {
     let nodes: StoreNodeModel[] = new Array();
 
     graph.nodes.forEach(graphNode => {
-      let node = new StoreNodeModel();
-      node.id = graphNode.id;
-      node.label = graphNode.label;
+      let node = new StoreNodeModel(graphNode.id, graphNode.label);
       if (graph.isNodesHasWeight) {
         node.weight = parseInt(graphNode.weight);
       }
