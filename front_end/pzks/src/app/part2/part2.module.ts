@@ -13,6 +13,8 @@ import { GraphGeneralComponent } from './components/graph-general/graph-general.
 import { DirectedGraphManipulationService } from './services/directed-graph-manipulation.service';
 import { UndirectedGraphManipulationService } from './services/undirected-graph-manipulation.service';
 import { Lab2Component } from './components/lab2/lab2.component';
+import { HttpClientModule } from '@angular/common/http';
+import { TaskPlannerApiService } from './services/task-planner-api.service';
 
 @NgModule({
   declarations: [
@@ -26,7 +28,8 @@ import { Lab2Component } from './components/lab2/lab2.component';
   ],
   imports: [
     CommonModule,
-    Part2RoutingModule
+    Part2RoutingModule,
+    HttpClientModule
   ],
   providers: [
     {
@@ -35,7 +38,8 @@ import { Lab2Component } from './components/lab2/lab2.component';
     },
     GraphPropsService,
     DirectedGraphManipulationService,
-    UndirectedGraphManipulationService
+    UndirectedGraphManipulationService,
+    TaskPlannerApiService
   ]
 })
 export class Part2Module { }
