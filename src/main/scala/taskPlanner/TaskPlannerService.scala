@@ -1,9 +1,13 @@
 package taskPlanner
 
+import taskPlanner.models.DirectedGraph
 import taskPlanner.views.PlanTasksViewModel
 
 class TaskPlannerService {
   def planSecondLab(planTasksViewModel: PlanTasksViewModel): Unit = {
+    val graphTask = DirectedGraph.createFromViewModel(planTasksViewModel.graphTask)
+
+
     println(planTasksViewModel.graphSystem.edges(0).from)
   }
 }

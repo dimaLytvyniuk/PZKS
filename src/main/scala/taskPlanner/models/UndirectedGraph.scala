@@ -3,8 +3,8 @@ package taskPlanner.models
 import taskPlanner.views.GraphViewModel
 
 class UndirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends Graph(_nodes, _edges) {
-  def getCriticalRoutes: Array[Array[Int]] = {
-    Array.ofDim[Int](_nodes.length,_nodes.length)
+  def getCriticalRoutes: Array[String] = {
+    new Array[String](0)
   }
 }
 

@@ -3,9 +3,9 @@ package taskPlanner.models
 import taskPlanner.views.EdgeViewModel
 
 class GraphEdge(private var _from: String, private var _to: String, private var _weight: Option[Int]) {
-  def from: String = from
+  def from: String = _from
 
-  def to: String = to
+  def to: String = _to
 
   def weight: Int = _weight.getOrElse(0)
 
