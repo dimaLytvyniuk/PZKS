@@ -2,9 +2,11 @@ package taskPlanner.models
 
 import taskPlanner.views.GraphViewModel
 
+import scala.collection.mutable.ArrayBuffer
+
 class UndirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends Graph(_nodes, _edges) {
-  def getCriticalRoutes: Array[String] = {
-    new Array[String](0)
+  def getCriticalRoute: ArrayBuffer[String] = {
+    new ArrayBuffer[String]()
   }
 }
 
