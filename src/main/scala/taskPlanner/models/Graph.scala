@@ -9,4 +9,8 @@ abstract class Graph(protected var _nodes: Array[GraphNode], protected var _edge
   protected val edgesFromToMap: Map[(String, String), GraphEdge] = _edges.map(x => ((x.from, x.to), x)).toMap
 
   def getCriticalRoute: ArrayBuffer[String]
+
+  def nodes: Array[GraphNode] = _nodes
+
+  def edges: Array[GraphEdge] = _edges
 }
