@@ -7,17 +7,18 @@ import scala.collection.mutable.ArrayBuffer
 
 class DirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends Graph(_nodes, _edges) {
   val nodesRoutesMap = getNodesRoutesMap()
+  val criticalRoute = getCriticalRoute
+  val criticalLen = getRouteLen(criticalRoute)
+  val criticalRoutesFromNodes = getCriticalRoutesFromNodes
+  val criticalRoutesToNodes = getCriticalRoutesToNodes
 
   def getCriticalRoute: ArrayBuffer[String] = {
-    val criticalPathes = getCriticalPathes
+    val criticalPathes = getCriticalRoutesFromNodes
     var maxLen = 0
     var maxNodeId = _nodes(0).id
 
     for ((targetNodeId, criticalPath) <- criticalPathes) {
-      var len = 0
-      for (nodeId <- criticalPath) {
-        len += nodesMap(nodeId).weight
-      }
+      var len = getRouteLen(criticalPath)
 
       if (len > maxLen) {
         maxLen = len
@@ -28,17 +29,17 @@ class DirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends 
     criticalPathes(maxNodeId)
   }
 
-  def getCriticalPathes: mutable.HashMap[String, ArrayBuffer[String]] = {
+  def getCriticalRoutesFromNodes: mutable.HashMap[String, ArrayBuffer[String]] = {
     val criticalPathes = new mutable.HashMap[String, ArrayBuffer[String]]
 
     for (node <- _nodes) {
-      criticalPathes(node.id) = getCriticalPath(node.id)
+      criticalPathes(node.id) = getCriticalRouteFromNode(node.id)
     }
 
     criticalPathes
   }
 
-  def getCriticalPath(nodeId: String): ArrayBuffer[String] = {
+  def getCriticalRouteFromNode(nodeId: String): ArrayBuffer[String] = {
     val sourceRoutes = nodesRoutesMap(nodeId)
     var maxTargetNodeId = nodeId
     var maxCountEdges = 0
@@ -57,11 +58,87 @@ class DirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends 
     if (maxTargetNodeId == nodeId) {
       new ArrayBuffer[String]()
     } else {
-      var criticalRoute = getRouteFromMap(sourceRoutes._2, maxTargetNodeId, maxCountEdges)
-      criticalRoute += nodeId
+      val criticalRoute = getRouteFromMap(sourceRoutes._2, maxTargetNodeId, maxCountEdges)
 
       criticalRoute.reverse
     }
+  }
+
+  def getCriticalRoutesToNodes: mutable.HashMap[String, ArrayBuffer[String]] = {
+    val criticalPathes = new mutable.HashMap[String, ArrayBuffer[String]]
+
+    for (node <- _nodes) {
+      criticalPathes(node.id) = getCriticalRouteToNode(node.id)
+    }
+
+    criticalPathes
+  }
+
+  def getCriticalRouteToNode(targetNodeId: String): ArrayBuffer[String] = {
+    var maxSourceNodeId = targetNodeId
+    var maxCountEdges = 0
+    var maxLen = 0
+
+    for ((sourceNodeId, sourceRoutes) <- nodesRoutesMap) {
+      val targetRoutes = sourceRoutes._1(targetNodeId)
+      for (i <- targetRoutes.indices) {
+        if (maxLen < targetRoutes(i)) {
+          maxLen = targetRoutes(i)
+          maxCountEdges = i
+          maxSourceNodeId = sourceNodeId
+        }
+      }
+    }
+
+    if (maxSourceNodeId == targetNodeId) {
+      new ArrayBuffer[String]()
+    } else {
+      val routes = nodesRoutesMap(maxSourceNodeId)._2
+      val criticalRoute = getRouteFromMap(routes, targetNodeId, maxCountEdges)
+
+      criticalRoute.reverse
+    }
+  }
+
+  def getRouteLen(route: ArrayBuffer[String]): Int = {
+    var len = 0
+    for (nodeId <- route) {
+      len += nodesMap(nodeId).weight
+    }
+
+    len
+  }
+
+  def getCriticalLenToStartForNode(nodeId: String): Int = {
+    val criticalRouteToNode = criticalRoutesToNodes(nodeId)
+
+    var sum = 0
+    if (criticalRouteToNode.nonEmpty) {
+      criticalRouteToNode.init.foreach(x => sum += nodesMap(x).weight)
+    }
+
+    sum
+  }
+
+  def getCriticalLenToEndForNode(nodeId: String): Int = {
+    val criticalRouteFromNode = criticalRoutesFromNodes(nodeId)
+
+    var sum = 0
+    if (criticalRouteFromNode.nonEmpty) {
+      criticalRouteFromNode.foreach(x => sum += nodesMap(x).weight)
+    } else {
+      sum = nodesMap(nodeId).weight
+    }
+
+    sum
+  }
+
+  def getEarlyNodeExecutionTime(nodeId: String): Int = {
+    getCriticalLenToStartForNode(nodeId) + 1
+  }
+
+  def getLateNodeExecutionTime(nodeId: String): Int = {
+    criticalLen - getCriticalLenToEndForNode(nodeId) + 1
   }
 
   def getNodesRoutesMap(): mutable.HashMap[String, (mutable.HashMap[String, Array[Int]], mutable.HashMap[String, Array[String]])] = {
@@ -116,9 +193,10 @@ class DirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends 
     val routeNodes = new ArrayBuffer[String]()
     var currentNodeId = lastNodeId
     var currentEdgeCount = edgeCount
+    routeNodes += currentNodeId
 
     while (currentEdgeCount > 0) {
-      var nodeId = routes(lastNodeId)(edgeCount)
+      var nodeId = routes(currentNodeId)(currentEdgeCount)
       routeNodes += nodeId
       currentNodeId = nodeId
       currentEdgeCount -= 1
