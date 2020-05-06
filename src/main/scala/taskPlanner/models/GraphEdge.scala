@@ -9,8 +9,12 @@ class GraphEdge(private var _from: String, private var _to: String, private var 
 
   def weight: Int = _weight.getOrElse(0)
 
-  def createWithOppositeWeight: GraphEdge = {
+  def getWithOppositeWeight: GraphEdge = {
     new GraphEdge(from, to, Some(weight * (-1)))
+  }
+
+  def getWithReversedDirection: GraphEdge = {
+    new GraphEdge(to, from, _weight)
   }
 }
 
