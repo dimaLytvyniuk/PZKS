@@ -168,6 +168,22 @@ class DirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends 
     (routesLenMap, routesNodesMap)
   }
 
+  def getSortedNodesByDiffBetweenLastAndEarlyExecution: Array[String] = {
+    var diffExecutionTimes = new Array[(String, Int)](_nodes.length)
+
+    for (i <- _nodes.indices) {
+      val earlyExecutionTime = getEarlyNodeExecutionTime(_nodes(i).id)
+      val lateExecutionTime = getLateNodeExecutionTime(_nodes(i).id)
+      val diff = lateExecutionTime - earlyExecutionTime
+
+      println(s"${_nodes(i).id}, ${earlyExecutionTime} ${lateExecutionTime}")
+
+      diffExecutionTimes(i) = (_nodes(i).id, diff)
+    }
+
+    diffExecutionTimes.sortBy(x => x._2).map(x => x._1)
+  }
+
   private def getRoutesLenMap: mutable.HashMap[String, Array[Int]] = {
     val routesMap = new mutable.HashMap[String, Array[Int]]()
     for (node <- _nodes) {
