@@ -1,7 +1,13 @@
 package taskPlanner.models
 
 class ExecutionTask(val id: String, val weight: Int, val priority: Int, val dependencies: Array[String]) {
-  var state: ExecutionTaskState.Value = ExecutionTaskState.Pending
+  private var _state: ExecutionTaskState.Value = ExecutionTaskState.Pending
+
+  def state = _state
+
+  def state_(state: ExecutionTaskState.Value) {
+    _state = state
+  }
 }
 
 object ExecutionTask {
