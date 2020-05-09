@@ -40,8 +40,8 @@ class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
 
   def parseFirstLabExpression(inputModel: PlanTasksViewModel): Route = {
     val service = new TaskPlannerService
-    service.planSecondLab(inputModel)
+    val queue = service.planSecondLab(inputModel)
 
-    complete(StatusCodes.OK)
+    complete(queue)
   }
 }
