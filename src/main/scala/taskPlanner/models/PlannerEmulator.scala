@@ -66,8 +66,4 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
       new ProcessorCore(node.id, node.weight, x._2, links)
     })
   }
-
-  private def getNextTask(): ExecutionTask = {
-
-  }
 }

@@ -1,10 +1,16 @@
 package taskPlanner
 
 import taskPlanner.models.{DirectedGraph, PlannerEmulator, UndirectedGraph}
-import taskPlanner.views.PlanTasksViewModel
+import taskPlanner.views.{GraphViewModel, PlanTasksViewModel}
 
 class TaskPlannerService {
-  def planSecondLab(planTasksViewModel: PlanTasksViewModel): Array[String] = {
+  def getSecondLabQueue(graphTaskViewModel: GraphViewModel): Array[String] = {
+    val graphTask = DirectedGraph.createFromViewModel(graphTaskViewModel)
+
+    graphTask.getSortedNodesByDiffBetweenLastAndEarlyExecution
+  }
+
+  def planSixthLab(planTasksViewModel: PlanTasksViewModel): Array[String] = {
     val graphTask = DirectedGraph.createFromViewModel(planTasksViewModel.graphTask)
     val graphSystem = UndirectedGraph.createFromViewModel(planTasksViewModel.graphSystem)
 

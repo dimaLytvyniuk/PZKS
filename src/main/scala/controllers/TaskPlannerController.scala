@@ -23,8 +23,8 @@ class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
       post {
         cors.corsHandler(concat(
           path(defaultRoutePrefix / "lab2") {
-            entity(as[PlanTasksViewModel]) { inputModel =>
-              parseFirstLabExpression(inputModel)
+            entity(as[GraphViewModel]) { inputModel =>
+              secondLabHandler(inputModel)
             }
           },
         ))
@@ -38,9 +38,16 @@ class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
       }
     )
 
-  def parseFirstLabExpression(inputModel: PlanTasksViewModel): Route = {
+  def secondLabHandler(inputModel: GraphViewModel): Route = {
     val service = new TaskPlannerService
-    val queue = service.planSecondLab(inputModel)
+    val queue = service.getSecondLabQueue(inputModel)
+
+    complete(queue)
+  }
+
+  def sixthLabHandler(inputModel: PlanTasksViewModel): Route = {
+    val service = new TaskPlannerService
+    val queue = service.planSixthLab(inputModel)
 
     complete(queue)
   }
