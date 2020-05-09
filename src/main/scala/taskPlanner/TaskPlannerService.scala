@@ -1,15 +1,14 @@
 package taskPlanner
 
-import taskPlanner.models.{DirectedGraph, UndirectedGraph}
+import taskPlanner.models.{DirectedGraph, PlannerEmulator, UndirectedGraph}
 import taskPlanner.views.PlanTasksViewModel
 
 class TaskPlannerService {
   def planSecondLab(planTasksViewModel: PlanTasksViewModel): Unit = {
     val graphTask = DirectedGraph.createFromViewModel(planTasksViewModel.graphTask)
     val graphSystem = UndirectedGraph.createFromViewModel(planTasksViewModel.graphSystem)
-    val sortedTasks = graphTask.getSortedNodesByDiffBetweenLastAndEarlyExecution
+    val emulator = new PlannerEmulator(graphTask, graphSystem)
 
-    graphSystem.getSortedByCountOfConnections.reverse.foreach(x => print(s"${x} "))
-    println
+    emulator.emulateWork
   }
 }

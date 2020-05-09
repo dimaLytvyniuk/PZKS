@@ -176,8 +176,6 @@ class DirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends 
       val lateExecutionTime = getLateNodeExecutionTime(_nodes(i).id)
       val diff = lateExecutionTime - earlyExecutionTime
 
-      println(s"${_nodes(i).id}, ${earlyExecutionTime} ${lateExecutionTime}")
-
       diffExecutionTimes(i) = (_nodes(i).id, diff)
     }
 
