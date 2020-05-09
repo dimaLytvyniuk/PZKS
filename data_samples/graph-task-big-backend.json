@@ -1,0 +1,229 @@
+{
+    "isDirected": true,
+    "isEdgesHasWeight": true,
+    "isNodesHasWeight": true,
+    "nodes": [
+        {
+            "id": "1",
+            "label": "1 [1]",
+            "weight": 1
+        },
+        {
+            "id": "2",
+            "label": "2 [2]",
+            "weight": 2
+        },
+        {
+            "id": "3",
+            "label": "3 [1]",
+            "weight": 1
+        },
+        {
+            "id": "4",
+            "label": "4 [5]",
+            "weight": 5
+        },
+        {
+            "id": "5",
+            "label": "5 [1]",
+            "weight": 1
+        },
+        {
+            "id": "6",
+            "label": "6 [4]",
+            "weight": 4
+        },
+        {
+            "id": "7",
+            "label": "7 [3]",
+            "weight": 3
+        },
+        {
+            "id": "8",
+            "label": "8 [6]",
+            "weight": 6
+        },
+        {
+            "id": "9",
+            "label": "9 [2]",
+            "weight": 2
+        },
+        {
+            "id": "10",
+            "label": "10 [3]",
+            "weight": 3
+        },
+        {
+            "id": "11",
+            "label": "11 [4]",
+            "weight": 4
+        },
+        {
+            "id": "12",
+            "label": "12 [1]",
+            "weight": 1
+        },
+        {
+            "id": "13",
+            "label": "13 [5]",
+            "weight": 5
+        },
+        {
+            "id": "14",
+            "label": "14 [5]",
+            "weight": 5
+        },
+        {
+            "id": "15",
+            "label": "15 [2]",
+            "weight": 2
+        },
+        {
+            "id": "16",
+            "label": "16 [1]",
+            "weight": 1
+        },
+        {
+            "id": "17",
+            "label": "17 [2]",
+            "weight": 2
+        },
+        {
+            "id": "18",
+            "label": "18 [5]",
+            "weight": 5
+        },
+        {
+            "id": "19",
+            "label": "19 [1]",
+            "weight": 1
+        },
+        {
+            "id": "20",
+            "label": "20 [3]",
+            "weight": 3
+        }
+    ],
+    "edges": [
+        {
+            "from": "1",
+            "to": "14",
+            "weight": 3
+        },
+        {
+            "from": "2",
+            "to": "9",
+            "weight": 1
+        },
+        {
+            "from": "2",
+            "to": "10",
+            "weight": 2
+        },
+        {
+            "from": "3",
+            "to": "14",
+            "weight": 3
+        },
+        {
+            "from": "3",
+            "to": "10",
+            "weight": 1
+        },
+        {
+            "from": "4",
+            "to": "15",
+            "weight": 1
+        },
+        {
+            "from": "5",
+            "to": "11",
+            "weight": 4
+        },
+        {
+            "from": "5",
+            "to": "16",
+            "weight": 2
+        },
+        {
+            "from": "6",
+            "to": "12",
+            "weight": 1
+        },
+        {
+            "from": "6",
+            "to": "13",
+            "weight": 2
+        },
+        {
+            "from": "7",
+            "to": "13",
+            "weight": 2
+        },
+        {
+            "from": "8",
+            "to": "17",
+            "weight": 3
+        },
+        {
+            "from": "9",
+            "to": "14",
+            "weight": 3
+        },
+        {
+            "from": "10",
+            "to": "18",
+            "weight": 2
+        },
+        {
+            "from": "10",
+            "to": "15",
+            "weight": 2
+        },
+        {
+            "from": "11",
+            "to": "15",
+            "weight": 1
+        },
+        {
+            "from": "12",
+            "to": "16",
+            "weight": 2
+        },
+        {
+            "from": "12",
+            "to": "17",
+            "weight": 3
+        },
+        {
+            "from": "13",
+            "to": "17",
+            "weight": 1
+        },
+        {
+            "from": "14",
+            "to": "18",
+            "weight": 1
+        },
+        {
+            "from": "15",
+            "to": "18",
+            "weight": 2
+        },
+        {
+            "from": "15",
+            "to": "19",
+            "weight": 1
+        },
+        {
+            "from": "16",
+            "to": "20",
+            "weight": 3
+        },
+        {
+            "from": "17",
+            "to": "20",
+            "weight": 1
+        }
+    ]
+}

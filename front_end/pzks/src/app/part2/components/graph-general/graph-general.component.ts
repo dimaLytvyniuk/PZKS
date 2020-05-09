@@ -139,7 +139,14 @@ export class GraphGeneralComponent implements OnInit {
   
     // create a network
     var options = {
-      layout: { randomSeed: this.seed }, // just to make sure the layout is the same when the locale is changed
+      layout: {
+        hierarchical: {
+          direction: "UD",
+          sortMethod: "directed",
+          //direction: "LR"
+          //direction: "RL"
+        }
+      }, // just to make sure the layout is the same when the locale is changed
       //locale: document.getElementById("locale").nodeValue,
       manipulation: {
         addNode: (data, callback) => this.onAddNode(data, callback),
@@ -147,7 +154,8 @@ export class GraphGeneralComponent implements OnInit {
         addEdge: (data, callback) => this.onAddEdge(data, callback),
         deleteNode: (data, callback) => this.onDeleteNode(data, callback),
         deleteEdge: (data, callback) => this.onDeleteEdge(data, callback)
-      }
+      },
+      physics: true
     };
 
     this.network = new vis.Network(this.networkElement, this.data, options);
