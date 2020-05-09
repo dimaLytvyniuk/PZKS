@@ -3,6 +3,9 @@ import * as vis from 'vis';
 import { StoreNetworkModel } from '../../models/store/store-network-model';
 import { StoreNodeModel } from '../../models/store/store-node.model';
 import { StoreEdgeModel } from '../../models/store/store-edge.model';
+import { Observable } from 'rxjs';
+import { TaskPlannerApiService } from '../../services/task-planner-api.service';
+import { map, mapTo } from "rxjs/operators"
 
 @Component({
   selector: 'app-graph-task',
@@ -11,10 +14,11 @@ import { StoreEdgeModel } from '../../models/store/store-edge.model';
 })
 export class GraphTaskComponent implements OnInit {
   graphData: StoreNetworkModel = this.getDefaultData();
+  lab2Queue$: Observable<any>;
 
   @Output() graphChanged = new EventEmitter<StoreNetworkModel>();
 
-  constructor() { }
+  constructor(private apiService: TaskPlannerApiService) { }
 
   ngOnInit() {
   }
@@ -50,5 +54,11 @@ export class GraphTaskComponent implements OnInit {
     console.log(graph);
     this.graphData = graph;
     this.graphChanged.emit(this.graphData);
+  }
+
+  onLab2Click() {
+    this.lab2Queue$ = this.apiService.lab2(this.graphData).pipe(
+      map(x => x.join(" "))
+    )
   }
 }

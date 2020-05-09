@@ -46,16 +46,15 @@
         <h5>Наявність циклу у графі:</h5>
         <h6>{{cyclicLabel}}</h6>
       </div>
+      <div class="info-container">
+        <div>
+          <button type="button" class="btn btn-info" id="search-btn" (click)="onSaveToFile()">Save to file</button>
+        </div>
+        <div class="custom-file read-file">
+          <input type="file" class="custom-file-input" id="customFile" (change)="onFileSelected($event)" accept=".json">
+          <label class="custom-file-label" for="customFile">Зчитати граф з файлу</label>
+        </div>
+      </div>
     </div>
-  </div>
-</div>
-
-<div class="info-container">
-  <div>
-    <button type="button" class="btn btn-info" id="search-btn" (click)="onSaveToFile()">Save to file</button>
-  </div>
-  <div class="custom-file read-file">
-    <input type="file" class="custom-file-input" id="customFile" (change)="onFileSelected($event)" accept=".json">
-    <label class="custom-file-label" for="customFile">Зчитати граф з файлу</label>
   </div>
 </div>

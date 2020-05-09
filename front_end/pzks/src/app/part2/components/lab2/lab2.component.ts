@@ -33,7 +33,7 @@ export class Lab2Component implements OnInit {
     planTaskModel.graphTask = this.graphTaskData;
     planTaskModel.graphSystem = this.graphSystemData;
 
-    this.apiService.lab2(planTaskModel).subscribe(response => {
+    this.apiService.lab6(planTaskModel).subscribe(response => {
       console.log(response);
     },
     (err: HttpErrorResponse) => {

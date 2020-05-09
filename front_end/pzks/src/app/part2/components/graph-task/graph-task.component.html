@@ -1,9 +1,12 @@
 <h3>Граф Задачі</h3>
 
-<app-graph-general
-    [inputData]="graphData"
-    [isDirected]="true"
-    [isNodesHasWeight]="true"
-    [isEdgesHasWeight]="true"
+<app-graph-general [inputData]="graphData" [isDirected]="true" [isNodesHasWeight]="true" [isEdgesHasWeight]="true"
     (graphChanged)="onGraphChanged($event)">
 </app-graph-general>
+
+<div class="info-container">
+    <div>
+        <button type="button" class="btn btn-info" id="search-btn" (click)="onLab2Click()">Сформувати чергу для лабораної роботи №2</button>
+        <h4>{{ lab2Queue$ | async }}</h4>
+    </div>
+</div>

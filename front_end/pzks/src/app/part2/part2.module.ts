@@ -39,7 +39,7 @@ import { TaskPlannerApiService } from './services/task-planner-api.service';
     GraphPropsService,
     DirectedGraphManipulationService,
     UndirectedGraphManipulationService,
-    TaskPlannerApiService
+    TaskPlannerApiService,
   ]
 })
 export class Part2Module { }
