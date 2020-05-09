@@ -3,11 +3,32 @@ package taskPlanner.models
 import scala.collection.mutable.ArrayBuffer
 
 class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedGraph) {
-  def emulateWork: Unit = {
-    val tasks = getExecutionTasks(graphTask)
-    val dataBuses = getDataBuses(graphSystem)
-    val dataBusesFromMap: Map[String, Array[DataBus]] = dataBuses.groupBy(x => x.from)
-    val processorCores = getProcessorCores(graphSystem, dataBusesFromMap)
+  private var pendingTasks: ArrayBuffer[ExecutionTask] = null
+  private var inProgressTasks: ArrayBuffer[ExecutionTask] = null
+  private var completedTasks: ArrayBuffer[ExecutionTask] = null
+  private var dataBuses: Array[DataBus] = null
+  private var dataBusesFromMap: Map[String, Array[DataBus]] = null
+  private var processorCores: Array[ProcessorCore] = null
+
+  def emulateWork(): Unit = {
+    pendingTasks = getExecutionTasks(graphTask)
+    inProgressTasks = new ArrayBuffer[ExecutionTask]()
+    completedTasks = new ArrayBuffer[ExecutionTask]()
+    dataBuses = getDataBuses(graphSystem)
+    dataBusesFromMap = dataBuses.groupBy(x => x.from)
+    processorCores = getProcessorCores(graphSystem, dataBusesFromMap)
+
+    while (pendingTasks.nonEmpty || inProgressTasks.nonEmpty) {
+
+    }
+  }
+
+  def doTick(): Unit = {
+    for (processorCore <- processorCores) {
+      if (processorCore.isFree) {
+
+      }
+    }
   }
 
   private def getExecutionTasks(graph: DirectedGraph): ArrayBuffer[ExecutionTask] = {
@@ -44,5 +65,9 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
 
       new ProcessorCore(node.id, node.weight, x._2, links)
     })
+  }
+
+  private def getNextTask(): ExecutionTask = {
+
   }
 }

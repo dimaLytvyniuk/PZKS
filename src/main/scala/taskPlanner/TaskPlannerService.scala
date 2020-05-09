@@ -9,6 +9,6 @@ class TaskPlannerService {
     val graphSystem = UndirectedGraph.createFromViewModel(planTasksViewModel.graphSystem)
     val emulator = new PlannerEmulator(graphTask, graphSystem)
 
-    emulator.emulateWork
+    emulator.emulateWork()
   }
 }

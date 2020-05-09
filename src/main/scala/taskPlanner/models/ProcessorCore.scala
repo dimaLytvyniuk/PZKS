@@ -14,4 +14,9 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, val link
   }
 
   def coreState = _coreState
+
+  def isFree: Boolean = _coreState == ProcessorCoreState.Free
+
+  def doWork(): Unit = {
+  }
 }
