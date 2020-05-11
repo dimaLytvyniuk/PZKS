@@ -10,6 +10,12 @@ class TaskPlannerService {
     graphTask.getSortedNodesByDiffBetweenLastAndEarlyExecution
   }
 
+  def getThirdLabQueue(graphTaskViewModel: GraphViewModel): Array[String] = {
+    val graphTask = DirectedGraph.createFromViewModel(graphTaskViewModel)
+
+    graphTask.getSortedNodesByDiffBetweenLastAndEarlyExecution
+  }
+
   def planSixthLab(planTasksViewModel: PlanTasksViewModel): Array[String] = {
     val graphTask = DirectedGraph.createFromViewModel(planTasksViewModel.graphTask)
     val graphSystem = UndirectedGraph.createFromViewModel(planTasksViewModel.graphSystem)
