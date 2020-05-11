@@ -140,12 +140,6 @@ export class GraphGeneralComponent implements OnInit {
     // create a network
     var options = {
       layout: {
-        hierarchical: {
-          direction: "UD",
-          sortMethod: "directed",
-          //direction: "LR"
-          //direction: "RL"
-        }
       }, // just to make sure the layout is the same when the locale is changed
       //locale: document.getElementById("locale").nodeValue,
       manipulation: {
