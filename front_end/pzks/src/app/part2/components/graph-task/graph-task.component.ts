@@ -15,6 +15,7 @@ import { map, mapTo } from "rxjs/operators"
 export class GraphTaskComponent implements OnInit {
   graphData: StoreNetworkModel = this.getDefaultData();
   lab2Queue$: Observable<any>;
+  lab3Queue$: Observable<any>;
 
   @Output() graphChanged = new EventEmitter<StoreNetworkModel>();
 
@@ -58,6 +59,12 @@ export class GraphTaskComponent implements OnInit {
 
   onLab2Click() {
     this.lab2Queue$ = this.apiService.lab2(this.graphData).pipe(
+      map(x => x.join(" "))
+    )
+  }
+
+  onLab3Click() {
+    this.lab3Queue$ = this.apiService.lab3(this.graphData).pipe(
       map(x => x.join(" "))
     )
   }

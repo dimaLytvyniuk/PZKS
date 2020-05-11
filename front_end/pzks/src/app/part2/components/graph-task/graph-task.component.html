@@ -10,4 +10,9 @@
         <h4>Черга обчислювальних робіт для лабораної роботи №2:</h4>
         <h4>{{ lab2Queue$ | async }}</h4>
     </div>
+    <div>
+        <button type="button" class="btn btn-info" id="search-btn" (click)="onLab3Click()">Сформувати чергу для лабораної роботи №3</button>
+        <h4>Черга обчислювальних робіт для лабораної роботи №3:</h4>
+        <h4>{{ lab3Queue$ | async }}</h4>
+    </div>
 </div>
