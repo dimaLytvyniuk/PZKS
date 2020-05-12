@@ -182,6 +182,10 @@ class DirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends 
     diffExecutionTimes.sortBy(x => x._2).map(x => x._1)
   }
 
+  def getSortedNodesByWeight: Array[String] = {
+    _nodes.sortBy(x => x.weight).map(x => x.id)
+  }
+
   private def getRoutesLenMap: mutable.HashMap[String, Array[Int]] = {
     val routesMap = new mutable.HashMap[String, Array[Int]]()
     for (node <- _nodes) {
