@@ -35,7 +35,7 @@ class UndirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extend
   }
 
   def getTheShortestRoute(from: String, to: String, excludeNodes: Array[String]): Array[String] = {
-    val (routesLenMap, routesNodesMap) = getNodeShortRoutesMap(from, new Array[String](0))
+    val (routesLenMap, routesNodesMap) = getNodeShortRoutesMap(from, excludeNodes)
     val targetRoutes = routesLenMap(to)
     var minLen = Int.MaxValue
     var minIndex = 0
@@ -67,7 +67,7 @@ class UndirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extend
       for (edge <- twoDirectionEdges) {
         if (excludeNodes.isEmpty || !excludeNodes.contains(edge.to)) {
           val newWeight = routesLenMap(edge.from)(i - 1) + edge.weight
-          if (routesLenMap(edge.to)(i) > newWeight) {
+          if (routesLenMap(edge.from)(i - 1) != Int.MaxValue && routesLenMap(edge.to)(i) > newWeight) {
             routesLenMap(edge.to)(i) = newWeight
             routesNodesMap(edge.to)(i) = edge.from
           }

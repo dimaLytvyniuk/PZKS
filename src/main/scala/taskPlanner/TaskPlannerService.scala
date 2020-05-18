@@ -20,7 +20,7 @@ class TaskPlannerService {
     val graphTask = DirectedGraph.createFromViewModel(planTasksViewModel.graphTask)
     val graphSystem = UndirectedGraph.createFromViewModel(planTasksViewModel.graphSystem)
 
-    val route = graphSystem.getTheShortestRoute("3", "8", new Array[String](0))
+    val route = graphSystem.getTheShortestRoute("3", "8")
     route
   }
 }
