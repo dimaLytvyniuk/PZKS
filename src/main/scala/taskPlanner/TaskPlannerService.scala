@@ -13,13 +13,14 @@ class TaskPlannerService {
   def getThirdLabQueue(graphTaskViewModel: GraphViewModel): Array[String] = {
     val graphTask = DirectedGraph.createFromViewModel(graphTaskViewModel)
 
-    graphTask.getSortedNodesByWeight()
+    graphTask.getSortedNodesByWeight
   }
 
   def planSixthLab(planTasksViewModel: PlanTasksViewModel): Array[String] = {
     val graphTask = DirectedGraph.createFromViewModel(planTasksViewModel.graphTask)
     val graphSystem = UndirectedGraph.createFromViewModel(planTasksViewModel.graphSystem)
 
-    graphTask.getSortedNodesByDiffBetweenLastAndEarlyExecution
+    val route = graphSystem.getTheShortestRoute("3", "8", new Array[String](0))
+    route
   }
 }

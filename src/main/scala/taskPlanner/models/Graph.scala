@@ -1,5 +1,6 @@
 package taskPlanner.models
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 abstract class Graph(protected var _nodes: Array[GraphNode], protected var _edges: Array[GraphEdge]) {
@@ -21,4 +22,20 @@ abstract class Graph(protected var _nodes: Array[GraphNode], protected var _edge
   def edgesFromMap = _edgesFromMap
 
   def edgesFromToMap = _edgesFromToMap
+
+  protected def getRouteFromMap(routes: mutable.HashMap[String, Array[String]], lastNodeId: String, edgeCount: Int): ArrayBuffer[String] = {
+    val routeNodes = new ArrayBuffer[String]()
+    var currentNodeId = lastNodeId
+    var currentEdgeCount = edgeCount
+    routeNodes += currentNodeId
+
+    while (currentEdgeCount > 0) {
+      var nodeId = routes(currentNodeId)(currentEdgeCount)
+      routeNodes += nodeId
+      currentNodeId = nodeId
+      currentEdgeCount -= 1
+    }
+
+    routeNodes
+  }
 }

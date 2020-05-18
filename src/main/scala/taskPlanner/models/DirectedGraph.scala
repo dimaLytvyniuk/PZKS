@@ -206,22 +206,6 @@ class DirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends 
 
     routesMap
   }
-
-  private def getRouteFromMap(routes: mutable.HashMap[String, Array[String]], lastNodeId: String, edgeCount: Int): ArrayBuffer[String] = {
-    val routeNodes = new ArrayBuffer[String]()
-    var currentNodeId = lastNodeId
-    var currentEdgeCount = edgeCount
-    routeNodes += currentNodeId
-
-    while (currentEdgeCount > 0) {
-      var nodeId = routes(currentNodeId)(currentEdgeCount)
-      routeNodes += nodeId
-      currentNodeId = nodeId
-      currentEdgeCount -= 1
-    }
-
-    routeNodes
-  }
 }
 
 object DirectedGraph {

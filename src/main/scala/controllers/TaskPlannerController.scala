@@ -32,6 +32,11 @@ class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
               thirdLabHandler(inputModel)
             }
           },
+          path(defaultRoutePrefix / "lab6") {
+            entity(as[PlanTasksViewModel]) { inputModel =>
+              sixthLabHandler(inputModel)
+            }
+          },
         ))
       },
       options {
@@ -40,6 +45,9 @@ class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
             complete(StatusCodes.OK)
           },
           path(defaultRoutePrefix / "lab3") {
+            complete(StatusCodes.OK)
+          },
+          path(defaultRoutePrefix / "lab6") {
             complete(StatusCodes.OK)
           },
         ))

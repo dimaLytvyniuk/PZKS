@@ -2,6 +2,7 @@ package taskPlanner.models
 
 import taskPlanner.views.GraphViewModel
 
+import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
 class UndirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extends Graph(_nodes, _edges) {
@@ -31,6 +32,71 @@ class UndirectedGraph(_nodes: Array[GraphNode], _edges: Array[GraphEdge]) extend
       .sortBy(x => x._2)
       .map(x => x._1)
       .toArray
+  }
+
+  def getTheShortestRoute(from: String, to: String, excludeNodes: Array[String]): Array[String] = {
+    val (routesLenMap, routesNodesMap) = getNodeShortRoutesMap(from, new Array[String](0))
+    val targetRoutes = routesLenMap(to)
+    var minLen = Int.MaxValue
+    var minIndex = 0
+
+    for (i <- targetRoutes.indices) {
+      if (minLen > targetRoutes(i)) {
+        minLen = targetRoutes(i)
+        minIndex = i
+      }
+    }
+
+    if (minLen == Int.MaxValue) {
+      if (excludeNodes.isEmpty) {
+        new Array[String](0)
+      } else {
+        getTheShortestRoute(from, to, new Array[String](0))
+      }
+    } else {
+      getRouteFromMap(routesNodesMap, to, minIndex).reverse.toArray
+    }
+  }
+
+  def getNodeShortRoutesMap(sourceId: String, excludeNodes: Array[String]): (mutable.HashMap[String, Array[Int]], mutable.HashMap[String, Array[String]]) = {
+    val routesLenMap = getRoutesLenMap
+    val routesNodesMap = getRoutesNodesMap
+    routesLenMap(sourceId)(0) = 0
+
+    for (i <- 1 until _nodes.length) {
+      for (edge <- twoDirectionEdges) {
+        if (excludeNodes.isEmpty || !excludeNodes.contains(edge.to)) {
+          val newWeight = routesLenMap(edge.from)(i - 1) + edge.weight
+          if (routesLenMap(edge.to)(i) > newWeight) {
+            routesLenMap(edge.to)(i) = newWeight
+            routesNodesMap(edge.to)(i) = edge.from
+          }
+        }
+      }
+    }
+
+    (routesLenMap, routesNodesMap)
+  }
+
+  private def getRoutesLenMap: mutable.HashMap[String, Array[Int]] = {
+    val routesMap = new mutable.HashMap[String, Array[Int]]()
+    for (node <- _nodes) {
+      routesMap(node.id) = new Array[Int](_nodes.length)
+      for (i <- 0 until _nodes.length) {
+        routesMap(node.id)(i) = Int.MaxValue
+      }
+    }
+
+    routesMap
+  }
+
+  private def getRoutesNodesMap: mutable.HashMap[String, Array[String]] = {
+    val routesMap = new mutable.HashMap[String, Array[String]]()
+    for (node <- _nodes) {
+      routesMap(node.id) = new Array[String](_nodes.length)
+    }
+
+    routesMap
   }
 }
 
