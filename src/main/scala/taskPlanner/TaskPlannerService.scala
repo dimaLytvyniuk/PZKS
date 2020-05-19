@@ -1,7 +1,9 @@
 package taskPlanner
 
-import taskPlanner.models.{DirectedGraph, PlannerEmulator, UndirectedGraph}
+import taskPlanner.models.{DirectedGraph, ExecutionTask, PlannerEmulator, UndirectedGraph}
 import taskPlanner.views.{GraphViewModel, PlanTasksViewModel}
+
+import scala.collection.mutable.ArrayBuffer
 
 class TaskPlannerService {
   def getSecondLabQueue(graphTaskViewModel: GraphViewModel): Array[String] = {
@@ -20,7 +22,6 @@ class TaskPlannerService {
     val graphTask = DirectedGraph.createFromViewModel(planTasksViewModel.graphTask)
     val graphSystem = UndirectedGraph.createFromViewModel(planTasksViewModel.graphSystem)
 
-    val route = graphSystem.getTheShortestRoute("3", "8")
-    route
+    new Array[String](0)
   }
 }

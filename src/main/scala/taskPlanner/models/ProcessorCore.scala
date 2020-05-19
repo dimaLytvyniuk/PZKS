@@ -22,6 +22,10 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, val link
 
   def isFree: Boolean = _coreState == ProcessorCoreState.Free
 
+  def isLinksFree: Boolean = _messageQueue.isEmpty
+
+  def completedTasks: Array[ExecutionTask] = _completedTasks.toArray
+
   def doWork(): Unit = {
     sendMessage()
   }

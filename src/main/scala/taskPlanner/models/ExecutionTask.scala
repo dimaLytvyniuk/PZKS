@@ -5,9 +5,11 @@ class ExecutionTask(val id: String, val weight: Int, val priority: Int, val depe
 
   def state = _state
 
-  def state_(state: ExecutionTaskState.Value) {
+  def state_=(state: ExecutionTaskState.Value) {
     _state = state
   }
+
+  def isHasDependency = dependencies.nonEmpty
 }
 
 object ExecutionTask {

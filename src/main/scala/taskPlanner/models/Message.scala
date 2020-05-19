@@ -1,5 +1,5 @@
 package taskPlanner.models
 
-class Message(val fromTask: Int, val toTask: Int, val fromProc: Int, val toProc: Int, val volume: Int) {
+class Message(val fromTask: String, val toTask: String, val fromProc: String, val volume: Int, val route: Array[String]) {
   private var _progress: Int = 0
 }
