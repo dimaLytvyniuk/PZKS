@@ -21,6 +21,8 @@ class TaskPlannerService {
   def planSixthLab(planTasksViewModel: PlanTasksViewModel): Array[String] = {
     val graphTask = DirectedGraph.createFromViewModel(planTasksViewModel.graphTask)
     val graphSystem = UndirectedGraph.createFromViewModel(planTasksViewModel.graphSystem)
+    val emulator = new PlannerEmulator(graphTask, graphSystem)
+    emulator.emulateWork()
 
     new Array[String](0)
   }
