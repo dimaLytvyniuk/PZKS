@@ -39,10 +39,14 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
       iterationCount += 1
     }
 
-    val result = Array.ofDim[String](processorCores.length, iterationCount)
+    val result = Array.ofDim[String](iterationCount + 1, processorCores.length)
     for (i <- processorCores.indices) {
-      for (j <- processorCores(i).tickExecutionTaskLogs.indices) {
-        result(i)(j) = s"${processorCores(i).tickExecutionTaskLogs(j)}; ${processorCores(i).tickMessageLogs(j)};"
+      result(0)(i) = processorCores(i).id
+    }
+
+    for (i <- 1 until (iterationCount + 1)) {
+      for (j <- processorCores.indices) {
+        result(i)(j) = s"${processorCores(j).tickExecutionTaskLogs(i - 1)}; ${processorCores(j).tickMessageLogs(i - 1)};"
       }
     }
 
