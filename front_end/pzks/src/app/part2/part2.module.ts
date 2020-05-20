@@ -15,6 +15,7 @@ import { UndirectedGraphManipulationService } from './services/undirected-graph-
 import { Lab2Component } from './components/lab2/lab2.component';
 import { HttpClientModule } from '@angular/common/http';
 import { TaskPlannerApiService } from './services/task-planner-api.service';
+import { GantDiagramComponent } from './components/gant-diagram/gant-diagram.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +25,8 @@ import { TaskPlannerApiService } from './services/task-planner-api.service';
     ModelingComponent, 
     StatisticComponent, 
     GraphGeneralComponent,
-    Lab2Component
+    Lab2Component,
+    GantDiagramComponent
   ],
   imports: [
     CommonModule,

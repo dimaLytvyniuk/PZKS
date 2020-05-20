@@ -1,0 +1,14 @@
+<div class="diagram-container">
+  <table class="table" *ngIf="tickResults$ | async as tickResults">
+    <thead>
+      <tr>
+        <th *ngFor="let iteration of tickResults[0]; index as i" scope="col">{{ i + 1 }}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let iteration of tickResults">
+        <td *ngFor scope="col">{{ iteration }}</td>
+      </tr>
+    </tbody>
+  </table>
+</div>
