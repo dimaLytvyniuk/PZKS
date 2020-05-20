@@ -2,12 +2,14 @@
   <table class="table" *ngIf="tickResults$ | async as tickResults">
     <thead>
       <tr>
-        <th *ngFor="let iteration of tickResults; index as i" scope="col">{{ i + 1 }}</th>
+        <th>Tick</th>
+        <th *ngFor="let procId of tickResults[0];" scope="col">{{ procId }}</th>
       </tr>
     </thead>
     <tbody>
-      <tr *ngFor="let item of [].constructor(tickResults[0].length); index as i">
-        <td *ngFor="let newItem of [].constructor(tickResults.length); index as j">{{ tickResults[j][i] }}</td>
+      <tr *ngFor="let item of [].constructor(tickResults.length - 1); index as i">
+        <th>{{ i + 1 }}</th>
+        <td *ngFor="let newItem of [].constructor(tickResults[0].length); index as j">{{ tickResults[i + 1][j] }}</td>
       </tr>
     </tbody>
   </table>
