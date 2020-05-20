@@ -3,7 +3,7 @@ package taskPlanner.models
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
 
-class ProcessorCore(val id: String, val weight: Int, val priority: Int, val links: Array[DataBus]) {
+class ProcessorCore(val id: String, val weight: Int, val priority: Int, var links: Array[DataBus]) {
   private var _currentTask: ExecutionTask = null
   private var _currentMessage: Message = null
   private val _tickExecutionTaskLogs = new ArrayBuffer[String]
@@ -14,6 +14,8 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, val link
   private var _completedTasks = new ArrayBuffer[ExecutionTask]()
   private var _sendedMessages = new ArrayBuffer[Message]()
 
+  private var _dataFromTasks = new ArrayBuffer[String]()
+
   def currentTask = _currentTask
 
   def currentTask_=(task: ExecutionTask) {
@@ -22,11 +24,19 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, val link
 
   def coreState = _coreState
 
-  def isFree: Boolean = _coreState == ProcessorCoreState.Free
+  def isFree: Boolean = _currentTask == null
 
   def isLinksFree: Boolean = _messageQueue.isEmpty
 
   def completedTasks: Array[ExecutionTask] = _completedTasks.toArray
+
+  def hasDataFromTask(taskId: String): Boolean = {
+    _dataFromTasks.contains(taskId)
+  }
+
+  def hasDataForAllTasks(tasks: Array[String]): Boolean = {
+    tasks.forall(x => _dataFromTasks.contains(x))
+  }
 
   def doWork(): ExecutionTask = {
     val completedTask = executionTaskWork()
@@ -37,8 +47,12 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, val link
   }
 
   def receiveMessage(message: Message): Unit = {
+    _dataFromTasks += message.fromTask
+
     if (message.route.length == 0) {
-      _currentTask.state = ExecutionTaskState.ReadyForExecution
+      if (_currentTask.dependencies.forall(x => _dataFromTasks.contains(x))) {
+        _currentTask.state = ExecutionTaskState.ReadyForExecution
+      }
     } else {
       val targetProc = message.route(0)
       val newRoute = message.route.drop(1)
@@ -67,6 +81,7 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, val link
         _currentTask.state = ExecutionTaskState.Completed
         _completedTasks += _currentTask
         completedTask = _currentTask
+        _dataFromTasks += _currentTask.id
         _currentTask = null
       }
 

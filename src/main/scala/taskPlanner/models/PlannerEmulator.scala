@@ -17,10 +17,11 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
     pendingTasks = getExecutionTasks(graphTask)
     inProgressTasks = new ArrayBuffer[ExecutionTask]()
     completedTasks = new ArrayBuffer[ExecutionTask]()
-    processorCores = getProcessorCores(graphSystem, dataBusesFromMap)
+    processorCores = getProcessorCores(graphSystem)
     processorsMap = processorCores.map(x => (x.id, x)).toMap
     dataBuses = getDataBuses(graphSystem, processorsMap)
     dataBusesFromMap = dataBuses.groupBy(x => x.from.id)
+    setLinksForProcessorCores(dataBusesFromMap)
 
     while (pendingTasks.nonEmpty || inProgressTasks.nonEmpty) {
       prepareStep()
@@ -45,14 +46,14 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
       for (taskToStart <- tasksToStart) {
         val proc = procQueue.dequeue
         proc.currentTask = taskToStart
+        pendingTasks -= taskToStart
 
         if (taskToStart.isHasDependency) {
           taskToStart.state = ExecutionTaskState.WaitingData
 
-          assignMessagesForTask(taskToStart, proc.id)
+          assignMessagesForTask(taskToStart, proc)
         } else {
           inProgressTasks += taskToStart
-          pendingTasks -= taskToStart
 
           taskToStart.state = ExecutionTaskState.ReadyForExecution
         }
@@ -69,7 +70,7 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
   }
 
   private def isCompletedTasks(tasks: Array[String]): Boolean = {
-    tasks.forall(x => completedTasks.contains(x))
+    tasks.forall(x => completedTasks.exists(c => c.id == x))
   }
 
   private def getFreeProcessorCores(): Array[ProcessorCore] = {
@@ -98,38 +99,49 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
     graph.twoDirectionEdges.map(x => new DataBus(processorsMap(x.from), processorsMap(x.to), x.weight))
   }
 
-  private def getProcessorCores(graph: UndirectedGraph, dataBusesFromMap: Map[String, Array[DataBus]]): Array[ProcessorCore] = {
+  private def getProcessorCores(graph: UndirectedGraph): Array[ProcessorCore] = {
     val sortedByConnections = graph.getSortedByCountOfConnections.reverse
 
     sortedByConnections.zipWithIndex.map(x => {
       val node = graph.nodesMap(x._1)
       var links = new Array[DataBus](0)
-      if (dataBusesFromMap.contains(node.id)) {
-        links = dataBusesFromMap(node.id)
-      }
 
-      new ProcessorCore(node.id, node.weight, x._2, links)
+      new ProcessorCore(node.id, node.weight, x._2, new Array[DataBus](0))
     })
   }
 
-  private def assignMessagesForTask(task: ExecutionTask, targetProcId: String): Unit = {
-    for (dependencyId <- task.dependencies) {
-      val sourceProc = processorCores.find(x => x.completedTasks.exists(x => x.id == dependencyId)).get
-      val procsWithNotFreeLinks = processorCores.filter(x => !x.isLinksFree).map(x => x.id)
-
-      var routeForMessage: Array[String] = null
-      if (procsWithNotFreeLinks.length == processorCores.length) {
-        routeForMessage = graphSystem.getTheShortestRoute(sourceProc.id, targetProcId, new Array[String](0))
-      } else {
-        routeForMessage = graphSystem.getTheShortestRoute(sourceProc.id, targetProcId, procsWithNotFreeLinks)
+  private def setLinksForProcessorCores(dataBusesFromMap: Map[String, Array[DataBus]]): Unit = {
+    processorCores.foreach(x => {
+      if (dataBusesFromMap.contains(x.id)) {
+        x.links = dataBusesFromMap(x.id)
       }
+    })
+  }
 
-      val firstProcId = processorCores.find(x => x.id == routeForMessage(1)).get.id
-      val dataVolume = graphTask.edgesFromToMap((dependencyId, task.id)).weight
-      val nextSteps = routeForMessage.drop(2)
-      val message = new Message(dependencyId, task.id, firstProcId, dataVolume, nextSteps)
+  private def assignMessagesForTask(task: ExecutionTask, targetProc: ProcessorCore): Unit = {
+    if (targetProc.hasDataForAllTasks(task.dependencies)) {
+      task.state = ExecutionTaskState.ReadyForExecution
+    } else {
+      for (dependencyId <- task.dependencies) {
+        if (!targetProc.hasDataFromTask(dependencyId)) {
+          val sourceProc = processorCores.find(x => x.completedTasks.exists(x => x.id == dependencyId)).get
+          val procsWithNotFreeLinks = processorCores.filter(x => !x.isLinksFree).map(x => x.id)
 
-      sourceProc.addMessageToQueue(message)
+          var routeForMessage: Array[String] = null
+          if (procsWithNotFreeLinks.length == processorCores.length) {
+            routeForMessage = graphSystem.getTheShortestRoute(sourceProc.id, targetProc.id, new Array[String](0))
+          } else {
+            routeForMessage = graphSystem.getTheShortestRoute(sourceProc.id, targetProc.id, procsWithNotFreeLinks)
+          }
+
+          val firstProcId = processorCores.find(x => x.id == routeForMessage(1)).get.id
+          val dataVolume = graphTask.edgesFromToMap((dependencyId, task.id)).weight
+          val nextSteps = routeForMessage.drop(2)
+          val message = new Message(dependencyId, task.id, firstProcId, dataVolume, nextSteps)
+
+          sourceProc.addMessageToQueue(message)
+        }
+      }
     }
   }
 }
