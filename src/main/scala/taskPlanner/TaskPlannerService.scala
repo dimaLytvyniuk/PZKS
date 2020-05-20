@@ -18,12 +18,11 @@ class TaskPlannerService {
     graphTask.getSortedNodesByWeight
   }
 
-  def planSixthLab(planTasksViewModel: PlanTasksViewModel): Array[String] = {
+  def planSixthLab(planTasksViewModel: PlanTasksViewModel): Array[Array[String]] = {
     val graphTask = DirectedGraph.createFromViewModel(planTasksViewModel.graphTask)
     val graphSystem = UndirectedGraph.createFromViewModel(planTasksViewModel.graphSystem)
     val emulator = new PlannerEmulator(graphTask, graphSystem)
-    emulator.emulateWork()
 
-    new Array[String](0)
+    emulator.emulateWork()
   }
 }

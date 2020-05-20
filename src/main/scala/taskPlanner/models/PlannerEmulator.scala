@@ -13,7 +13,7 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
   private var processorCores: Array[ProcessorCore] = null
   private var processorsMap: Map[String, ProcessorCore] = null
 
-  def emulateWork(): Unit = {
+  def emulateWork(): Array[Array[String]] = {
     pendingTasks = getExecutionTasks(graphTask)
     inProgressTasks = new ArrayBuffer[ExecutionTask]()
     completedTasks = new ArrayBuffer[ExecutionTask]()
@@ -23,6 +23,7 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
     dataBusesFromMap = dataBuses.groupBy(x => x.from.id)
     setLinksForProcessorCores(dataBusesFromMap)
 
+    var iterationCount = 0;
     while (pendingTasks.nonEmpty || inProgressTasks.nonEmpty) {
       prepareStep()
 
@@ -35,7 +36,17 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
       }
 
       onCompletedStep()
+      iterationCount += 1
     }
+
+    val result = Array.ofDim[String](processorCores.length, iterationCount)
+    for (i <- processorCores.indices) {
+      for (j <- processorCores(i).tickExecutionTaskLogs.indices) {
+        result(i)(j) = s"${processorCores(i).tickExecutionTaskLogs(j)}; ${processorCores(i).tickMessageLogs(j)};"
+      }
+    }
+
+    result
   }
 
   def prepareStep(): Unit = {

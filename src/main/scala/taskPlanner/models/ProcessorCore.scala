@@ -30,6 +30,10 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, var link
 
   def completedTasks: Array[ExecutionTask] = _completedTasks.toArray
 
+  def tickExecutionTaskLogs = _tickExecutionTaskLogs
+
+  def tickMessageLogs = _tickMessageLogs
+
   def hasDataFromTask(taskId: String): Boolean = {
     _dataFromTasks.contains(taskId)
   }
@@ -87,7 +91,7 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, var link
 
       completedTask
     } else {
-      _tickExecutionTaskLogs += ""
+      _tickExecutionTaskLogs += "-"
 
       null
     }
@@ -111,7 +115,7 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, var link
         _currentMessage = null
       }
     } else {
-      _tickMessageLogs += ""
+      _tickMessageLogs += "-"
     }
   }
 }

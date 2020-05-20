@@ -70,8 +70,8 @@ class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
 
   def sixthLabHandler(inputModel: PlanTasksViewModel): Route = {
     val service = new TaskPlannerService
-    val queue = service.planSixthLab(inputModel)
+    val result = service.planSixthLab(inputModel)
 
-    complete(queue)
+    complete(result)
   }
 }
