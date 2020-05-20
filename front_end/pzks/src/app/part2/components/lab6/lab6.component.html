@@ -25,7 +25,7 @@
         <app-graph-system (graphChanged)="onGraphSystemChanged($event)"></app-graph-system>
       </div>
       <div class="tab-pane fade" id="diagram" role="tabpanel" aria-labelledby="diagram-tab">
-
+        <app-gant-diagram [tickResults$]="planningResults"></app-gant-diagram>
       </div>
     </div>
   </div>

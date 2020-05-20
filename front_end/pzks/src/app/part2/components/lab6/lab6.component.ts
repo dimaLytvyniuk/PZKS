@@ -3,6 +3,7 @@ import { StoreNetworkModel } from '../../models/store/store-network-model';
 import { PlanTasksModel } from '../../models/store/plan-tasks.model';
 import { TaskPlannerApiService } from '../../services/task-planner-api.service';
 import { HttpErrorResponse } from '@angular/common/http';
+import { Observable } from 'rxjs';
 
 @Component({
   selector: 'app-lab6',
@@ -12,6 +13,8 @@ import { HttpErrorResponse } from '@angular/common/http';
 export class Lab6Component implements OnInit {
   graphTaskData: StoreNetworkModel
   graphSystemData: StoreNetworkModel;
+
+  planningResults: Observable<string[][]>;
 
   constructor(private apiService: TaskPlannerApiService) { }
 
@@ -33,15 +36,6 @@ export class Lab6Component implements OnInit {
     planTaskModel.graphTask = this.graphTaskData;
     planTaskModel.graphSystem = this.graphSystemData;
 
-    this.apiService.lab6(planTaskModel).subscribe(response => {
-      console.log(response);
-    },
-    (err: HttpErrorResponse) => {
-      if (err.error instanceof Error) {
-        console.log('An error occurred:', err.error.message);
-      } else {
-        console.log(`Backend returned code ${err.status}, body was: ${err.error}`);
-      }
-    });
+    this.planningResults = this.apiService.lab6(planTaskModel);
   }
 }
