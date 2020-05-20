@@ -12,7 +12,7 @@ import { GraphPropsService } from './services/graph-props.service';
 import { GraphGeneralComponent } from './components/graph-general/graph-general.component';
 import { DirectedGraphManipulationService } from './services/directed-graph-manipulation.service';
 import { UndirectedGraphManipulationService } from './services/undirected-graph-manipulation.service';
-import { Lab2Component } from './components/lab2/lab2.component';
+import { Lab6Component } from './components/lab6/lab6.component';
 import { HttpClientModule } from '@angular/common/http';
 import { TaskPlannerApiService } from './services/task-planner-api.service';
 import { GantDiagramComponent } from './components/gant-diagram/gant-diagram.component';
@@ -25,7 +25,7 @@ import { GantDiagramComponent } from './components/gant-diagram/gant-diagram.com
     ModelingComponent, 
     StatisticComponent, 
     GraphGeneralComponent,
-    Lab2Component,
+    Lab6Component,
     GantDiagramComponent
   ],
   imports: [

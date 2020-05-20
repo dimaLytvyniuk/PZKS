@@ -5,11 +5,11 @@ import { TaskPlannerApiService } from '../../services/task-planner-api.service';
 import { HttpErrorResponse } from '@angular/common/http';
 
 @Component({
-  selector: 'app-lab2',
-  templateUrl: './lab2.component.html',
-  styleUrls: ['./lab2.component.css']
+  selector: 'app-lab6',
+  templateUrl: './lab6.component.html',
+  styleUrls: ['./lab6.component.css']
 })
-export class Lab2Component implements OnInit {
+export class Lab6Component implements OnInit {
   graphTaskData: StoreNetworkModel
   graphSystemData: StoreNetworkModel;
 
