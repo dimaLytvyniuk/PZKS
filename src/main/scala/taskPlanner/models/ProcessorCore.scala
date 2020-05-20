@@ -45,9 +45,11 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, var link
   def doWork(): ExecutionTask = {
     val completedTask = executionTaskWork()
 
-    messageQueueWork()
-
     completedTask
+  }
+
+  def doMessageWork(): Unit = {
+    messageQueueWork()
   }
 
   def receiveMessage(message: Message): Unit = {

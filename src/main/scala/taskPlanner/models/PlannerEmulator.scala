@@ -35,6 +35,10 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
         }
       }
 
+      for (proc <- processorCores) {
+        proc.doMessageWork()
+      }
+
       onCompletedStep()
       iterationCount += 1
     }
@@ -62,14 +66,13 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
         val proc = procQueue.dequeue
         proc.currentTask = taskToStart
         pendingTasks -= taskToStart
-
+        inProgressTasks += taskToStart
+        
         if (taskToStart.isHasDependency) {
           taskToStart.state = ExecutionTaskState.WaitingData
 
           assignMessagesForTask(taskToStart, proc)
         } else {
-          inProgressTasks += taskToStart
-
           taskToStart.state = ExecutionTaskState.ReadyForExecution
         }
       }
