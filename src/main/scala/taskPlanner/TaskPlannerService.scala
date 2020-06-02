@@ -25,4 +25,8 @@ class TaskPlannerService {
 
     emulator.emulateWork()
   }
+
+  def rgrAnalyze(planTasksViewModel: Array[PlanTasksViewModel]): Unit = {
+    println(planTasksViewModel(1).graphSystem.nodes(0).id)
+  }
 }

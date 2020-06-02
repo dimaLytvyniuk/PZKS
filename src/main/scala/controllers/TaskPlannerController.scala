@@ -1,6 +1,7 @@
 package controllers
 
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport
+import akka.http.scaladsl.model.HttpHeader.ParsingResult.Ok
 import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{Directives, Route}
 import spray.json._
@@ -37,6 +38,11 @@ class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
               sixthLabHandler(inputModel)
             }
           },
+          path(defaultRoutePrefix / "rgr") {
+            entity(as[Array[PlanTasksViewModel]]) { inputModel =>
+              rgrHandler(inputModel)
+            }
+          },
         ))
       },
       options {
@@ -48,6 +54,9 @@ class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
             complete(StatusCodes.OK)
           },
           path(defaultRoutePrefix / "lab6") {
+            complete(StatusCodes.OK)
+          },
+          path(defaultRoutePrefix / "rgr") {
             complete(StatusCodes.OK)
           },
         ))
@@ -73,5 +82,12 @@ class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
     val result = service.planSixthLab(inputModel)
 
     complete(result)
+  }
+
+  def rgrHandler(inputModel: Array[PlanTasksViewModel]): Route = {
+    val service = new TaskPlannerService
+    service.rgrAnalyze(inputModel)
+
+    complete(StatusCodes.OK)
   }
 }
