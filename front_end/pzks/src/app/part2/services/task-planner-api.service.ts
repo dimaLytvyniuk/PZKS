@@ -13,12 +13,14 @@ export class TaskPlannerApiService {
   private readonly lab2Path: string;
   private readonly lab3Path: string;
   private readonly lab6Path: string;
+  private readonly rgrPath: string;
 
   constructor(private http: HttpClient) {
-    this.apiBaseUrl = environment['ApiBaseUrl']
-    this.lab2Path = this.apiBaseUrl.concat('/taskPlanner/lab2')
-    this.lab3Path = this.apiBaseUrl.concat('/taskPlanner/lab3')
-    this.lab6Path = this.apiBaseUrl.concat('/taskPlanner/lab6')
+    this.apiBaseUrl = environment['ApiBaseUrl'];
+    this.lab2Path = this.apiBaseUrl.concat('/taskPlanner/lab2');
+    this.lab3Path = this.apiBaseUrl.concat('/taskPlanner/lab3');
+    this.lab6Path = this.apiBaseUrl.concat('/taskPlanner/lab6');
+    this.rgrPath = this.apiBaseUrl.concat('/taskPlanner/rgr');
    }
 
    lab2(graphModel: StoreNetworkModel): Observable<string[]> {
@@ -31,5 +33,9 @@ export class TaskPlannerApiService {
 
    lab6(planTasksModel: PlanTasksModel) {
     return this.http.post<any>(this.lab6Path, planTasksModel);
+  }
+
+  rgr(planTasksModels: PlanTasksModel[]) {
+    return this.http.post<any>(this.rgrPath, planTasksModels);
   }
 }

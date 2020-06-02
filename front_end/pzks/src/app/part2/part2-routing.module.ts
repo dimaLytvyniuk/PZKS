@@ -6,6 +6,7 @@ import { GraphSystemComponent } from './components/graph-system/graph-system.com
 import { StatisticComponent } from './components/statistic/statistic.component';
 import { ModelingComponent } from './components/modeling/modeling.component';
 import { Lab6Component } from './components/lab6/lab6.component';
+import { RgrContainerComponent } from './components/rgr-container/rgr-container.component';
 
 const routes: Routes = [
   { path: 'part2', component: MainPageComponent},
@@ -13,7 +14,8 @@ const routes: Routes = [
   { path: 'part2/graph-system', component: GraphSystemComponent},
   { path: 'part2/modeling', component: ModelingComponent },
   { path: 'part2/statistic', component: StatisticComponent },
-  { path: 'part2/lab6', component: Lab6Component }
+  { path: 'part2/lab6', component: Lab6Component },
+  { path: 'part2/rgr', component: RgrContainerComponent }
 ];
 
 @NgModule({

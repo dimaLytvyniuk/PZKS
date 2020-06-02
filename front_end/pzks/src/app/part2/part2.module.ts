@@ -16,6 +16,7 @@ import { Lab6Component } from './components/lab6/lab6.component';
 import { HttpClientModule } from '@angular/common/http';
 import { TaskPlannerApiService } from './services/task-planner-api.service';
 import { GantDiagramComponent } from './components/gant-diagram/gant-diagram.component';
+import { RgrContainerComponent } from './components/rgr-container/rgr-container.component';
 
 @NgModule({
   declarations: [
@@ -26,7 +27,8 @@ import { GantDiagramComponent } from './components/gant-diagram/gant-diagram.com
     StatisticComponent, 
     GraphGeneralComponent,
     Lab6Component,
-    GantDiagramComponent
+    GantDiagramComponent,
+    RgrContainerComponent
   ],
   imports: [
     CommonModule,
