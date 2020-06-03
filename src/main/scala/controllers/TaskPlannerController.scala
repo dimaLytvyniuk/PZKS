@@ -6,13 +6,15 @@ import akka.http.scaladsl.model.StatusCodes
 import akka.http.scaladsl.server.{Directives, Route}
 import spray.json._
 import taskPlanner.TaskPlannerService
-import taskPlanner.views.{EdgeViewModel, GraphNodeViewModel, GraphViewModel, PlanTasksViewModel}
+import taskPlanner.views.{CombinedStatisticViewModel, EdgeViewModel, GraphNodeViewModel, GraphViewModel, PlanTasksViewModel, StatisticViewModel}
 
 trait TaskPlannerJsonSupport extends SprayJsonSupport with DefaultJsonProtocol {
   implicit val graphNodeViewModelFormat = jsonFormat3(GraphNodeViewModel)
   implicit val edgeViewModelFormat = jsonFormat3(EdgeViewModel)
   implicit val graphViewModelFormat = jsonFormat2(GraphViewModel)
   implicit val planTasksViewModelFormat = jsonFormat2(PlanTasksViewModel)
+  implicit val statisticViewModelFormat = jsonFormat7(StatisticViewModel)
+  implicit val combinedStatisticViewModelFormat = jsonFormat2(CombinedStatisticViewModel)
 }
 
 class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
@@ -86,8 +88,8 @@ class TaskPlannerController extends Directives with TaskPlannerJsonSupport {
 
   def rgrHandler(inputModel: Array[PlanTasksViewModel]): Route = {
     val service = new TaskPlannerService
-    service.rgrAnalyze(inputModel)
+    val result = service.rgrAnalyze(inputModel)
 
-    complete(StatusCodes.OK)
+    complete(result)
   }
 }
