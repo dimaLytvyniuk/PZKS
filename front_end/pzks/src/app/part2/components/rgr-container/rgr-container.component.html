@@ -1,16 +1,33 @@
 <div class="rgr-container">
   <div class="custom-file read-file">
-    <input type="file" class="custom-file-input" id="customFile" (change)="onFileSelected($event)" accept=".json">
-    <label class="custom-file-label" for="customFile">Зчитати граф з файлу</label>
+    <input
+      type="file"
+      class="custom-file-input"
+      id="customFile"
+      (change)="onFileSelected($event)"
+      accept=".json"
+    />
+    <label class="custom-file-label" for="customFile"
+      >Зчитати граф з файлу</label
+    >
   </div>
-  <div class="statistic-container" *ngIf="statisticResults$ | async as statisticResults">
+  <div
+    class="statistic-container"
+    *ngIf="statisticResults$ | async as statisticResults"
+  >
     <ol>
       <li *ngFor="let statisticResult of statisticResults">
-        <div>
-          <app-statistic-item [statisticInput]="statisticResult.firstMethod"></app-statistic-item>
-        </div>
-        <div>
-          <app-statistic-item [statisticInput]="statisticResult.secondMethod"></app-statistic-item>
+        <div class="section-container">
+          <div class="item-container">
+            <app-statistic-item
+              [statisticInput]="statisticResult.firstMethod"
+            ></app-statistic-item>
+          </div>
+          <div class="item-container">
+            <app-statistic-item
+              [statisticInput]="statisticResult.secondMethod"
+            ></app-statistic-item>
+          </div>
         </div>
       </li>
     </ol>
