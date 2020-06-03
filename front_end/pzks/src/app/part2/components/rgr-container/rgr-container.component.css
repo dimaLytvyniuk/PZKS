@@ -3,7 +3,11 @@
 }
 
 .rgr-container {
-    width: 800px;
+    width: 1000px;
     margin-top: 10px;
     padding: 20px;
+}
+
+.statistic-container {
+    margin-top: 20px;
 }

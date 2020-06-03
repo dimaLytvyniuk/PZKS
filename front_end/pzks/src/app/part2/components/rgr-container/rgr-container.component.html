@@ -3,4 +3,16 @@
     <input type="file" class="custom-file-input" id="customFile" (change)="onFileSelected($event)" accept=".json">
     <label class="custom-file-label" for="customFile">Зчитати граф з файлу</label>
   </div>
+  <div class="statistic-container" *ngIf="statisticResults$ | async as statisticResults">
+    <ol>
+      <li *ngFor="let statisticResult of statisticResults">
+        <div>
+          <app-statistic-item [statisticInput]="statisticResult.firstMethod"></app-statistic-item>
+        </div>
+        <div>
+          <app-statistic-item [statisticInput]="statisticResult.secondMethod"></app-statistic-item>
+        </div>
+      </li>
+    </ol>
+  </div>
 </div>

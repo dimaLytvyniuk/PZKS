@@ -1,5 +1,8 @@
 import { Component, OnInit } from '@angular/core';
 import { TaskPlannerApiService } from '../../services/task-planner-api.service';
+import { Observable } from 'rxjs';
+import { StatisticModel } from '../../models/statistic.model';
+import { CombinedStatisticModel } from '../../models/combined-statistic.model';
 
 @Component({
   selector: 'app-rgr-container',
@@ -7,7 +10,8 @@ import { TaskPlannerApiService } from '../../services/task-planner-api.service';
   styleUrls: ['./rgr-container.component.css']
 })
 export class RgrContainerComponent implements OnInit {
-  
+  statisticResults$: Observable<CombinedStatisticModel>;
+
   constructor(private apiService: TaskPlannerApiService) { }
 
   ngOnInit() {
@@ -29,8 +33,6 @@ export class RgrContainerComponent implements OnInit {
     const fileData = $event.target.result;
     const object = JSON.parse(fileData);
 
-    this.apiService.rgr(object).subscribe(data => {
-      console.log(data);
-    });
+    this.statisticResults$ = this.apiService.rgr(object);
   }
 }
