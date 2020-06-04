@@ -13,8 +13,8 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
   private var processorCores: Array[ProcessorCore] = null
   private var processorsMap: Map[String, ProcessorCore] = null
 
-  def emulateWork(): Array[Array[String]] = {
-    pendingTasks = getExecutionTasks(graphTask)
+  def emulateWork(taskQueue: Array[String]): Array[Array[String]] = {
+    pendingTasks = getExecutionTasks(graphTask, taskQueue)
     inProgressTasks = new ArrayBuffer[ExecutionTask]()
     completedTasks = new ArrayBuffer[ExecutionTask]()
     processorCores = getProcessorCores(graphSystem)
@@ -95,13 +95,12 @@ class PlannerEmulator(val graphTask: DirectedGraph, val graphSystem: UndirectedG
     processorCores.filter(x => x.isFree)
   }
 
-  private def getExecutionTasks(graph: DirectedGraph): ArrayBuffer[ExecutionTask] = {
+  private def getExecutionTasks(graph: DirectedGraph, taskQueue: Array[String]): ArrayBuffer[ExecutionTask] = {
     val dependenciesTo = graph.edgesToMap
-    val sortedByPriority = graph.getSortedNodesByDiffBetweenLastAndEarlyExecution
 
     var tasks = new ArrayBuffer[ExecutionTask]()
-    for (i <- sortedByPriority.indices) {
-      val node = graph.nodesMap(sortedByPriority(i))
+    for (i <- taskQueue.indices) {
+      val node = graph.nodesMap(taskQueue(i))
       var dependencies = new Array[String](0)
       if (dependenciesTo.contains(node.id)) {
         dependencies = dependenciesTo(node.id).map(d => d.from)

@@ -1,5 +1,7 @@
 package taskPlanner.views
 
+import taskPlanner.models.StatisticModel
+
 final case class StatisticViewModel(
                                      queueAlgorithm: String,
                                      onOneCoreTime: Int,

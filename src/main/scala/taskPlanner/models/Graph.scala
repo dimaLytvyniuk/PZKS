@@ -23,6 +23,8 @@ abstract class Graph(protected var _nodes: Array[GraphNode], protected var _edge
 
   def edgesFromToMap = _edgesFromToMap
 
+  def totalWeight: Int = _nodes.map(x => x.weight).sum
+
   protected def getRouteFromMap(routes: mutable.HashMap[String, Array[String]], lastNodeId: String, edgeCount: Int): ArrayBuffer[String] = {
     val routeNodes = new ArrayBuffer[String]()
     var currentNodeId = lastNodeId
