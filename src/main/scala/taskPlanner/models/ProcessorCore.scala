@@ -44,6 +44,9 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, var link
 
   def doWork(): ExecutionTask = {
     val completedTask = executionTaskWork()
+    if (_currentMessage == null && _messageQueue.nonEmpty) {
+      _currentMessage = _messageQueue.dequeue()
+    }
 
     completedTask
   }
@@ -100,10 +103,6 @@ class ProcessorCore(val id: String, val weight: Int, val priority: Int, var link
   }
 
   private def messageQueueWork(): Unit = {
-    if (_currentMessage == null && _messageQueue.nonEmpty) {
-      _currentMessage = _messageQueue.dequeue()
-    }
-
     if (_currentMessage != null) {
       val link = links.find(x => x.to.id == _currentMessage.toProc).get
 
